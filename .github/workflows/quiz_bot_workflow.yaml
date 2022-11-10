@@ -1,4 +1,4 @@
-name: gks_56_bot workflow
+name: quiz_bot workflow
 
 on: [push]
 
@@ -18,10 +18,10 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
-          cd gks_56_bot/
+          cd quiz_bot/
           rm logs_bot.log
           git pull
-          pm2 restart wimp
+          pm2 restart quiz
 
   send_message:
     runs-on: ubuntu-latest
