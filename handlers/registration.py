@@ -3,6 +3,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
+from config.mongo_config import users
+from config.telegram_config import MY_TELEGRAM_ID
+from texts.initial import REGISTRATION_TEXT
 from utils.constants import DEPARTMENTS
 
 
@@ -23,7 +26,7 @@ async def user_registration(message):
         ),
         reply_markup=keyboard
     )
-    # await Registration.waiting_department.set()
+    await Registration.waiting_department.set()
 
 
 async def department_confirm(message: types.Message, state: FSMContext):
@@ -34,14 +37,14 @@ async def department_confirm(message: types.Message, state: FSMContext):
         return
     await state.update_data(department=message.text)
     buffer_data = await state.get_data()
-    station = buffer_data['station']
+    depart = buffer_data['department']
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add('Нет', 'Да')
     await message.answer(
-        text=f'Вы выбрали {station}. Сохранить?',
+        text=f'Вы выбрали {depart}. Сохранить?',
         reply_markup=keyboard,
     )
-    await GksManager.waiting_station_confirm.set()
+    await Registration.waiting_department_confirm.set()
 
 
 async def user_save(message: types.Message, state: FSMContext):
@@ -51,56 +54,66 @@ async def user_save(message: types.Message, state: FSMContext):
         )
         return
     if message.text.lower() == 'да':
-        buffer_data = await state.get_data()
-        station = buffer_data['station']
         user = message.from_user
-        station_check = users.find_one({'_id': station})
-        if station_check is not None:
+        user_check = users.find_one({ 'user_id':  user.id })
+        buffer_data = await state.get_data()
+        depart = buffer_data['department']
+        if user_check is not None:
             users.update_one(
-                {'_id': station},
+                {'user_id': user.id},
                 {
                     '$set':
                     {
-                        'user_id': user.id,
-                        'username': user.full_name
+                        'username': user.username,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'full_name': user.full_name,
+                        'department': depart
                     }
                 },
                 upsert=False
             )
-            await message.answer(
-                'Данные отправлены и сохранены.',
-                reply_markup=types.ReplyKeyboardRemove()
-            )
             await state.finish()
             await bot.send_message(
                 chat_id=MY_TELEGRAM_ID,
-                text=f'Обновлён начальник ГКС: {station}, {user.full_name}'
+                text=f'Обновлён пользователь: {depart} - {user.full_name}'
             )
         else:
             users.insert_one(
                 {
-                    '_id': station,
                     'user_id': user.id,
-                    'username': user.full_name
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'full_name': user.full_name,
+                    'department': depart
                 }
-            )
-            await message.answer(
-                'Данные отправлены и сохранены.',
-                reply_markup=types.ReplyKeyboardRemove()
             )
             await state.finish()
             await bot.send_message(
                 chat_id=MY_TELEGRAM_ID,
-                text=f'Добавлен начальник ГКС: {station}, {user.full_name}'
+                text=f'Добавлен пользователь: {depart} - {user.full_name}'
             )
+        await message.answer(
+            REGISTRATION_TEXT,
+            reply_markup=types.ReplyKeyboardRemove()
+        )
     else:
         await message.answer(
             ('Данные не сохранены.\n'
-             'Если необходимо отправить новые данные - нажмите /gks'),
+             'Если необходимо снова пройти процедуру регистрации '
+             '- нажмите /registration'),
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.reset_state()
 
 def register_handlers_registration(dp: Dispatcher):
-#     dp.register_message_handler(reset_handler, commands='reset', state='*')
     dp.register_message_handler(user_registration, commands='registration')
+    dp.register_message_handler(
+        department_confirm,
+        state=Registration.waiting_department,
+    )
+    dp.register_message_handler(
+        user_save,
+        state=Registration.waiting_department_confirm,
+    )

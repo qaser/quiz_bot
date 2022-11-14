@@ -24,16 +24,7 @@ logging.basicConfig(
 
 @dp.message_handler(commands=['start'])
 async def start_handler(message: types.Message):
-    keyboard = types.InlineKeyboardMarkup()
-    await message.answer(
-        text=INITIAL_TEXT,
-        reply_markup=keyboard.add(types.InlineKeyboardButton(text='Зарегистрироваться', callback_data="registration"))
-    )
-
-
-@dp.callback_query_handler(text='registration')
-async def registration(call: types.CallbackQuery, message: types.Message):
-    await user_registration(message)
+    await message.answer(text=INITIAL_TEXT)
 
 
 async def on_startup(_):
