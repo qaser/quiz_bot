@@ -9,6 +9,7 @@ quiz = db['quiz']
 users = db['users']
 offers = db['offers']
 results = db['results']
+patterns = db['patterns']
 
 
 ''' 
@@ -45,10 +46,11 @@ results = db['results']
     'user_id' id пользователя телеграм
     'username': имя пользователя
 
-структура данных шаблонов теста
+структура данных шаблонов теста (patterns)
     '_id': дефолтный первичный ключ
     'department': наименование службы
     'year': год проверки знаний
     'quarter': квартал года
     'themes': темы вопросов квартала (список)
+    'owner': кто составил
 '''
