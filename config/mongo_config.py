@@ -4,15 +4,16 @@ from aiogram.contrib.fsm_storage.mongo import MongoStorage
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
 storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
-db = client['knowledge_db']
+db = client['quiz_db']
 quiz = db['quiz']
 users = db['users']
+admins = db['admins']
 offers = db['offers']
 results = db['results']
 patterns = db['patterns']
 
 
-''' 
+'''
 структура данных results
     '_id': дефолтный первичный ключ
     'user': id пользователя телеграм

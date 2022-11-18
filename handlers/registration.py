@@ -1,9 +1,12 @@
+import functools
+import inspect
+from typing import Callable
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
-from config.mongo_config import users
+from config.mongo_config import admins, users
 from config.telegram_config import MY_TELEGRAM_ID
 from texts.initial import REGISTRATION_TEXT
 from utils.constants import DEPARTMENTS
@@ -12,6 +15,18 @@ from utils.constants import DEPARTMENTS
 class Registration(StatesGroup):
     waiting_department = State()
     waiting_department_confirm = State()
+
+
+def admin_check(f):
+    @functools.wraps(f)
+    async def wrapped_func(*args, **kwargs):
+        func_args = inspect.getcallargs(f, *args, **kwargs)
+        user_id = func_args['message'].from_user.id
+        if admins.find_one({'user_id': user_id}) is None:
+            await bot.send_message(user_id, 'Вам не доступна эта команда')
+        else:
+            return await f(*args, **kwargs)
+    return wrapped_func
 
 
 # обработка команды /registration - сбор данных о пользователях
@@ -107,8 +122,15 @@ async def user_save(message: types.Message, state: FSMContext):
         )
         await state.reset_state()
 
+
+async def admin_registration(message):
+    admins.insert_one({'user_id': message.from_user.id})
+    await message.answer('Вы добавлены в администраторы')
+
+
 def register_handlers_registration(dp: Dispatcher):
     dp.register_message_handler(user_registration, commands='registration')
+    dp.register_message_handler(admin_registration, commands='admin')
     dp.register_message_handler(
         department_confirm,
         state=Registration.waiting_department,

@@ -6,7 +6,7 @@ from aiogram.utils import executor
 from config.bot_config import bot, dp
 from config.mongo_config import users
 from config.telegram_config import MY_TELEGRAM_ID
-from handlers.quiz import register_handlers_quiz
+from handlers.pattern import register_handlers_pattern
 from handlers.registration import (register_handlers_registration,
                                    user_registration)
 from handlers.service import register_handlers_service
@@ -19,7 +19,7 @@ logging.basicConfig(
     filemode='a',
     format='%(asctime)s - %(message)s',
     datefmt='%d.%m.%y %H:%M:%S',
-    # encoding='utf-8',
+    encoding='utf-8',
 )
 
 
@@ -36,5 +36,6 @@ if __name__ == '__main__':
     scheduler.start()
     register_handlers_service(dp)
     register_handlers_registration(dp)
-    register_handlers_quiz(dp)
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    register_handlers_pattern(dp)
+    # executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=True)

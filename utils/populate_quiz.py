@@ -1,8 +1,9 @@
 import pymongo
+# from config.mongo_config import quiz
 
 client = pymongo.MongoClient('localhost', 27017)
 # Connect to our database
-db = client['gks_bot_db']
+db = client['quiz_db']
 quiz = db['quiz']
 quiz_count = quiz.count_documents({})
 answer_num = quiz_count
