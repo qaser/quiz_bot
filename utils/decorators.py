@@ -41,7 +41,7 @@ def superuser_check(f):
     async def wrapped_func(*args, **kwargs):
         func_args = inspect.getcallargs(f, *args, **kwargs)
         user_id = func_args['message'].from_user.id
-        if user_id != ADMIN_TELEGRAM_ID:
+        if user_id != int(ADMIN_TELEGRAM_ID):
             await bot.send_message(user_id, 'Вам не доступна эта команда')
         else:
             return await f(*args, **kwargs)
