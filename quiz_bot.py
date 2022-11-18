@@ -37,5 +37,4 @@ if __name__ == '__main__':
     register_handlers_service(dp)
     register_handlers_registration(dp)
     register_handlers_pattern(dp)
-    # executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
