@@ -4,8 +4,8 @@ from aiogram import types
 from aiogram.utils import executor
 
 from config.bot_config import bot, dp
-from config.mongo_config import users
-from config.telegram_config import MY_TELEGRAM_ID
+# from config.mongo_config import users
+# from config.telegram_config import MY_TELEGRAM_ID
 from handlers.pattern import register_handlers_pattern
 from handlers.registration import (register_handlers_registration,
                                    user_registration)
