@@ -28,12 +28,13 @@ async def admin_request(message):
     user_is_admin = users.find_one({'user_id': user_id}).get('is_admin')
     if user_is_admin == 'true':
         await message.answer('Вы уже являетесь администратором')
-    request_user = admin_requests.find_one({'user_id': user_id})
-    if request_user is not None:
-        await message.answer('Вы уже подали заявку, ожидайте ответа')
     else:
-        await message.answer(text=ADMIN_REQUEST)
-        await AdminRegistration.waiting_comment.set()
+        request_user = admin_requests.find_one({'user_id': user_id})
+        if request_user is not None:
+            await message.answer('Вы уже подали заявку, ожидайте ответа')
+        else:
+            await message.answer(text=ADMIN_REQUEST)
+            await AdminRegistration.waiting_comment.set()
 
 
 async def request_confirm(message: types.Message, state: FSMContext):
