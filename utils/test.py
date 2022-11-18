@@ -6,7 +6,6 @@
 # from config.mongo_config import quiz
 
 
-
 # def get_poll():
 #     count = quiz.count_documents({})
 #     rand_num = random.randint(0, count)

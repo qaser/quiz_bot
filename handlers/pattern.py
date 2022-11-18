@@ -6,6 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.mongo_config import patterns
 from utils.constants import DEPARTMENTS, THEMES
+from utils.decorators import admin_check
 
 
 class Pattern(StatesGroup):
@@ -17,6 +18,7 @@ class Pattern(StatesGroup):
 
 
 # создание списка тем на квартал (шаблон)
+@admin_check
 async def create_pattern(message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for dep in DEPARTMENTS:
@@ -86,7 +88,7 @@ async def choose_themes(message: types.Message, state: FSMContext):
 
 
 async def create_list_themes(message: types.Message, state: FSMContext):
-    #TODO сделать проверку на повторный ввод одинаковых тем
+    # TODO сделать проверку на повторный ввод одинаковых тем
     if message.text.lower() != '<< завершить выбор >>':
         if message.text not in THEMES.values():
             await message.answer(
@@ -99,7 +101,7 @@ async def create_list_themes(message: types.Message, state: FSMContext):
         data = await state.get_data()
         list_themes = data['themes']
         list_themes.append(theme)
-        await state.update_data(themes = list_themes)
+        await state.update_data(themes=list_themes)
         await message.answer('Если необходимо выберите ещё тему')
         return
     else:
@@ -126,8 +128,8 @@ async def create_list_themes(message: types.Message, state: FSMContext):
 
 
 async def pattern_save(message: types.Message, state: FSMContext):
-    #TODO сделать проверку на пустой список тем
-    #TODO сделать ограничение на количество тем (10)
+    # TODO сделать проверку на пустой список тем
+    # TODO сделать ограничение на количество тем (10)
     if message.text.lower() not in ['нет', 'да']:
         await message.answer(
             'Пожалуйста, отправьте "Да" или "Нет"'

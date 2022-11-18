@@ -6,7 +6,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot
 from config.mongo_config import offers, users
-from config.telegram_config import MY_TELEGRAM_ID
+from config.telegram_config import ADMIN_TELEGRAM_ID
+from utils.decorators import superuser_check
 
 
 class BotOffer(StatesGroup):
@@ -91,17 +92,18 @@ async def confirm_offer(message: types.Message, state: FSMContext):
     )
     await state.finish()
     await bot.send_message(
-        chat_id=MY_TELEGRAM_ID,
+        chat_id=ADMIN_TELEGRAM_ID,
         text=f'Получен новый отзыв от {user.full_name}:\n{offer}'
     )
 
 
 # обработка команды /log
+@superuser_check
 async def send_logs(message: types.Message):
-    file = f'logs_bot.log'
+    file = 'logs_bot.log'
     with open(file, 'rb') as f:
         content = f.read()
-        await bot.send_document(chat_id=MY_TELEGRAM_ID, document=content)
+        await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
 
 
 def register_handlers_service(dp: Dispatcher):

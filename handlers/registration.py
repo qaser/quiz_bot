@@ -1,32 +1,18 @@
-import functools
-import inspect
-from typing import Callable
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.bot_config import bot, dp
-from config.mongo_config import admins, users
-from config.telegram_config import MY_TELEGRAM_ID
+from config.bot_config import bot
+from config.mongo_config import users
+from config.telegram_config import ADMIN_TELEGRAM_ID
 from texts.initial import REGISTRATION_TEXT
 from utils.constants import DEPARTMENTS
+from utils.decorators import admin_check, registration_check
 
 
 class Registration(StatesGroup):
     waiting_department = State()
     waiting_department_confirm = State()
-
-
-def admin_check(f):
-    @functools.wraps(f)
-    async def wrapped_func(*args, **kwargs):
-        func_args = inspect.getcallargs(f, *args, **kwargs)
-        user_id = func_args['message'].from_user.id
-        if admins.find_one({'user_id': user_id}) is None:
-            await bot.send_message(user_id, 'Вам не доступна эта команда')
-        else:
-            return await f(*args, **kwargs)
-    return wrapped_func
 
 
 # обработка команды /registration - сбор данных о пользователях
@@ -64,13 +50,11 @@ async def department_confirm(message: types.Message, state: FSMContext):
 
 async def user_save(message: types.Message, state: FSMContext):
     if message.text.lower() not in ['нет', 'да']:
-        await message.answer(
-            'Пожалуйста, отправьте "Да" или "Нет"'
-        )
+        await message.answer('Пожалуйста, отправьте "Да" или "Нет"')
         return
     if message.text.lower() == 'да':
         user = message.from_user
-        user_check = users.find_one({ 'user_id':  user.id })
+        user_check = users.find_one({'user_id':  user.id})
         buffer_data = await state.get_data()
         depart = buffer_data['department']
         if user_check is not None:
@@ -90,8 +74,8 @@ async def user_save(message: types.Message, state: FSMContext):
             )
             await state.finish()
             await bot.send_message(
-                chat_id=MY_TELEGRAM_ID,
-                text=f'Обновлён пользователь: {depart} - {user.full_name}'
+                chat_id=ADMIN_TELEGRAM_ID,
+                text=f'Обновлён пользователь:\n{depart} - {user.full_name}'
             )
         else:
             users.insert_one(
@@ -101,13 +85,14 @@ async def user_save(message: types.Message, state: FSMContext):
                     'first_name': user.first_name,
                     'last_name': user.last_name,
                     'full_name': user.full_name,
-                    'department': depart
+                    'department': depart,
+                    'is_admin': 'false'
                 }
             )
-            await state.finish()
+            await state.reset_state()
             await bot.send_message(
-                chat_id=MY_TELEGRAM_ID,
-                text=f'Добавлен пользователь: {depart} - {user.full_name}'
+                chat_id=ADMIN_TELEGRAM_ID,
+                text=f'Добавлен пользователь:\n{depart} - {user.full_name}'
             )
         await message.answer(
             REGISTRATION_TEXT,
@@ -123,14 +108,8 @@ async def user_save(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
-async def admin_registration(message):
-    admins.insert_one({'user_id': message.from_user.id})
-    await message.answer('Вы добавлены в администраторы')
-
-
 def register_handlers_registration(dp: Dispatcher):
     dp.register_message_handler(user_registration, commands='registration')
-    dp.register_message_handler(admin_registration, commands='admin')
     dp.register_message_handler(
         department_confirm,
         state=Registration.waiting_department,

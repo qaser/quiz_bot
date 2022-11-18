@@ -7,7 +7,7 @@ storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
 db = client['quiz_db']
 quiz = db['quiz']
 users = db['users']
-admins = db['admins']
+admin_requests = db['admin_requests']
 offers = db['offers']
 results = db['results']
 patterns = db['patterns']
@@ -21,7 +21,7 @@ patterns = db['patterns']
     'quarter': квартал года
     'test_type': тип теста (входной или выходной)
     'done': прошел проверку знаний (булево)
-    'quiz': список из кортежей (id вопроса, id ответа, ответ дан правильно\неправильно)
+    'quiz': список из кортежей (id вопроса, id ответа, ответ дан правильно/неправильно)
     'result': оценка за тест
 
 структура данных user
@@ -32,6 +32,7 @@ patterns = db['patterns']
     'full_name': имя и фамилия пользователя
     'username':  логин пользователя
     'department': место работы (опционально)
+    'is_admin': по умолчанию false
 
 структура данных quiz
     '_id': дефолтный первичный ключ
@@ -42,11 +43,6 @@ patterns = db['patterns']
     'num_answers' количество ответов (не более 10-ти)
     'answers' ответы (список)
 
-структура данных admins
-    '_id': дефолтный первичный ключ
-    'user_id' id пользователя телеграм
-    'username': имя пользователя
-
 структура данных шаблонов теста (patterns)
     '_id': дефолтный первичный ключ
     'department': наименование службы
@@ -54,4 +50,10 @@ patterns = db['patterns']
     'quarter': квартал года
     'themes': темы вопросов квартала (список)
     'owner': кто составил
+
+структура данных admin_requests
+    '_id' дефолтный первичный ключ
+    'user_id' id юзера
+    'username' имя пользователя
+    'comment' комментарий
 '''

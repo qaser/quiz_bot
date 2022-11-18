@@ -3,12 +3,12 @@ import logging
 from aiogram import types
 from aiogram.utils import executor
 
-from config.bot_config import bot, dp
+from config.bot_config import dp
+from handlers.admin_registration import register_handlers_admin_registration
 # from config.mongo_config import users
-# from config.telegram_config import MY_TELEGRAM_ID
+# from config.telegram_config import ADMIN_TELEGRAM_ID
 from handlers.pattern import register_handlers_pattern
-from handlers.registration import (register_handlers_registration,
-                                   user_registration)
+from handlers.registration import register_handlers_registration
 from handlers.service import register_handlers_service
 from scheduler.scheduler_jobs import scheduler, scheduler_jobs
 from texts.initial import INITIAL_TEXT
@@ -36,5 +36,6 @@ if __name__ == '__main__':
     scheduler.start()
     register_handlers_service(dp)
     register_handlers_registration(dp)
+    register_handlers_admin_registration(dp)
     register_handlers_pattern(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
