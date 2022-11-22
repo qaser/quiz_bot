@@ -1,20 +1,52 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import utils.constants as const
+from scheduler.scheduler_func import (add_questions_in_plan, send_input_quiz,
+                                      send_output_quiz)
 
-# from handlers.quiz import send_quiz_shedule
 
 scheduler = AsyncIOScheduler()
 
 
+'''
+рассылка будет первого числа нового квартала
+по истечению 4 дней, если тест не пройден, будет напоминание, что приём завершается через 1 день
+
+'''
+
 def scheduler_jobs():
-    pass
-    # по будням в 15:00 отправляет заметку о сегодняшнем дне
+    scheduler.add_job(
+        add_questions_in_plan,
+        'cron',
+        month='1,4,7,10',
+        day=1,
+        hour=7,
+        minute=0,
+        timezone=const.TIME_ZONE
+    )
+    scheduler.add_job(
+        send_input_quiz,
+        'cron',
+        month='1,4,7,10',
+        day=1,
+        hour=10,
+        minute=0,
+        timezone=const.TIME_ZONE
+    )
+    scheduler.add_job(
+        send_output_quiz,
+        'cron',
+        month='3,6,9,12',
+        day=25,
+        hour=10,
+        minute=0,
+        timezone=const.TIME_ZONE
+    )
     # scheduler.add_job(
-    #     send_history_day,
+    #     add_questions_in_plan,
     #     'cron',
-    #     day_of_week='mon-sun',
-    #     hour=15,
-    #     minute=0,
+    #     day=21,
+    #     hour=16,
+    #     minute=49,
     #     timezone=const.TIME_ZONE
     # )

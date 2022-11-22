@@ -7,7 +7,7 @@ from config.bot_config import dp, bot
 from config.mongo_config import admin_requests, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from texts.initial import ADMIN_REQUEST
-from utils.decorators import registration_check, superuser_check
+from utils.decorators import registration_check
 
 
 class AdminRegistration(StatesGroup):
@@ -108,7 +108,7 @@ async def request_save(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
-@dp.callback_query_handler(Text(startswith="admin_"))
+@dp.callback_query_handler(Text(startswith='admin_'))
 async def admin_request_confirm(call: types.CallbackQuery):
     _, user_id, result = call.data.split('_')
     if result == 'deny':

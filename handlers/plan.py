@@ -4,12 +4,13 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.mongo_config import patterns
+from config.mongo_config import plans
+from config.bot_config import dp
 from utils.constants import DEPARTMENTS, THEMES
 from utils.decorators import admin_check
 
 
-class Pattern(StatesGroup):
+class Plan(StatesGroup):
     waiting_department = State()
     waiting_year = State()
     waiting_quarter = State()
@@ -19,7 +20,7 @@ class Pattern(StatesGroup):
 
 # создание списка тем на квартал (шаблон)
 @admin_check
-async def create_pattern(message):
+async def create_plan(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for dep in DEPARTMENTS:
         keyboard.add(dep)
@@ -27,9 +28,10 @@ async def create_pattern(message):
         text='Выберите службу',
         reply_markup=keyboard,
     )
-    await Pattern.waiting_department.set()
+    await Plan.waiting_department.set()
 
 
+@dp.message_handler(state=Plan.waiting_department)
 async def choose_year(message: types.Message, state: FSMContext):
     if message.text not in DEPARTMENTS:
         await message.answer(
@@ -44,7 +46,7 @@ async def choose_year(message: types.Message, state: FSMContext):
         text='Выберите год планирования',
         reply_markup=keyboard,
     )
-    await Pattern.waiting_year.set()
+    await Plan.waiting_year.set()
 
 
 async def choose_quarter(message: types.Message, state: FSMContext):
@@ -62,10 +64,11 @@ async def choose_quarter(message: types.Message, state: FSMContext):
         text='Выберите квартал планирования',
         reply_markup=keyboard,
     )
-    await Pattern.waiting_quarter.set()
+    await Plan.waiting_quarter.set()
 
 
 async def choose_themes(message: types.Message, state: FSMContext):
+    # TODO сделать проверку на наличие плана на эти даты
     if message.text not in ['1', '2', '3', '4']:
         await message.answer(
             'Пожалуйста, выберите квартал, используя список ниже.'
@@ -84,7 +87,7 @@ async def choose_themes(message: types.Message, state: FSMContext):
         ),
         reply_markup=keyboard,
     )
-    await Pattern.waiting_themes.set()
+    await Plan.waiting_themes.set()
 
 
 async def create_list_themes(message: types.Message, state: FSMContext):
@@ -124,10 +127,10 @@ async def create_list_themes(message: types.Message, state: FSMContext):
             ),
             reply_markup=keyboard,
         )
-        await Pattern.waiting_confirm.set()
+        await Plan.waiting_confirm.set()
 
 
-async def pattern_save(message: types.Message, state: FSMContext):
+async def plan_save(message: types.Message, state: FSMContext):
     # TODO сделать проверку на пустой список тем
     # TODO сделать ограничение на количество тем (10)
     if message.text.lower() not in ['нет', 'да']:
@@ -137,34 +140,19 @@ async def pattern_save(message: types.Message, state: FSMContext):
         return
     if message.text.lower() == 'да':
         data = await state.get_data()
-        dep, year = data['department'], data['year']
-        quarter, themes = data['quarter'], data['themes']
+        dep, year = data['department'], int(data['year'])
+        quarter, themes = int(data['quarter']), data['themes']
         user_id = message.from_user.id
-        pattern_check = patterns.find_one(
-            {
-                'year': year,
-                'quarter': quarter,
-                'department': dep
-            }
+        plan_check = plans.find_one(
+            {'year': year, 'quarter': quarter, 'department': dep}
         )
-        if pattern_check is not None:
-            patterns.update_one(
-                {
-                    'year': year,
-                    'quarter': quarter,
-                    'department': dep
-                },
-                {
-                    '$set':
-                    {
-                        'owner': user_id,
-                        'themes': themes
-
-                    }
-                }
+        if plan_check is not None:
+            plans.update_one(
+                {'year': year, 'quarter': quarter, 'department': dep},
+                {'$set': {'owner': user_id, 'themes': themes}}
             )
         else:
-            patterns.insert_one(
+            plans.insert_one(
                 {
                     'year': year,
                     'quarter': quarter,
@@ -187,25 +175,10 @@ async def pattern_save(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
-def register_handlers_pattern(dp: Dispatcher):
-    dp.register_message_handler(create_pattern, commands='plan')
-    dp.register_message_handler(
-        choose_year,
-        state=Pattern.waiting_department,
-    )
-    dp.register_message_handler(
-        choose_quarter,
-        state=Pattern.waiting_year,
-    )
-    dp.register_message_handler(
-        choose_themes,
-        state=Pattern.waiting_quarter,
-    )
-    dp.register_message_handler(
-        create_list_themes,
-        state=Pattern.waiting_themes,
-    )
-    dp.register_message_handler(
-        pattern_save,
-        state=Pattern.waiting_confirm,
-    )
+def register_handlers_plan(dp: Dispatcher):
+    dp.register_message_handler(create_plan, commands='plan')
+    # dp.register_message_handler(choose_year, state=Plan.waiting_department)
+    dp.register_message_handler(choose_quarter, state=Plan.waiting_year)
+    dp.register_message_handler(choose_themes, state=Plan.waiting_quarter)
+    dp.register_message_handler(create_list_themes, state=Plan.waiting_themes)
+    dp.register_message_handler(plan_save, state=Plan.waiting_confirm)

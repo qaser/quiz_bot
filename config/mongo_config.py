@@ -5,24 +5,26 @@ from aiogram.contrib.fsm_storage.mongo import MongoStorage
 client = pymongo.MongoClient('localhost', 27017)
 storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
 db = client['quiz_db']
-quiz = db['quiz']
+# quizzy = db['quiz_buffer']
 users = db['users']
 admin_requests = db['admin_requests']
 offers = db['offers']
 results = db['results']
-patterns = db['patterns']
+questions = db['questions']
+plans = db['plans']
+
 
 
 '''
 структура данных results
     '_id': дефолтный первичный ключ
-    'user': id пользователя телеграм
+    'user_id': id пользователя телеграм
     'year': год проверки знаний
     'quarter': квартал года
     'test_type': тип теста (входной или выходной)
     'done': прошел проверку знаний (булево)
-    'quiz': список из кортежей (id вопроса, id ответа, ответ дан правильно/неправильно)
-    'result': оценка за тест
+    'quiz_results': список из кортежей (id вопроса, id правильного ответа, id ответа пользователя, ответ дан правильно/неправильно)
+    'grade': оценка за тест
 
 структура данных user
     '_id': дефолтный первичный ключ
@@ -34,22 +36,21 @@ patterns = db['patterns']
     'department': место работы (опционально)
     'is_admin': по умолчанию false
 
-структура данных quiz
+структура данных question
     '_id': дефолтный первичный ключ
-    'num': номер вопроса
     'theme' тематика вопроса
     'question' вопрос (не более 200 знаков)
     'correct_answer' индекс правильного ответа
-    'num_answers' количество ответов (не более 10-ти)
     'answers' ответы (список)
 
-структура данных шаблонов теста (patterns)
+структура данных планов (plans)
     '_id': дефолтный первичный ключ
     'department': наименование службы
     'year': год проверки знаний
     'quarter': квартал года
     'themes': темы вопросов квартала (список)
     'owner': кто составил
+    'questions' id вопросов список
 
 структура данных admin_requests
     '_id' дефолтный первичный ключ
