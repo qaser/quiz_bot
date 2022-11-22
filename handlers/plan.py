@@ -177,7 +177,7 @@ async def plan_save(message: types.Message, state: FSMContext):
 
 
 async def populate_plans(message: types.Message):
-    add_questions_in_plan()
+    await add_questions_in_plan()
     await message.answer('Вопросы для тестов сформированы')
 
 
