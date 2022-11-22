@@ -6,6 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.mongo_config import plans
 from config.bot_config import dp
+from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS, THEMES
 from utils.decorators import admin_check
 
@@ -175,6 +176,11 @@ async def plan_save(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
+async def populate_plans(message: types.Message):
+    add_questions_in_plan()
+    await message.answer('Вопросы для тестов сформированы')
+
+
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
     # dp.register_message_handler(choose_year, state=Plan.waiting_department)
@@ -182,3 +188,4 @@ def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(choose_themes, state=Plan.waiting_quarter)
     dp.register_message_handler(create_list_themes, state=Plan.waiting_themes)
     dp.register_message_handler(plan_save, state=Plan.waiting_confirm)
+    dp.register_message_handler(populate_plans, commands='pop_plan')
