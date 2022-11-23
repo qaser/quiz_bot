@@ -42,11 +42,11 @@ def scheduler_jobs():
         minute=0,
         timezone=const.TIME_ZONE
     )
-    # scheduler.add_job(
-    #     add_questions_in_plan,
-    #     'cron',
-    #     day=21,
-    #     hour=16,
-    #     minute=49,
-    #     timezone=const.TIME_ZONE
-    # )
+    scheduler.add_job(
+        add_questions_in_plan,
+        'cron',
+        day=23,
+        hour=23,
+        minute=55,
+        timezone=const.TIME_ZONE
+    )
