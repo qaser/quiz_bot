@@ -5,7 +5,7 @@ from aiogram.contrib.fsm_storage.mongo import MongoStorage
 client = pymongo.MongoClient('localhost', 27017)
 storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
 db = client['quiz_db']
-# quizzy = db['quiz_buffer']
+themes = db['themes']
 users = db['users']
 admin_requests = db['admin_requests']
 offers = db['offers']

@@ -5,6 +5,7 @@ from aiogram.utils import executor
 
 from config.bot_config import dp
 from handlers.admin_registration import register_handlers_admin_registration
+from handlers.import_questions import register_handlers_excel
 # from config.mongo_config import users
 # from config.telegram_config import ADMIN_TELEGRAM_ID
 from handlers.plan import register_handlers_plan
@@ -40,4 +41,5 @@ if __name__ == '__main__':
     register_handlers_admin_registration(dp)
     register_handlers_plan(dp)
     register_handlers_quiz(dp)
+    register_handlers_excel(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
