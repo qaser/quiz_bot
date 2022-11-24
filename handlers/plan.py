@@ -168,6 +168,8 @@ async def plan_save(message: types.Message, state: FSMContext):
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()
+        await add_questions_in_plan()
+        await message.answer('Вопросы для тестов сформированы')
     else:
         await message.answer(
             'Данные не сохранены',
