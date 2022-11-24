@@ -107,6 +107,7 @@ async def save_result(res_id):
     count_pos_ans = [x[3] for x in quiz_results].count('true')
     grade = calc_grade(count_pos_ans, len(quiz_results))
     q_word = word_conjugate(count_pos_ans, ['вопрос', 'вопроса', 'вопросов'])
+    g_word = word_conjugate(grade, ['балл', 'балла', 'баллов'])
     results.update_one(
         {'_id': res_id},
         {
@@ -123,7 +124,7 @@ async def save_result(res_id):
     await bot.send_message(
         chat_id=data.get('user_id'),
         text=(
-            f'Тестирование завершено\nВаш результат: {grade}\n'
+            f'Тестирование завершено\nВаш результат: {grade} {g_word}\n'
             f'Вы ответили правильно на {count_pos_ans} {q_word} '
             f'из {len(quiz_results)}'
         )
