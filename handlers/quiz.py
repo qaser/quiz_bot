@@ -53,6 +53,7 @@ async def get_questions(call: types.CallbackQuery):
         'quiz_results': [],
         'date_start': date_start,
     })
+    await call.message.delete_reply_markup()
     await send_quiz(res_id.inserted_id)
 
 
