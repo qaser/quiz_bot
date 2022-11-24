@@ -5,7 +5,7 @@ from config.bot_config import bot, dp
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from config.mongo_config import users, questions, plans, results
 from scheduler.scheduler_func import send_quiz_button
-from utils.utils import calc_date, calc_grade
+from utils.utils import calc_date, calc_grade, calc_test_type
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
@@ -19,7 +19,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 Сделать отчёт о прохождении входного/выходного теста по истечению квартала
 со сравнением входа и выхода
 
-Запрет команды /quiz если временной период закончился, если есть незавершенный тест, если тест уже пройден
 '''
 
 @dp.callback_query_handler(Text(startswith='quiz_'))
@@ -28,12 +27,7 @@ async def get_questions(call: types.CallbackQuery):
     _, id = call.data.split('_')
     user_id = int(id)
     year, month, quarter = calc_date()
-    if month in [1, 4, 7, 10]:
-        test_type = 'input'
-    elif month in [3, 6, 9, 12]:
-        test_type = 'output'
-    else:
-        test_type = 'special'
+    test_type = calc_test_type(month)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({
         'year': year,

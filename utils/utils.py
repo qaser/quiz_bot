@@ -29,3 +29,10 @@ def word_conjugate(number, words):
     if 1 < last_digit < 5 and last_two_digit not in range(11, 15):
         return f'{words[1]}'  # заявки
     return f'{words[2]}'  # заявок
+
+def calc_test_type(month):
+    if month in [1, 4, 7, 10]:
+        return 'input'
+    elif month in [3, 6, 9, 12]:
+        return 'output'
+    return 'special'

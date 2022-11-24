@@ -5,7 +5,8 @@ from aiogram import Dispatcher, types
 from config.mongo_config import plans, questions, users
 from config.bot_config import bot
 from config.telegram_config import ADMIN_TELEGRAM_ID
-from utils.utils import calc_date
+from utils.constants import TEST_TYPE
+from utils.utils import calc_date, calc_test_type
 
 
 # формирование списка вопросов согласно тем плана
@@ -30,7 +31,8 @@ async def add_questions_in_plan():
 
 async def send_quiz_button():
     keyboard = types.InlineKeyboardMarkup()
-    year, _, quarter = calc_date()
+    year, month, quarter = calc_date()
+    test_type = TEST_TYPE.get(calc_test_type(month))
     queryset = list(plans.find({'year': year, 'quarter': quarter,}))
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
@@ -40,7 +42,7 @@ async def send_quiz_button():
     for user_id in user_ids:
         keyboard.add(
             types.InlineKeyboardButton(
-                text='Пройти тестирование',
+                text=f'Пройти {test_type} тест знаний {quarter}-го квартала',
                 callback_data=f'quiz_{user_id}'
             )
         )
