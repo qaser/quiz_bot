@@ -49,7 +49,7 @@ async def send_quiz_button():
         try:
             await bot.send_message(
                 chat_id=user_id,
-                text=f'Пройдите {test_type} тест знаний {quarter}-го квартала',
+                text=f'Пройдите {test_type} тест знаний по плану {quarter}-го квартала',
                 reply_markup=keyboard,
             )
         except:
