@@ -95,7 +95,6 @@ async def choose_themes(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Plan.waiting_themes)
 async def create_list_themes(message: types.Message, state: FSMContext):
-    # TODO сделать проверку на повторный ввод одинаковых тем
     if message.text.lower() != '<< завершить выбор >>':
         if message.text not in THEMES.values():
             await message.answer(

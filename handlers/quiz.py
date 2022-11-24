@@ -4,6 +4,7 @@ from math import ceil
 from config.bot_config import bot, dp
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from config.mongo_config import users, questions, plans, results
+from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_date, calc_grade
 
 from aiogram import Dispatcher, types
@@ -21,9 +22,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 Запрет команды /quiz если временной период закончился, если есть незавершенный тест, если тест уже пройден
 '''
 
-async def get_questions(message: types.Message):
+@dp.callback_query_handler(Text(startswith='quiz_'))
+async def get_questions(call: types.CallbackQuery):
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    user_id = message.from_user.id
+    _, user_id = call.data.split('_')
     year, month, quarter = calc_date()
     if month in [1, 4, 7, 10]:
         test_type = 'input'
@@ -128,29 +130,9 @@ async def save_result(res_id):
     await bot.send_message(data.get('user_id'), f'Ваш результат: {grade}')
 
 
-async def send_input_quiz(message: types.Message):
-    year, _, quarter = calc_date()
-    queryset = list(plans.find({'year': year, 'quarter': quarter,}))
-    departments = [dep.get('department') for dep in queryset]
-    user_ids = []
-    for dep in departments:
-        ids = [user.get('user_id') for user in list(users.find({'department': dep}))]
-        user_ids += ids
-    for user_id in user_ids:
-        try:
-            await bot.send_message(
-                chat_id=user_id,
-                text='Пройдите тестирование нажав кнопку /quiz',
-            )
-        except:
-            bot.send_message(
-                ADMIN_TELEGRAM_ID,
-                f'Пользователь {user_id} не доступен'
-            )
-
-
+async def send_quiz_to_users(message: types.Message):
+    await send_quiz_button()
 
 
 def register_handlers_quiz(dp: Dispatcher):
-    dp.register_message_handler(get_questions, commands='quiz')
-    dp.register_message_handler(send_input_quiz, commands='q')
+    dp.register_message_handler(send_quiz_to_users, commands='quiz')
