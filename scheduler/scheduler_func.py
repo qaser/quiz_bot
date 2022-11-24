@@ -42,14 +42,14 @@ async def send_quiz_button():
     for user_id in user_ids:
         keyboard.add(
             types.InlineKeyboardButton(
-                text=f'Пройти {test_type} тест знаний {quarter}-го квартала',
+                text=f'Начать тестирование',
                 callback_data=f'quiz_{user_id}'
             )
         )
         try:
             await bot.send_message(
                 chat_id=user_id,
-                text='Пройдите тестирование нажав кнопку',
+                text=f'Пройдите {test_type} тест знаний {quarter}-го квартала',
                 reply_markup=keyboard,
             )
         except:
