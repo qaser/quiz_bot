@@ -5,7 +5,7 @@ from config.bot_config import bot, dp
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from config.mongo_config import users, questions, plans, results
 from scheduler.scheduler_func import send_quiz_button
-from utils.utils import calc_date, calc_grade, calc_test_type
+from utils.utils import calc_date, calc_grade, calc_test_type, word_conjugate
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
@@ -75,10 +75,6 @@ async def send_quiz(res_id):
             upsert=False
         )
     else:
-        await bot.send_message(
-            data.get('user_id'),
-            'Тестирование окончено'
-        )
         await save_result(res_id)
 
 
@@ -110,6 +106,7 @@ async def save_result(res_id):
     quiz_results = data.get('quiz_results')
     count_pos_ans = [x[3] for x in quiz_results].count('true')
     grade = calc_grade(count_pos_ans, len(quiz_results))
+    q_word = word_conjugate(count_pos_ans, ['вопрос', 'вопроса', 'вопросов'])
     results.update_one(
         {'_id': res_id},
         {
@@ -123,7 +120,14 @@ async def save_result(res_id):
         },
         upsert=False
     )
-    await bot.send_message(data.get('user_id'), f'Ваш результат: {grade}')
+    await bot.send_message(
+        chat_id=data.get('user_id'),
+        text=(
+            f'Тестирование завершено\nВаш результат: {grade}\n'
+            f'Вы ответили правильно на {count_pos_ans} {q_word} '
+            f'из {len(quiz_results)}'
+        )
+    )
 
 
 async def send_quiz_to_users(message: types.Message):
