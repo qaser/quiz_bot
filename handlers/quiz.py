@@ -25,7 +25,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 @dp.callback_query_handler(Text(startswith='quiz_'))
 async def get_questions(call: types.CallbackQuery):
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    _, user_id = call.data.split('_')
+    _, id = call.data.split('_')
+    user_id = int(id)
     year, month, quarter = calc_date()
     if month in [1, 4, 7, 10]:
         test_type = 'input'
