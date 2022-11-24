@@ -9,6 +9,8 @@ from utils.constants import THEMES
 from utils.utils import word_conjugate
 from aiogram import Dispatcher, types
 
+# TODO сделать импорт тем из excel файла
+
 
 async def import_file(message: types.Message):
     await message.answer('Отправьте следующим сообщением файл с вопросами')

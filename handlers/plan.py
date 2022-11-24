@@ -50,6 +50,7 @@ async def choose_year(message: types.Message, state: FSMContext):
     await Plan.waiting_year.set()
 
 
+@dp.message_handler(state=Plan.waiting_year)
 async def choose_quarter(message: types.Message, state: FSMContext):
     now_year = dt.datetime.now().year
     if message.text not in [str(now_year), str(now_year + 1)]:
@@ -68,6 +69,7 @@ async def choose_quarter(message: types.Message, state: FSMContext):
     await Plan.waiting_quarter.set()
 
 
+@dp.message_handler(state=Plan.waiting_quarter)
 async def choose_themes(message: types.Message, state: FSMContext):
     # TODO сделать проверку на наличие плана на эти даты
     if message.text not in ['1', '2', '3', '4']:
@@ -91,6 +93,7 @@ async def choose_themes(message: types.Message, state: FSMContext):
     await Plan.waiting_themes.set()
 
 
+@dp.message_handler(state=Plan.waiting_themes)
 async def create_list_themes(message: types.Message, state: FSMContext):
     # TODO сделать проверку на повторный ввод одинаковых тем
     if message.text.lower() != '<< завершить выбор >>':
@@ -104,7 +107,8 @@ async def create_list_themes(message: types.Message, state: FSMContext):
                 theme = key
         data = await state.get_data()
         list_themes = data['themes']
-        list_themes.append(theme)
+        if theme not in list_themes:
+            list_themes.append(theme)
         await state.update_data(themes=list_themes)
         await message.answer('Если необходимо выберите ещё тему')
         return
@@ -131,6 +135,7 @@ async def create_list_themes(message: types.Message, state: FSMContext):
         await Plan.waiting_confirm.set()
 
 
+@dp.message_handler(state=Plan.waiting_confirm)
 async def plan_save(message: types.Message, state: FSMContext):
     # TODO сделать проверку на пустой список тем
     # TODO сделать ограничение на количество тем (10)
@@ -185,9 +190,4 @@ async def populate_plans(message: types.Message):
 
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
-    # dp.register_message_handler(choose_year, state=Plan.waiting_department)
-    dp.register_message_handler(choose_quarter, state=Plan.waiting_year)
-    dp.register_message_handler(choose_themes, state=Plan.waiting_quarter)
-    dp.register_message_handler(create_list_themes, state=Plan.waiting_themes)
-    dp.register_message_handler(plan_save, state=Plan.waiting_confirm)
     dp.register_message_handler(populate_plans, commands='pop_plan')
