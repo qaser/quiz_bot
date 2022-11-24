@@ -105,9 +105,11 @@ async def save_result(res_id):
     data = results.find_one({'_id': res_id})
     quiz_results = data.get('quiz_results')
     count_pos_ans = [x[3] for x in quiz_results].count('true')
-    grade = calc_grade(count_pos_ans, len(quiz_results))
+    len_quiz_res = len(quiz_results)
+    grade = calc_grade(count_pos_ans, len_quiz_res)
     q_word = word_conjugate(count_pos_ans, ['вопрос', 'вопроса', 'вопросов'])
     g_word = word_conjugate(grade, ['балл', 'балла', 'баллов'])
+    l_word = word_conjugate(len_quiz_res, ['-го', '-х', '-ти'])
     results.update_one(
         {'_id': res_id},
         {
@@ -126,7 +128,7 @@ async def save_result(res_id):
         text=(
             f'Тестирование завершено\nВаш результат: {grade} {g_word}\n'
             f'Вы ответили правильно на {count_pos_ans} {q_word} '
-            f'из {len(quiz_results)}'
+            f'из {len_quiz_res}{l_word}'
         )
     )
 
