@@ -104,6 +104,7 @@ async def save_result(res_id):
     date_end = dt.datetime.now().strftime('%d.%m.%Y')
     data = results.find_one({'_id': res_id})
     quiz_results = data.get('quiz_results')
+    user_id = data.get('user_id')
     count_pos_ans = [x[3] for x in quiz_results].count('true')
     len_quiz_res = len(quiz_results)
     grade = calc_grade(count_pos_ans, len_quiz_res)
@@ -124,14 +125,31 @@ async def save_result(res_id):
         upsert=False
     )
     await bot.send_message(
-        chat_id=data.get('user_id'),
+        chat_id=user_id,
         text=(
             'Тестирование завершено.\n'
             f'Вы ответили правильно на {count_pos_ans} {q_word} '
-            f'из {len_quiz_res}{l_word}'
+            f'из {len_quiz_res}{l_word}.\n'
             f'Ваш результат: {grade} {g_word}\n'
         )
     )
+    await send_admin_notification(user_id)
+
+
+async def send_admin_notification(user_id):
+    user = users.find_one({'user_id': user_id})
+    user_name = user.get('full_name')
+    department = user.get('department')
+    admins = list(users.find({'department': department, 'is_admin': 'true'}))
+    if len(admins) > 0:
+        for admin in admins:
+            try:
+                await bot.send_message(
+                    chat_id=admin.get('user_id'),
+                    text=f'Пользователь {user_name} прошёл тестирование'
+                )
+            except:
+                continue
 
 
 async def send_quiz_to_users(message: types.Message):

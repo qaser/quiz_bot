@@ -116,7 +116,11 @@ async def create_list_themes(message: types.Message, state: FSMContext):
         keyboard.add('Нет', 'Да')
         data = await state.get_data()
         dep, year = data['department'], data['year']
-        quarter, themes = data['quarter'], data['themes']
+        quarter = data['quarter']
+        themes = data['themes']
+        if len(themes) == 0:
+            await message.answer('Необходимо выбрать минимум одну тему')
+            return
         text_themes = ''
         for i in themes:
             name = THEMES.get(i)
@@ -148,9 +152,6 @@ async def plan_save(message: types.Message, state: FSMContext):
         dep, year = data['department'], int(data['year'])
         quarter = int(data['quarter'])
         themes = data['themes']
-        if len(themes) == 0:
-            message.answer('Необходимо выбрать минимум одну тему')
-            return
         user_id = message.from_user.id
         plan_check = plans.find_one(
             {'year': year, 'quarter': quarter, 'department': dep}
