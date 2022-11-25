@@ -4,7 +4,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.bot_config import bot
+from config.bot_config import bot, dp
 from config.mongo_config import offers, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.decorators import superuser_check
@@ -25,6 +25,7 @@ async def reset_handler(message: types.Message, state: FSMContext):
 
 
 # обработка команды /users просмотр количества пользователей в БД
+@superuser_check
 async def count_users(message: types.Message):
     queryset = list(users.find({}))
     users_count = len(queryset)
@@ -50,6 +51,7 @@ async def bot_offer(message: types.Message):
     await BotOffer.waiting_for_offer.set()
 
 
+@dp.message_handler(state=BotOffer.waiting_for_offer)
 async def add_offer(message: types.Message, state: FSMContext):
     await state.update_data(offer=message.text)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -61,6 +63,7 @@ async def add_offer(message: types.Message, state: FSMContext):
     await BotOffer.waiting_for_offer_confirm.set()
 
 
+@dp.message_handler(state=BotOffer.waiting_for_offer_confirm)
 async def confirm_offer(message: types.Message, state: FSMContext):
     if message.text.lower() not in ['нет', 'да']:
         await message.answer(
@@ -111,8 +114,3 @@ def register_handlers_service(dp: Dispatcher):
     dp.register_message_handler(count_users, commands='users')
     dp.register_message_handler(send_logs, commands='log')
     dp.register_message_handler(bot_offer, commands='offer')
-    dp.register_message_handler(add_offer, state=BotOffer.waiting_for_offer)
-    dp.register_message_handler(
-        confirm_offer,
-        state=BotOffer.waiting_for_offer_confirm
-    )

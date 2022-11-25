@@ -118,7 +118,7 @@ async def save_result(res_id):
                 'q_len': True,
                 'count': True,
                 'q_ids': True,
-                'quiz': True
+                'quiz': True,
             }
         },
         upsert=False
@@ -126,9 +126,10 @@ async def save_result(res_id):
     await bot.send_message(
         chat_id=data.get('user_id'),
         text=(
-            f'Тестирование завершено\nВаш результат: {grade} {g_word}\n'
+            'Тестирование завершено.\n'
             f'Вы ответили правильно на {count_pos_ans} {q_word} '
             f'из {len_quiz_res}{l_word}'
+            f'Ваш результат: {grade} {g_word}\n'
         )
     )
 

@@ -49,7 +49,10 @@ async def send_quiz_button():
         try:
             await bot.send_message(
                 chat_id=user_id,
-                text=f'Пройдите {test_type} тест знаний по плану {quarter}-го квартала',
+                text=(
+                    f'Пройдите {test_type} тест знаний по '
+                    f'плану технической учёбы {quarter}-го квартала'
+                ),
                 reply_markup=keyboard,
             )
         except:
@@ -57,11 +60,3 @@ async def send_quiz_button():
                 ADMIN_TELEGRAM_ID,
                 f'Пользователь {user_id} не доступен'
             )
-
-
-async def send_input_quiz():
-    pass
-
-
-async def send_output_quiz():
-    pass

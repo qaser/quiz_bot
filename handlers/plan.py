@@ -146,7 +146,11 @@ async def plan_save(message: types.Message, state: FSMContext):
     if message.text.lower() == 'да':
         data = await state.get_data()
         dep, year = data['department'], int(data['year'])
-        quarter, themes = int(data['quarter']), data['themes']
+        quarter = int(data['quarter'])
+        themes = data['themes']
+        if len(themes) == 0:
+            message.answer('Необходимо выбрать минимум одну тему')
+            return
         user_id = message.from_user.id
         plan_check = plans.find_one(
             {'year': year, 'quarter': quarter, 'department': dep}
