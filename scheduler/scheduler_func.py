@@ -29,6 +29,7 @@ async def add_questions_in_plan():
     await bot.send_message(ADMIN_TELEGRAM_ID, 'Тесты сформированы')
 
 
+# отправка кнопки для начала тестирования
 async def send_quiz_button():
     keyboard = types.InlineKeyboardMarkup()
     year, month, quarter = calc_date()
@@ -51,7 +52,7 @@ async def send_quiz_button():
                 chat_id=user_id,
                 text=(
                     f'Пройдите {test_type} тест знаний по '
-                    f'плану технической учёбы {quarter}-го квартала'
+                    f'плану технической учёбы {quarter}-го квартала.'
                 ),
                 reply_markup=keyboard,
             )
