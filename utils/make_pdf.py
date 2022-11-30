@@ -4,10 +4,10 @@ from pathlib import Path
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
                       SingleColumnLayout)
 from borb.pdf.canvas.color.color import HexColor
-# not an easy import
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
 from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
 from borb.pdf.canvas.layout.table.table import TableCell
+from config.mongo_config import results, users
 
 
 TABLE_HEADERS = [
@@ -20,7 +20,8 @@ TABLE_HEADERS = [
 ]
 
 
-def main():
+def report_department_pdf():
+    res_queryset = results.find({})
     # create Document
     doc = Document()
     page = Page()
@@ -90,9 +91,5 @@ def main():
     layout.add(table)
 
     # сохранение документа
-    with open('output.pdf', 'wb') as pdf_file_handle:
+    with open('report_department.pdf', 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)
-
-
-if __name__ == '__main__':
-    main()

@@ -7,7 +7,7 @@ from config.bot_config import bot
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.constants import TEST_TYPE
 from utils.utils import calc_date, calc_test_type
-
+from utils.make_pdf import report_department_pdf
 
 # формирование списка вопросов согласно тем плана
 async def add_questions_in_plan():
