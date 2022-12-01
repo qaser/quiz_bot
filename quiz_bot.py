@@ -10,6 +10,7 @@ from handlers.import_questions import register_handlers_excel
 # from config.telegram_config import ADMIN_TELEGRAM_ID
 from handlers.plan import register_handlers_plan
 from handlers.quiz import register_handlers_quiz
+from handlers.reports import register_handlers_reports
 from handlers.registration import register_handlers_registration
 from handlers.service import register_handlers_service
 from scheduler.scheduler_jobs import scheduler, scheduler_jobs
@@ -42,4 +43,5 @@ if __name__ == '__main__':
     register_handlers_plan(dp)
     register_handlers_quiz(dp)
     register_handlers_excel(dp)
+    register_handlers_reports(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

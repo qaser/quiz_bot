@@ -20,8 +20,7 @@ TABLE_HEADERS = [
 ]
 
 
-def report_department_pdf():
-    res_queryset = results.find({})
+def report_department_pdf(year, quarter, department, results_set):
     # create Document
     doc = Document()
     page = Page()
@@ -51,7 +50,8 @@ def report_department_pdf():
     # заголовок страницы
     layout.add(
         Paragraph(
-            'Отчёт о тестировании знаний персонала КС-5,6 за 1 квартал 2022 года',
+            text=('Отчёт о тестировании знаний персонала '
+                  f'{department} за {quarter} квартал {year} года'),
             font=regular_font,
             font_size=Decimal(14),
             text_alignment=Alignment.CENTERED,
@@ -61,7 +61,7 @@ def report_department_pdf():
     )
 
     table = Table(
-        number_of_rows=5,
+        number_of_rows=len(results_set)+1,
         number_of_columns=6,
         margin_top=Decimal(20),
         column_widths=[
@@ -85,11 +85,78 @@ def report_department_pdf():
                 ),
             ),
         )
-    # сделать цикл с данными результатов тестирования
+    for num, res in enumerate(results_set):
+        table.add(
+            TableCell(
+                Paragraph(
+                    str(num+1),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
+        table.add(
+            TableCell(
+                Paragraph(
+                    res.get('user'),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
+        table.add(
+            TableCell(
+                Paragraph(
+                    res.get('date_input'),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
+        table.add(
+            TableCell(
+                Paragraph(
+                    str(res.get('grade_input')),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
+        table.add(
+            TableCell(
+                Paragraph(
+                    res.get('date_output'),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
+        table.add(
+            TableCell(
+                Paragraph(
+                    str(res.get('grade_output')),
+                    horizontal_alignment=Alignment.CENTERED,
+                    text_alignment=Alignment.CENTERED,
+                    font=regular_font,
+                ),
+                padding_top=Decimal(10),
+            ),
+        )
 
     table.no_borders()
     layout.add(table)
 
     # сохранение документа
-    with open('report_department.pdf', 'wb') as pdf_file_handle:
+    f_path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
+    with open(f_path, 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)

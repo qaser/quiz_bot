@@ -12,6 +12,7 @@ offers = db['offers']
 results = db['results']
 questions = db['questions']
 plans = db['plans']
+buffer = db['buffer']
 
 
 

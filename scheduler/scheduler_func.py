@@ -9,6 +9,7 @@ from utils.constants import TEST_TYPE
 from utils.utils import calc_date, calc_test_type
 from utils.make_pdf import report_department_pdf
 
+
 # формирование списка вопросов согласно тем плана
 async def add_questions_in_plan():
     year, _, quarter = calc_date()
@@ -33,7 +34,8 @@ async def add_questions_in_plan():
 async def send_quiz_button():
     keyboard = types.InlineKeyboardMarkup()
     year, month, quarter = calc_date()
-    test_type = TEST_TYPE.get(calc_test_type(month))
+    test_type = calc_test_type(month)
+    test_type_name = TEST_TYPE.get(test_type)
     queryset = list(plans.find({'year': year, 'quarter': quarter,}))
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
@@ -44,14 +46,14 @@ async def send_quiz_button():
         keyboard.add(
             types.InlineKeyboardButton(
                 text=f'Начать тестирование',
-                callback_data=f'quiz_{user_id}'
+                callback_data=f'quiz_{year}_{quarter}_{test_type}_{user_id}'
             )
         )
         try:
             await bot.send_message(
                 chat_id=user_id,
                 text=(
-                    f'Пройдите {test_type} тест знаний по '
+                    f'Пройдите {test_type_name} тест знаний по '
                     f'плану технической учёбы {quarter}-го квартала.'
                 ),
                 reply_markup=keyboard,

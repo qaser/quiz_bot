@@ -23,11 +23,11 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 @dp.callback_query_handler(Text(startswith='quiz_'))
 async def get_questions(call: types.CallbackQuery):
+    # TODO сделать разделение на составление вопросов при типе теста 'special'
+    # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    _, id = call.data.split('_')
+    _, year, quarter, test_type, id = call.data.split('_')
     user_id = int(id)
-    year, month, quarter = calc_date()
-    test_type = calc_test_type(month)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({
         'year': year,
