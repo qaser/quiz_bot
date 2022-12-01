@@ -30,14 +30,14 @@ async def get_questions(call: types.CallbackQuery):
     user_id = int(id)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({
-        'year': str(year),
-        'quarter': str(quarter),
+        'year': int(year),
+        'quarter': int(quarter),
         'department': department
     }).get('questions')
     res_id = results.insert_one({
         'user_id': user_id,
-        'year': str(year),
-        'quarter': str(quarter),
+        'year': int(year),
+        'quarter': int(quarter),
         'test_type': test_type,
         'done': 'false',
         'q_len': len(questions_ids),
