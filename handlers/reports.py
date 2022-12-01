@@ -1,19 +1,12 @@
-import datetime as dt
-from math import ceil
 import os
-import pprint
-
 from config.bot_config import bot, dp
-from config.telegram_config import ADMIN_TELEGRAM_ID
-from config.mongo_config import users, questions, plans, results
-from scheduler.scheduler_func import send_quiz_button
-from utils.utils import calc_date, calc_grade, calc_test_type, word_conjugate
+from config.mongo_config import users, results
+
 from utils.decorators import admin_check
 from utils.make_pdf import report_department_pdf
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 

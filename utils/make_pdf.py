@@ -1,14 +1,10 @@
 from decimal import Decimal
-import gc
 from pathlib import Path
-
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
                       SingleColumnLayout)
-from borb.pdf.canvas.color.color import HexColor
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
 from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
 from borb.pdf.canvas.layout.table.table import TableCell
-from config.mongo_config import results, users
 
 
 TABLE_HEADERS = [
@@ -161,5 +157,3 @@ def report_department_pdf(year, quarter, department, results_set):
     f_path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
     with open(f_path, 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)
-    del doc
-    gc.collect()
