@@ -1,4 +1,5 @@
 from decimal import Decimal
+import gc
 from pathlib import Path
 
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
@@ -160,3 +161,5 @@ def report_department_pdf(year, quarter, department, results_set):
     f_path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
     with open(f_path, 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)
+    del doc
+    gc.collect()
