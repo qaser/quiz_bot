@@ -82,73 +82,73 @@ def report_department_pdf(year, quarter, department, results_set):
                 ),
             ),
         )
-    for num, res in enumerate(results_set):
-        table.add(
-            TableCell(
-                Paragraph(
-                    str(num+1),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
-        table.add(
-            TableCell(
-                Paragraph(
-                    res.get('user'),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
-        table.add(
-            TableCell(
-                Paragraph(
-                    res.get('date_input'),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
-        table.add(
-            TableCell(
-                Paragraph(
-                    str(res.get('grade_input')),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
-        table.add(
-            TableCell(
-                Paragraph(
-                    res.get('date_output'),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
-        table.add(
-            TableCell(
-                Paragraph(
-                    str(res.get('grade_output')),
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=regular_font,
-                ),
-                padding_top=Decimal(10),
-            ),
-        )
+    # for num, res in enumerate(results_set):
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 str(num+1),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 res.get('user'),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 res.get('date_input'),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 str(res.get('grade_input')),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 res.get('date_output'),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
+    #     table.add(
+    #         TableCell(
+    #             Paragraph(
+    #                 str(res.get('grade_output')),
+    #                 horizontal_alignment=Alignment.CENTERED,
+    #                 text_alignment=Alignment.CENTERED,
+    #                 font=regular_font,
+    #             ),
+    #             padding_top=Decimal(10),
+    #         ),
+    #     )
 
     table.no_borders()
     layout.add(table)
