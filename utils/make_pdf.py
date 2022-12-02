@@ -1,11 +1,14 @@
 from decimal import Decimal
 from pathlib import Path
+
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
                       SingleColumnLayout)
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
-from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
+from borb.pdf.canvas.layout.image.barcode import Barcode, BarcodeType
+from borb.pdf.canvas.layout.layout_element import LayoutElement
+from borb.pdf.canvas.layout.table.fixed_column_width_table import \
+    FixedColumnWidthTable as Table
 from borb.pdf.canvas.layout.table.table import TableCell
-
 
 TABLE_HEADERS = [
     '№ п/п',
@@ -153,6 +156,17 @@ def report_department_pdf(year, quarter, department, results_set):
 
     table.no_borders()
     layout.add(table)
+
+    # Код для создания QR-кода LayoutElement
+    qr_code: LayoutElement = Barcode(
+        data='https://t.me/quiz_blpu_bot',
+        width=Decimal(64),
+        height=Decimal(64),
+        type=BarcodeType.QR,
+        vertical_alignment=Alignment.BOTTOM,
+        horizontal_alignment=Alignment.RIGHT
+    )
+    layout.add(qr_code)
 
     # сохранение документа
     f_path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
