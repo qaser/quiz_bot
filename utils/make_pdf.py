@@ -3,7 +3,8 @@ from pathlib import Path
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
                       SingleColumnLayout)
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
-from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
+from borb.pdf.canvas.layout.table.flexible_column_width_table import FlexibleColumnWidthTable as Table
+# from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
 from borb.pdf.canvas.layout.table.table import TableCell
 
 
