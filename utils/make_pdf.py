@@ -3,8 +3,8 @@ from pathlib import Path
 from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
                       SingleColumnLayout)
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
-from borb.pdf.canvas.layout.table.flexible_column_width_table import FlexibleColumnWidthTable as Table
-# from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
+# from borb.pdf.canvas.layout.table.flexible_column_width_table import FlexibleColumnWidthTable as Table
+from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
 from borb.pdf.canvas.layout.table.table import TableCell
 
 
@@ -32,9 +32,9 @@ def report_department_pdf(year, quarter, department, results_set):
 
     # используемые шрифты
     font_path = Path('static/fonts')
-    regular_font = TrueTypeFont.true_type_font_from_file(
-        font_path / 'Inter-Regular.ttf'
-    )
+    # regular_font = TrueTypeFont.true_type_font_from_file(
+    #     font_path / 'Inter-Regular.ttf'
+    # )
     # thin_font = TrueTypeFont.true_type_font_from_file(
     #     font_path / 'Inter-Thin.ttf'
     # )
@@ -91,7 +91,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     str(num+1),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
@@ -102,7 +102,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     res.get('user'),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
@@ -113,7 +113,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     res.get('date_input'),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
@@ -124,7 +124,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     str(res.get('grade_input')),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
@@ -135,7 +135,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     res.get('date_output'),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
@@ -146,7 +146,7 @@ def report_department_pdf(year, quarter, department, results_set):
                     str(res.get('grade_output')),
                     # horizontal_alignment=Alignment.CENTERED,
                     # text_alignment=Alignment.CENTERED,
-                    font=regular_font,
+                    # font=regular_font,
                 ),
                 padding_top=Decimal(10),
             ),
