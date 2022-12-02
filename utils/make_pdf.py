@@ -32,9 +32,9 @@ def report_department_pdf(year, quarter, department, results_set):
 
     # используемые шрифты
     font_path = Path('static/fonts')
-    # regular_font = TrueTypeFont.true_type_font_from_file(
-    #     font_path / 'Inter-Regular.ttf'
-    # )
+    regular_font = TrueTypeFont.true_type_font_from_file(
+        font_path / 'Inter-Regular.ttf'
+    )
     # thin_font = TrueTypeFont.true_type_font_from_file(
     #     font_path / 'Inter-Thin.ttf'
     # )
