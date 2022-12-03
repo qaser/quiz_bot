@@ -1,6 +1,7 @@
 import datetime as dt
 from math import ceil
 from aiogram import Dispatcher, types
+from aiogram.utils.exceptions import CantInitiateConversation
 
 from config.mongo_config import plans, questions, users
 from config.bot_config import bot
@@ -38,6 +39,7 @@ async def send_quiz_button():
     queryset = list(plans.find({'year': year, 'quarter': quarter,}))
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
+    # err =  CantInitiateConversation
     for dep in departments:
         ids = [user.get('user_id') for user in list(users.find({'department': dep}))]
         user_ids += ids
@@ -58,8 +60,10 @@ async def send_quiz_button():
                 ),
                 reply_markup=keyboard,
             )
-        except:
-            bot.send_message(
+        except CantInitiateConversation:
+            missed_user = users.find_one({'user_id': user_id}).get('full_name')
+            # missed_user_name = missed_user.get('full_name')
+            await bot.send_message(
                 ADMIN_TELEGRAM_ID,
-                f'Пользователь {user_id} не доступен'
+                f'Пользователь {missed_user} не доступен'
             )
