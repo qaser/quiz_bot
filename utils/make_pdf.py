@@ -169,6 +169,6 @@ def report_department_pdf(year, quarter, department, results_set):
     layout.add(qr_code)
 
     # сохранение документа
-    f_path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
+    f_path = f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
     with open(f_path, 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)

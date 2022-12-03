@@ -99,7 +99,7 @@ async def get_results(year, quarter, user_id):
 
 async def send_result(year, quarter, department, user_id, results_set):
     report_department_pdf(year, quarter, department, results_set)
-    path = f'static/reports/Отчёт ТУ {department} {quarter} кв. {year}г.pdf'
+    path = f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
     await bot.send_document(
         chat_id=user_id,
         document=open(path, 'rb')
