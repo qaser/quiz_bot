@@ -1,17 +1,19 @@
 import logging
 
 from aiogram import types
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 
 from config.bot_config import dp
+from config.mongo_config import users
 from handlers.admin_registration import register_handlers_admin_registration
 from handlers.import_questions import register_handlers_excel
-# from config.mongo_config import users
-# from config.telegram_config import ADMIN_TELEGRAM_ID
+from aiogram.dispatcher import FSMContext
+from config.telegram_config import ADMIN_TELEGRAM_ID, PASSWORD
 from handlers.plan import register_handlers_plan
 from handlers.quiz import register_handlers_quiz
-from handlers.reports import register_handlers_reports
 from handlers.registration import register_handlers_registration
+from handlers.reports import register_handlers_reports
 from handlers.service import register_handlers_service
 from scheduler.scheduler_jobs import scheduler, scheduler_jobs
 from texts.initial import INITIAL_TEXT
@@ -26,9 +28,30 @@ logging.basicConfig(
 )
 
 
+class PasswordCheck(StatesGroup):
+    waiting_password = State()
+
+
 @dp.message_handler(commands=['start'])
 async def start_handler(message: types.Message):
-    await message.answer(text=INITIAL_TEXT)
+    user_id = message.from_user.id
+    check_user = users.find_one({'user_id': user_id})
+    if check_user is not None:
+        await message.answer(INITIAL_TEXT)
+    else:
+        await message.answer('Введите пароль')
+        await PasswordCheck.waiting_password.set()
+
+
+@dp.message_handler(state=PasswordCheck.waiting_password)
+async def check_password(message: types.Message, state: FSMContext):
+    if message.text == PASSWORD:
+        await message.answer(INITIAL_TEXT)
+        await state.reset_state()
+        await state.reset_data()
+    else:
+        await message.answer('Пароль неверный, повторите попытку')
+        return
 
 
 async def on_startup(_):

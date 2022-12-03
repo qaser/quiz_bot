@@ -32,7 +32,6 @@ async def add_questions_in_plan():
 
 # отправка кнопки для начала тестирования
 async def send_quiz_button():
-    keyboard = types.InlineKeyboardMarkup()
     year, month, quarter = calc_date()
     test_type = calc_test_type(month)
     test_type_name = TEST_TYPE.get(test_type)
@@ -43,13 +42,14 @@ async def send_quiz_button():
         ids = [user.get('user_id') for user in list(users.find({'department': dep}))]
         user_ids += ids
     for user_id in user_ids:
-        keyboard.add(
-            types.InlineKeyboardButton(
-                text=f'Начать тестирование',
-                callback_data=f'quiz_{year}_{quarter}_{test_type}_{user_id}'
-            )
-        )
         try:
+            keyboard = types.InlineKeyboardMarkup()
+            keyboard.add(
+                types.InlineKeyboardButton(
+                    text=f'Начать тестирование',
+                    callback_data=f'quiz_{year}_{quarter}_{test_type}_{user_id}'
+                )
+            )
             await bot.send_message(
                 chat_id=user_id,
                 text=(

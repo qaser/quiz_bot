@@ -17,6 +17,7 @@ class BotOffer(StatesGroup):
 
 # обработка команды /reset - сброс клавиатуры и состояния
 async def reset_handler(message: types.Message, state: FSMContext):
+    await state.reset_state()
     await state.reset_data()
     await message.answer(
         text='Сброс настроек бота выполнен, текущее действие отменено.',
