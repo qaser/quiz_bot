@@ -113,14 +113,15 @@ async def send_logs(message: types.Message):
         await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
 
 
-@dp.errors_handler(exception=exceptions.BotBlocked)
-async def bot_blocked_error(update: types.Update):
-    user_id = update.message.from_user.id
-    username = users.find_one({'user_id': user_id}).get('full_name')
-    await bot.send_message(
-        chat_id=ADMIN_TELEGRAM_ID,
-        text=f'Пользователь {username} заблокировал бота'
-    )
+# @dp.errors_handler(exception=exceptions.BotBlocked)
+# async def bot_blocked_error(update: types.Update):
+#     user_id = update.message.from_user.id
+#     username = users.find_one({'user_id': user_id}).get('full_name')
+#     print(username)
+    # await bot.send_message(
+    #     chat_id=ADMIN_TELEGRAM_ID,
+    #     text=f'Пользователь {username} заблокировал бота'
+    # )
 
 
 def register_handlers_service(dp: Dispatcher):
