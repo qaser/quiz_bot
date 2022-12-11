@@ -16,9 +16,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 '''
 Сделать протоколы проверки знаний в формате pdf
 
-Сделать отчёт о прохождении входного/выходного теста по истечению квартала
-со сравнением входа и выхода
-
 '''
 
 @dp.callback_query_handler(Text(startswith='quiz_'))

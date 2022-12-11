@@ -4,10 +4,10 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.mongo_config import plans
+from config.mongo_config import plans, themes
 from config.bot_config import dp
 from scheduler.scheduler_func import add_questions_in_plan
-from utils.constants import DEPARTMENTS, THEMES
+from utils.constants import DEPARTMENTS
 from utils.decorators import admin_check
 
 
@@ -81,7 +81,8 @@ async def choose_themes(message: types.Message, state: FSMContext):
     await state.update_data(themes=[])
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add('<< Завершить выбор >>')
-    for theme in THEMES.values():
+    themes_queryset = themes.distinct('name')
+    for theme in themes_queryset:
         keyboard.add(theme)
     await message.answer(
         text=(
@@ -95,15 +96,16 @@ async def choose_themes(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Plan.waiting_themes)
 async def create_list_themes(message: types.Message, state: FSMContext):
+    themes_queryset = themes.distinct('name')
     if message.text.lower() != '<< завершить выбор >>':
-        if message.text not in THEMES.values():
+        if message.text not in themes_queryset:
             await message.answer(
                 'Пожалуйста, выберите тему, используя список ниже.'
             )
             return
-        for key, value in THEMES.items():
+        for value in themes_queryset:
             if value == message.text:
-                theme = key
+                theme = themes.find_one({'name': value}).get('code')
         data = await state.get_data()
         list_themes = data['themes']
         if theme not in list_themes:
@@ -117,21 +119,21 @@ async def create_list_themes(message: types.Message, state: FSMContext):
         data = await state.get_data()
         dep, year = data['department'], data['year']
         quarter = data['quarter']
-        themes = data['themes']
-        if len(themes) == 0:
+        thms = data['themes']
+        if len(thms) == 0:
             await message.answer('Необходимо выбрать минимум одну тему')
             return
         text_themes = ''
-        for i in themes:
-            name = THEMES.get(i)
-            text_themes = '{}\n{}'.format(text_themes, name)
+        for i in thms:
+            name = themes.find_one({'code': i}).get('name')
+            text_themes = '{}\n    {}'.format(text_themes, name)
         await message.answer(
             text=(
                 'Вы выбрали:\n'
                 f'Служба - {dep}\n'
                 f'Период планирования - {quarter} кв. {year} г.\n'
-                f'Темы занятий:{text_themes}'
-                '\nСохранить?'
+                f'Темы занятий:\n{text_themes}'
+                '\n\nСохранить?'
             ),
             reply_markup=keyboard,
         )
@@ -140,7 +142,6 @@ async def create_list_themes(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=Plan.waiting_confirm)
 async def plan_save(message: types.Message, state: FSMContext):
-    # TODO сделать проверку на пустой список тем
     # TODO сделать ограничение на количество тем (10)
     if message.text.lower() not in ['нет', 'да']:
         await message.answer(
@@ -177,8 +178,6 @@ async def plan_save(message: types.Message, state: FSMContext):
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()
-        await add_questions_in_plan()
-        await message.answer('Вопросы для тестов сформированы')
     else:
         await message.answer(
             'Данные не сохранены',

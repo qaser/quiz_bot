@@ -18,12 +18,13 @@ class BotOffer(StatesGroup):
 
 # обработка команды /reset - сброс клавиатуры и состояния
 async def reset_handler(message: types.Message, state: FSMContext):
+    await state.finish()
     await state.reset_state()
-    await state.reset_data()
     await message.answer(
         text='Сброс настроек бота выполнен, текущее действие отменено.',
         reply_markup=types.ReplyKeyboardRemove(),
     )
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
 # обработка команды /users просмотр количества пользователей в БД
@@ -110,6 +111,7 @@ async def send_logs(message: types.Message):
     file = 'logs_bot.log'
     with open(file, 'rb') as f:
         content = f.read()
+        await bot.delete_message(message.chat.id, message.message_id)
         await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
 
 

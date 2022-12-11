@@ -1,98 +1,45 @@
-from decimal import Decimal
-from pathlib import Path
+import pymongo
+from aiogram.contrib.fsm_storage.mongo import MongoStorage
 
-from borb.pdf import (PDF, Alignment, Document, Page, PageLayout, Paragraph,
-                      SingleColumnLayout)
-from borb.pdf.canvas.color.color import HexColor
-# not an easy import
-from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
-from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable as Table
-from borb.pdf.canvas.layout.table.table import TableCell
-
-
-TABLE_HEADERS = [
-    '№ п/п',
-    'Сотрудник',
-    'Входной тест',
-    'Результат',
-    'Выходной тест',
-    'Результат'
-]
+# Create the client
+client = pymongo.MongoClient('localhost', 27017)
+storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
+db = client['quiz_db']
+themes = db['themes']
+users = db['users']
+admin_requests = db['admin_requests']
+offers = db['offers']
+results = db['results']
+questions = db['questions']
+plans = db['plans']
+buffer = db['buffer']
 
 
-def main():
-    # create Document
-    doc = Document()
-    page = Page()
-    doc.add_page(page)
+THEMES = {
+    'apk': 'АПК',
+    'bptpg': 'БПТПГ',
+    'first_aid': 'Первая помощь',
+    'gor': 'Газоопасные работы',
+    'gpa-с-16': 'Агрегат ГПА-Ц-16',
+    'gtd': 'Теория ГТУ (ГТД)',
+    'gtk-25i': 'Агрегат ГТК-25И',
+    'kip': 'КИПиА',
+    'ks': 'КС (общая тема)',
+    'ms': 'Маслосистема КЦ',
+    'ms_nc-16-76': 'Маслосистема НЦ-16/76',
+    'ms_nk-16st': 'Маслосистема НК-16СТ',
+    'nc-16-76': 'Нагнетатель НЦ-16/76',
+    'nk-16st': 'ГТД НК-16СТ',
+    'or': 'Огневые работы',
+    'ot': 'Охрана труда',
+    'pb': 'Промышленная безопасность',
+    'pemg': 'ПЭМГ',
+    'pump': 'Нагнетатель (теория)',
+    'srd': 'СРД',
+    'tpa': 'ТПА',
+    'vysota': 'Работы на высоте',
+    'zem': 'Земляные работы',
+}
 
-    # set a PageLayout
-    layout: PageLayout = SingleColumnLayout(
-        page,
-        vertical_margin=Decimal(40)
-    )
-
-    # используемые шрифты
-    font_path = Path('static/fonts')
-    regular_font = TrueTypeFont.true_type_font_from_file(
-        font_path / 'Inter-Regular.ttf'
-    )
-    thin_font = TrueTypeFont.true_type_font_from_file(
-        font_path / 'Inter-Thin.ttf'
-    )
-    semibold_font = TrueTypeFont.true_type_font_from_file(
-        font_path / 'Inter-SemiBold.ttf'
-    )
-    italic_font = TrueTypeFont.true_type_font_from_file(
-        font_path / 'Inter-Italic.ttf'
-    )
-
-    # заголовок страницы
-    layout.add(
-        Paragraph(
-            'Отчёт о тестировании знаний персонала КС-5,6 за 1 квартал 2022 года',
-            font=regular_font,
-            font_size=Decimal(14),
-            text_alignment=Alignment.CENTERED,
-            margin_right=Decimal(30),
-            margin_left=Decimal(50),
-        )
-    )
-
-    table = Table(
-        number_of_rows=5,
-        number_of_columns=6,
-        margin_top=Decimal(20),
-        column_widths=[
-            Decimal(0.7),
-            Decimal(3),
-            Decimal(2),
-            Decimal(1.7),
-            Decimal(2),
-            Decimal(1.7),
-        ],
-    )
-
-    for header in TABLE_HEADERS:
-        table.add(
-            TableCell(
-                Paragraph(
-                    header,
-                    horizontal_alignment=Alignment.CENTERED,
-                    text_alignment=Alignment.CENTERED,
-                    font=semibold_font,
-                ),
-            ),
-        )
-    # сделать цикл с данными результатов тестирования
-
-    table.no_borders()
-    layout.add(table)
-
-    # сохранение документа
-    with open('output.pdf', 'wb') as pdf_file_handle:
-        PDF.dumps(pdf_file_handle, doc)
-
-
-if __name__ == '__main__':
-    main()
+for code, name in THEMES.items():
+    themes.insert_one({'code': code, 'name': name})
