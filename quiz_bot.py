@@ -68,5 +68,5 @@ if __name__ == '__main__':
     register_handlers_quiz(dp)
     register_handlers_excel(dp)
     register_handlers_reports(dp)
-    register_handlers_definitions(dp)
+    register_handlers_definitions(dp)  # всегда должен быть последним
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
