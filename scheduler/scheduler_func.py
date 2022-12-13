@@ -1,14 +1,11 @@
-import datetime as dt
-from math import ceil
-from aiogram import Dispatcher, types
+from aiogram import types
 from aiogram.utils.exceptions import CantInitiateConversation
 
-from config.mongo_config import plans, questions, users
 from config.bot_config import bot
+from config.mongo_config import plans, questions, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.constants import TEST_TYPE
 from utils.utils import calc_date, calc_test_type
-from utils.make_pdf import report_department_pdf
 
 
 # формирование списка вопросов согласно тем плана
@@ -36,19 +33,23 @@ async def send_quiz_button():
     year, month, quarter = calc_date()
     test_type = calc_test_type(month)
     test_type_name = TEST_TYPE.get(test_type)
-    queryset = list(plans.find({'year': year, 'quarter': quarter,}))
+    queryset = list(plans.find({'year': year, 'quarter': quarter}))
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
     for dep in departments:
-        ids = [user.get('user_id') for user in list(users.find({'department': dep}))]
+        ids = [user.get('user_id') for user in list(
+            users.find({'department': dep})
+        )]
         user_ids += ids
     for user_id in user_ids:
         try:
             keyboard = types.InlineKeyboardMarkup()
             keyboard.add(
                 types.InlineKeyboardButton(
-                    text=f'Начать тестирование',
-                    callback_data=f'quiz_{year}_{quarter}_{test_type}_{user_id}'
+                    text='Начать тестирование',
+                    callback_data=(
+                        f'quiz_{year}_{quarter}_{test_type}_{user_id}'
+                    )
                 )
             )
             await bot.send_message(

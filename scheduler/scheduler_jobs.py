@@ -1,16 +1,10 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import utils.constants as const
-from scheduler.scheduler_func import add_questions_in_plan, send_quiz_button
-
+from scheduler.scheduler_func import send_quiz_button
 
 scheduler = AsyncIOScheduler()
 
-
-'''
-рассылка будет первого числа нового квартала
-по истечению 4 дней, если тест не пройден, будет напоминание, что приём завершается через 1 день
-'''
 
 def scheduler_jobs():
     # scheduler.add_job(

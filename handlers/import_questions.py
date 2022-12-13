@@ -1,13 +1,12 @@
 import os
-import openpyxl
 
-from openpyxl.utils import get_column_letter
-from config.mongo_config import questions, themes
-from config.bot_config import bot, dp
-from config.telegram_config import ADMIN_TELEGRAM_ID
-from utils.constants import THEMES
-from utils.utils import word_conjugate
+import openpyxl
 from aiogram import Dispatcher, types
+from openpyxl.utils import get_column_letter
+
+from config.bot_config import bot, dp
+from config.mongo_config import questions, themes
+from utils.utils import word_conjugate
 
 # TODO сделать импорт тем из excel файла
 
@@ -43,32 +42,29 @@ async def import_from_excel(user_id):
     num_rows_t = sheet_t.max_row
     count_q = 0
     for row in range(2, (num_rows_q + 1)):
-        try:
-            num_ans = sheet_q['D' + str(row)].value
-            theme = sheet_q['A' + str(row)].value
-            answers = []
-            for num in range(5, (num_ans + 5)):
-                ans = sheet_q[get_column_letter(num) + str(row)].value
-                if ans == '' or ans == None or ans == 'null' or len(ans) > 200:
-                    break
-                answers.append(ans)
-            if len(answers) < num_ans:
-                continue
-            if theme != None:
-                questions.insert_one({
-                    'theme': theme,
-                    'question': sheet_q['B' + str(row)].value,
-                    'correct_answer': sheet_q['C' + str(row)].value,
-                    'num_answers': num_ans,
-                    'answers': answers,
-                })
-                count_q += 1
-        except:
+        num_ans = sheet_q['D' + str(row)].value
+        theme = sheet_q['A' + str(row)].value
+        answers = []
+        for num in range(5, (num_ans + 5)):
+            ans = sheet_q[get_column_letter(num) + str(row)].value
+            if ans == '' or ans is None or ans == 'null' or len(ans) > 200:
+                break
+            answers.append(ans)
+        if len(answers) < num_ans:
             continue
+        if theme is not None:
+            questions.insert_one({
+                'theme': theme,
+                'question': sheet_q['B' + str(row)].value,
+                'correct_answer': sheet_q['C' + str(row)].value,
+                'num_answers': num_ans,
+                'answers': answers,
+            })
+            count_q += 1
     for row in range(2, (num_rows_t + 1)):
         name = sheet_t['B' + str(row)].value
         code = sheet_t['A' + str(row)].value
-        if name != None and code != None:
+        if name is not None and code is not None:
             themes.update_one(
                 {'code': code},
                 {'$set': {'name': name}},
@@ -87,7 +83,6 @@ async def import_from_excel(user_id):
 
 async def send_example(message: types.Message):
     await message.answer_document(open('static/example/questions.xlsx', 'rb'))
-
 
 
 def register_handlers_excel(dp: Dispatcher):

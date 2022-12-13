@@ -3,7 +3,6 @@ import datetime as dt
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils import exceptions
 
 from config.bot_config import bot, dp
 from config.mongo_config import offers, users
@@ -30,12 +29,9 @@ async def reset_handler(message: types.Message, state: FSMContext):
 # обработка команды /users просмотр количества пользователей в БД
 @superuser_check
 async def count_users(message: types.Message):
-    queryset = list(users.find({}))
+    queryset = users.distinct('full_name')
     users_count = len(queryset)
-    final_text = ''
-    for user in queryset:
-        username = '{} {}'.format(user['first_name'], user['last_name'])
-        final_text = '{}\n{}'.format(username, final_text)
+    final_text = '\n'.join(queryset)
     await message.answer(
         text=f'Количество пользователей в БД: {users_count}\n{final_text}'
     )
@@ -87,8 +83,8 @@ async def confirm_offer(message: types.Message, state: FSMContext):
             }
         )
         await message.answer(
-            ('Отлично! Сообщение отправлено.\n'
-            'Спасибо за отзыв!'),
+            text=('Отлично! Сообщение отправлено.\n'
+                  'Спасибо за отзыв!'),
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()
@@ -113,17 +109,6 @@ async def send_logs(message: types.Message):
         content = f.read()
         await bot.delete_message(message.chat.id, message.message_id)
         await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
-
-
-# @dp.errors_handler(exception=exceptions.BotBlocked)
-# async def bot_blocked_error(update: types.Update):
-#     user_id = update.message.from_user.id
-#     username = users.find_one({'user_id': user_id}).get('full_name')
-#     print(username)
-    # await bot.send_message(
-    #     chat_id=ADMIN_TELEGRAM_ID,
-    #     text=f'Пользователь {username} заблокировал бота'
-    # )
 
 
 def register_handlers_service(dp: Dispatcher):

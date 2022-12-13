@@ -1,4 +1,5 @@
 import pymongo
+
 # from config.mongo_config import quiz
 
 client = pymongo.MongoClient('localhost', 27017)

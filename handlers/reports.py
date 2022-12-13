@@ -1,13 +1,13 @@
 import os
-from config.bot_config import bot, dp
-from config.mongo_config import users, results
-
-from utils.decorators import admin_check
-from utils.make_pdf import report_department_pdf
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+
+from config.bot_config import bot, dp
+from config.mongo_config import results, users
+from utils.decorators import admin_check
+from utils.make_pdf import report_department_pdf
 
 
 class DepartmentReport(StatesGroup):
@@ -37,7 +37,7 @@ async def get_year(call: types.CallbackQuery):
     buttons = [types.InlineKeyboardButton(
         text=str(q),
         callback_data=f'report_quarter_{q}_{year}_{user_id}'
-    ) for q in range(1,5)]
+    ) for q in range(1, 5)]
     keyboard.add(*buttons)
     await bot.send_message(
         chat_id=user_id,

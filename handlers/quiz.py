@@ -1,22 +1,20 @@
 import datetime as dt
-from math import ceil
-
-from config.bot_config import bot, dp
-from config.telegram_config import ADMIN_TELEGRAM_ID
-from config.mongo_config import users, questions, plans, results
-from scheduler.scheduler_func import send_quiz_button
-from utils.utils import calc_date, calc_grade, calc_test_type, word_conjugate
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.exceptions import CantInitiateConversation
 
+from config.bot_config import bot, dp
+from config.mongo_config import plans, questions, results, users
+from config.telegram_config import ADMIN_TELEGRAM_ID
+from scheduler.scheduler_func import send_quiz_button
+from utils.utils import calc_grade, word_conjugate
 
 '''
 Сделать протоколы проверки знаний в формате pdf
 
 '''
+
 
 @dp.callback_query_handler(Text(startswith='quiz_'))
 async def get_questions(call: types.CallbackQuery):
@@ -146,7 +144,11 @@ async def send_admin_notification(user_id):
                     chat_id=admin.get('user_id'),
                     text=f'Пользователь {user_name} прошёл тестирование'
                 )
-            except:
+            except CantInitiateConversation:
+                await bot.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=f'Пользователь "{user_name}" недоступен.'
+                )
                 continue
 
 

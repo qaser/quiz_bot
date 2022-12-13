@@ -1,15 +1,16 @@
 import logging
 
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 
 from config.bot_config import dp
 from config.mongo_config import users
+from config.telegram_config import PASSWORD
 from handlers.admin_registration import register_handlers_admin_registration
+from handlers.definitions import register_handlers_definitions
 from handlers.import_questions import register_handlers_excel
-from aiogram.dispatcher import FSMContext
-from config.telegram_config import ADMIN_TELEGRAM_ID, PASSWORD
 from handlers.plan import register_handlers_plan
 from handlers.quiz import register_handlers_quiz
 from handlers.registration import register_handlers_registration
@@ -67,4 +68,5 @@ if __name__ == '__main__':
     register_handlers_quiz(dp)
     register_handlers_excel(dp)
     register_handlers_reports(dp)
+    register_handlers_definitions(dp)
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

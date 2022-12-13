@@ -4,11 +4,11 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.mongo_config import plans, themes
 from config.bot_config import dp
+from config.mongo_config import plans, questions, themes
 from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS
-from utils.decorators import admin_check
+from utils.decorators import admin_check, superuser_check
 
 
 class Plan(StatesGroup):
@@ -191,6 +191,22 @@ async def populate_plans(message: types.Message):
     await message.answer('Вопросы для тестов сформированы')
 
 
+@superuser_check
+async def show_themes(message: types.Message):
+    text = '\n'.join(themes.distinct('name'))
+    await message.answer(text)
+
+
+@superuser_check
+async def count_questions(message: types.Message):
+    queryset = list(questions.find({}))
+    count_q = len(queryset)
+    text = f'Количество вопросов в БД: {count_q}'
+    await message.answer(text)
+
+
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
     dp.register_message_handler(populate_plans, commands='pop_plan')
+    dp.register_message_handler(show_themes, commands='themes')
+    dp.register_message_handler(count_questions, commands='count_q')

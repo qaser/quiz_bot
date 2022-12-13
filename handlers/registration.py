@@ -7,7 +7,6 @@ from config.mongo_config import users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from texts.initial import REGISTRATION_TEXT
 from utils.constants import DEPARTMENTS
-from utils.decorators import admin_check, registration_check
 
 
 class Registration(StatesGroup):

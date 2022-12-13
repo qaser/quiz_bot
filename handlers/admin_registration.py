@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.bot_config import dp, bot
+from config.bot_config import bot, dp
 from config.mongo_config import admin_requests, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from texts.initial import ADMIN_REQUEST
@@ -48,7 +48,7 @@ async def request_confirm(message: types.Message, state: FSMContext):
         keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
         keyboard.add('Нет', 'Да')
         await message.answer(
-            text=f'Комментарий принят. Отправить запрос?',
+            text='Комментарий принят. Отправить запрос?',
             reply_markup=keyboard,
         )
         await AdminRegistration.waiting_request_confirm.set()

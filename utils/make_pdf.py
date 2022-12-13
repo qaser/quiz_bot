@@ -46,7 +46,6 @@ def report_department_pdf(year, quarter, department, results_set):
     # italic_font = TrueTypeFont.true_type_font_from_file(
     #     font_path / 'Inter-Italic.ttf'
     # )
-
     # заголовок страницы
     layout.add(
         Paragraph(
@@ -59,7 +58,6 @@ def report_department_pdf(year, quarter, department, results_set):
             margin_left=Decimal(50),
         )
     )
-
     table = Table(
         number_of_rows=len(results_set)+1,
         number_of_columns=6,
@@ -73,7 +71,6 @@ def report_department_pdf(year, quarter, department, results_set):
             Decimal(1.7),
         ],
     )
-
     for header in TABLE_HEADERS:
         table.add(
             TableCell(
@@ -85,7 +82,6 @@ def report_department_pdf(year, quarter, department, results_set):
                 ),
             ),
         )
-
     for num, res in enumerate(results_set):
         table.add(
             TableCell(
@@ -156,7 +152,6 @@ def report_department_pdf(year, quarter, department, results_set):
 
     table.no_borders()
     layout.add(table)
-
     # Код для создания QR-кода LayoutElement
     qr_code: LayoutElement = Barcode(
         data='https://t.me/quiz_blpu_bot',
@@ -169,6 +164,8 @@ def report_department_pdf(year, quarter, department, results_set):
     layout.add(qr_code)
 
     # сохранение документа
-    f_path = f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
+    f_path = (
+        f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
+    )
     with open(f_path, 'wb') as pdf_file_handle:
         PDF.dumps(pdf_file_handle, doc)
