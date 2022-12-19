@@ -12,7 +12,7 @@ offers = db['offers']
 results = db['results']
 questions = db['questions']
 plans = db['plans']
-buffer = db['buffer']
+terms = db['terms']
 
 
 '''
@@ -62,4 +62,10 @@ buffer = db['buffer']
     '_id' дефолтный первичный ключ
     'code' id юзера
     'name' имя пользователя
+
+структура данных definitions
+    '_id' дефолтный первичный ключ
+    'theme': тематика терминов
+    'term': термин
+    'description': описание термина
 '''

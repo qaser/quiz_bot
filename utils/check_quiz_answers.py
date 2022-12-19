@@ -7,5 +7,5 @@ with open(file, 'r', encoding='UTF-8') as f:
         theme, question, correct_answer, num_answers, *answers = row_list
         for ind, ans in enumerate(answers):
             str_len = len(ans)
-            if str_len > 100:
+            if str_len > 200:
                 print(id, question, ind, str_len)

@@ -20,7 +20,6 @@ from utils.utils import calc_grade, word_conjugate
 async def get_questions(call: types.CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
-    print(call.data)
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
     _, year, quarter, test_type, id = call.data.split('_')
     user_id = int(id)
