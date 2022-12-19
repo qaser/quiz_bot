@@ -13,6 +13,7 @@ results = db['results']
 questions = db['questions']
 plans = db['plans']
 terms = db['terms']
+key_rules = db['key_rules']
 
 
 '''
@@ -65,7 +66,11 @@ terms = db['terms']
 
 структура данных definitions
     '_id' дефолтный первичный ключ
+    'theme_code': код темы
     'theme': тематика терминов
-    'term': термин
+    'name': название термина
     'description': описание термина
+
+структура данных для картинок Ключевые правила key_rules
+
 '''
