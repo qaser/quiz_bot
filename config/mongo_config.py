@@ -14,6 +14,7 @@ questions = db['questions']
 plans = db['plans']
 terms = db['terms']
 key_rules = db['key_rules']
+attentions = db['attentions']
 
 
 '''

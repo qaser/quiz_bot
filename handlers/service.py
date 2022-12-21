@@ -1,11 +1,12 @@
 import datetime as dt
+import os
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
-from config.mongo_config import offers, users
+from config.mongo_config import offers, users, key_rules, attentions
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.decorators import superuser_check
 
@@ -111,8 +112,23 @@ async def send_logs(message: types.Message):
         await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
 
 
+# @superuser_check
+async def upload_photo_attention(message: types.Message):
+    folder_path = os.path.join('./static', 'attention')
+    for year_dir in os.listdir(folder_path):
+        subfolder_path = os.path.join(folder_path, year_dir)
+        for filename in os.listdir(subfolder_path):
+            if filename.startswith('.'):
+                continue
+            with open(os.path.join(subfolder_path, filename), 'rb') as photo:
+                msg = await bot.send_photo(ADMIN_TELEGRAM_ID, photo, disable_notification=True)
+                file_id = msg.photo[-1].file_id
+                attentions.insert_one({'_id': file_id, 'year': int(year_dir)})
+
+
 def register_handlers_service(dp: Dispatcher):
     dp.register_message_handler(reset_handler, commands='reset', state='*')
     dp.register_message_handler(count_users, commands='users')
     dp.register_message_handler(send_logs, commands='log')
     dp.register_message_handler(bot_offer, commands='offer')
+    dp.register_message_handler(upload_photo_attention, commands='upload_attention')

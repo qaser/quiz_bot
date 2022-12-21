@@ -1,10 +1,10 @@
-from aiogram import Dispatcher, types
-from aiogram.dispatcher.filters import Text
-from config.bot_config import bot, dp
-from config.mongo_config import terms, key_rules
-from bson.objectid import ObjectId
 import os
+
+from aiogram import Dispatcher, types
 from aiogram.types import InputMediaPhoto
+
+from config.bot_config import bot
+from config.mongo_config import key_rules
 
 
 async def send_key_rules(message: types.Message):
@@ -18,9 +18,6 @@ async def send_key_rules(message: types.Message):
             await bot.send_media_group(chat_id=message.chat.id, media=media_group)
             media_group = []
             count = 0
-
-
-
 
 
 def register_handlers_key_rules(dp: Dispatcher):
