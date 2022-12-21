@@ -22,15 +22,15 @@ async def sent_attentions(call: types.CallbackQuery):
     _, year = call.data.split('_')
     photo_ids = [file_id.get('_id') for file_id in list(attentions.find({'year': int(year)}))]
     print(len(photo_ids))
-    count = 0
+    # count = 0
     media_group = []
     for photo_id in photo_ids:
-        count += 1
+        # count += 1
         media_group.append(InputMediaPhoto(photo_id))
-        if count >= 6:
+        if len(media_group) >= 6:
             await bot.send_media_group(chat_id=call.message.chat.id, media=media_group)
             media_group = []
-            count = 0
+            # count = 0
     if 0 < len(media_group) < 6:
         await bot.send_media_group(chat_id=call.message.chat.id, media=media_group)
 
