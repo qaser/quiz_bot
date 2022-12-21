@@ -18,6 +18,8 @@ async def send_key_rules(message: types.Message):
             await bot.send_media_group(chat_id=message.chat.id, media=media_group)
             media_group = []
             count = 0
+    if 0 < len(media_group) < 6:
+        await bot.send_media_group(chat_id=message.chat.id, media=media_group)
 
 
 def register_handlers_key_rules(dp: Dispatcher):

@@ -31,7 +31,7 @@ async def sent_attentions(call: types.CallbackQuery):
             await bot.send_media_group(chat_id=call.message.chat.id, media=media_group)
             media_group = []
             count = 0
-    if len(media_group) < 6:
+    if 0 < len(media_group) < 6:
         await bot.send_media_group(chat_id=call.message.chat.id, media=media_group)
 
 
