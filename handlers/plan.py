@@ -191,22 +191,19 @@ async def populate_plans(message: types.Message):
     await message.answer('Вопросы для тестов сформированы')
 
 
-@superuser_check
 async def show_themes(message: types.Message):
-    text = '\n'.join(themes.distinct('name'))
-    await message.answer(text)
-
-
-@superuser_check
-async def count_questions(message: types.Message):
+    text = ''
     queryset = list(questions.find({}))
     count_q = len(queryset)
-    text = f'Количество вопросов в БД: {count_q}'
-    await message.answer(text)
+    for theme in list(themes.find()):
+        name = theme['name']
+        code = theme['code']
+        res = len(list(questions.find({'theme': code})))
+        text = f'{text}\n{name}: {res}'
+    await message.answer(f'Количество вопросов в БД:\n{text}\n\nВсего: {count_q}')
 
 
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
     dp.register_message_handler(populate_plans, commands='pop_plan')
     dp.register_message_handler(show_themes, commands='themes')
-    dp.register_message_handler(count_questions, commands='count_q')

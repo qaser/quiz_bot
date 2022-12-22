@@ -46,7 +46,7 @@ async def get_theme(call: types.CallbackQuery):
         )
     keyboard.row(
         types.InlineKeyboardButton(text='< Выход >', callback_data='exit'),
-        types.InlineKeyboardButton(text='< Назад >', callback_data='back_theme_id'),
+        types.InlineKeyboardButton(text='<< Назад', callback_data='back_theme_id'),
     )
     await call.message.edit_text(
         'Выберите термин:',
