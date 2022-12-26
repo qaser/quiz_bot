@@ -199,7 +199,8 @@ async def show_themes(message: types.Message):
         name = theme['name']
         code = theme['code']
         res = len(list(questions.find({'theme': code})))
-        text = f'{text}\n{name}: {res}'
+        if res != 0:
+            text = f'{text}\n{name}: {res}'
     await message.answer(f'Количество вопросов в БД:\n{text}\n\nВсего: {count_q}')
 
 
