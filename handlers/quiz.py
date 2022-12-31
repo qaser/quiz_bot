@@ -92,6 +92,7 @@ async def handle_quiz_answer(quiz_answer: types.PollAnswer):
         {'$set': {'quiz_results': quiz_result, 'done': 'true'}},
         upsert=False
     )
+    await bot.delete_message(chat_id=quiz_answer.user.id, message_id=quiz_answer.poll_id)
     await send_quiz(data.get('_id'))
 
 

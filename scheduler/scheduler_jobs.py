@@ -34,13 +34,13 @@ def scheduler_jobs():
         minute=0,
         timezone=const.TIME_ZONE
     )
-    # scheduler.add_job(
-    #     send_quiz_button,
-    #     'cron',
-    #     hour=12,
-    #     minute=24,
-    #     timezone=const.TIME_ZONE
-    # )
+    scheduler.add_job(
+        send_quiz_button,
+        'cron',
+        hour=15,
+        minute=8,
+        timezone=const.TIME_ZONE
+    )
     # scheduler.add_job(
     #     add_questions_in_plan,
     #     'cron',
