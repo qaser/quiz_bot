@@ -46,7 +46,7 @@ async def import_from_excel(user_id):
         theme = sheet_q['A' + str(row)].value
         answers = []
         for num in range(5, (num_ans + 5)):
-            ans = sheet_q[get_column_letter(num) + str(row)].value
+            ans = str(sheet_q[get_column_letter(num) + str(row)].value)
             if ans == '' or ans is None or ans == 'null' or len(ans) > 200:
                 break
             answers.append(ans)

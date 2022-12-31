@@ -186,11 +186,13 @@ async def plan_save(message: types.Message, state: FSMContext):
         await state.reset_state()
 
 
+@superuser_check
 async def populate_plans(message: types.Message):
     await add_questions_in_plan()
     await message.answer('Вопросы для тестов сформированы')
 
 
+@admin_check
 async def show_themes(message: types.Message):
     text = ''
     queryset = list(questions.find({}))
