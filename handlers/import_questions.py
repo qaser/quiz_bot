@@ -47,7 +47,7 @@ async def import_from_excel(user_id):
         answers = []
         for num in range(5, (num_ans + 5)):
             ans = str(sheet_q[get_column_letter(num) + str(row)].value)
-            if ans == '' or ans is None or ans == 'null' or len(ans) > 200:
+            if ans == '' or ans is None or ans == 'null' or len(ans) > 100:
                 break
             answers.append(ans)
         if len(answers) < num_ans:

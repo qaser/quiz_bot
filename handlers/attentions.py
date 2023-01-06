@@ -12,7 +12,12 @@ async def choose_year_attentions(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
     years = attentions.distinct('year')
     for year in years:
-        keyboard.add(types.InlineKeyboardButton(text=f'{year}', callback_data=f'attention_{year}'))
+        keyboard.add(
+            types.InlineKeyboardButton(
+                text=f'{year}',
+                callback_data=f'attention_{year}'
+            )
+        )
     await message.delete()
     await message.answer('Выберите год', reply_markup=keyboard)
 

@@ -39,6 +39,7 @@ async def get_questions(call: types.CallbackQuery):
         'count': 0,
         'q_ids': questions_ids,
         'quiz': '',
+        'message_id': '',
         'quiz_results': [],
         'date_start': date_start,
     })
@@ -66,7 +67,7 @@ async def send_quiz(res_id):
         )
         results.update_one(
             {'_id': res_id},
-            {'$set': {'quiz': quiz.poll.id, 'count': count + 1}},
+            {'$set': {'quiz': quiz.poll.id, 'count': count + 1, 'message_id': quiz.message_id}},
             upsert=False
         )
     else:
@@ -92,8 +93,9 @@ async def handle_quiz_answer(quiz_answer: types.PollAnswer):
         {'$set': {'quiz_results': quiz_result, 'done': 'true'}},
         upsert=False
     )
-    await bot.delete_message(chat_id=quiz_answer.user.id, message_id=quiz_answer.poll_id)
     await send_quiz(data.get('_id'))
+    if data.get('test_type') == 'input':
+        await bot.delete_message(chat_id=quiz_answer.user.id, message_id=data.get('message_id'))
 
 
 async def save_result(res_id):

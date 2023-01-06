@@ -1,11 +1,17 @@
-file = 'quiz_raw.csv'
+import openpyxl
+from openpyxl.utils import get_column_letter
+
+file = 'questions_new - Copy.xlsx'
 quiz_dict = {}
-with open(file, 'r', encoding='UTF-8') as f:
-    contents = f.readlines()
-    for id, row in enumerate(contents):
-        row_list = row.rstrip('\n').split(';')
-        theme, question, correct_answer, num_answers, *answers = row_list
-        for ind, ans in enumerate(answers):
-            str_len = len(ans)
-            if str_len > 200:
-                print(id, question, ind, str_len)
+wbook = openpyxl.load_workbook(file)
+sheet_q = wbook['questions']
+num_rows_q = sheet_q.max_row
+count_q = 0
+for row in range(2, (num_rows_q + 1)):
+    num_ans = sheet_q['D' + str(row)].value
+    theme = sheet_q['A' + str(row)].value
+    answers = []
+    for num in range(5, (num_ans + 5)):
+        ans = str(sheet_q[get_column_letter(num) + str(row)].value)
+        if len(ans) > 100:
+            print(row, len(ans), get_column_letter(num))

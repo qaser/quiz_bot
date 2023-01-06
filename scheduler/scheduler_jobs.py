@@ -37,8 +37,8 @@ def scheduler_jobs():
     scheduler.add_job(
         send_quiz_button,
         'cron',
-        hour=15,
-        minute=30,
+        hour=17,
+        minute=32,
         timezone=const.TIME_ZONE
     )
     # scheduler.add_job(
