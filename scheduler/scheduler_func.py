@@ -15,9 +15,11 @@ async def add_questions_in_plan():
     for plan in plans_queryset:
         themes = plan.get('themes')
         res = []
+        num_themes = len(themes)
+        num_q = 30 // num_themes
         for theme in themes:
             list_questions = list(questions.aggregate(
-                [{'$match': {'theme': theme}}, {'$sample': {'size': 10}}]
+                [{'$match': {'theme': theme}}, {'$sample': {'size': num_q}}]
             ))
             q_ids = [q.get('_id') for q in list_questions]
             res = res + q_ids

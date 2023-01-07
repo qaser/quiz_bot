@@ -10,11 +10,6 @@ from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
 
-'''
-Сделать протоколы проверки знаний в формате pdf
-
-'''
-
 
 @dp.callback_query_handler(Text(startswith='quiz_'))
 async def get_questions(call: types.CallbackQuery):
