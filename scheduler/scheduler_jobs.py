@@ -20,7 +20,7 @@ def scheduler_jobs():
         send_quiz_button,
         'cron',
         month='1,4,7,10',
-        day=12,
+        day=16,
         hour=10,
         minute=0,
         timezone=const.TIME_ZONE
