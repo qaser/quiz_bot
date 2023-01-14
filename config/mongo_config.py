@@ -15,6 +15,7 @@ plans = db['plans']
 terms = db['terms']
 key_rules = db['key_rules']
 attentions = db['attentions']
+plan_tu = db['plan_tu']
 
 
 '''
@@ -72,6 +73,9 @@ attentions = db['attentions']
     'name': название термина
     'description': описание термина
 
-структура данных для картинок Ключевые правила key_rules
+структура данных plan_tu
+    'department' наименование подразделения
+    'plan': словарь с даными вида: {'date': дата, 'theme: название темы, 'doc':ссылка на документ}
+
 
 '''

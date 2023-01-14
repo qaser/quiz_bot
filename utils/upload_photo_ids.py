@@ -13,13 +13,6 @@ load_dotenv()
 client = pymongo.MongoClient('localhost', 27017)
 storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
 db = client['quiz_db']
-themes = db['themes']
-users = db['users']
-admin_requests = db['admin_requests']
-offers = db['offers']
-results = db['results']
-questions = db['questions']
-plans = db['plans']
 terms = db['terms']
 key_rules = db['key_rules']
 

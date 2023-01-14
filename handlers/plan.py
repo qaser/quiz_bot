@@ -2,13 +2,18 @@ import datetime as dt
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import dp
-from config.mongo_config import plans, questions, themes
+from config.mongo_config import plans, questions, themes, users
 from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS
 from utils.decorators import admin_check, superuser_check
+
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font
+from openpyxl.utils import get_column_letter
 
 
 class Plan(StatesGroup):
@@ -206,7 +211,44 @@ async def show_themes(message: types.Message):
     await message.answer(f'Количество вопросов в БД:\n{text}\n\nВсего: {count_q}')
 
 
+# экспорт вопросов в файл
+# @admin_check
+# async def export_tests(message: types.Message):
+#     keyboard = types.InlineKeyboardMarkup(row_width=3)
+#     user_id = message.from_user.id
+#     department = users.find_one({'user_id': user_id}).get('department')
+#     years = plans.distinct('year')
+#     buttons = [types.InlineKeyboardButton(
+#         text=str(year),
+#         callback_data=f'test_year_{year}_{user_id}_{department}'
+#     ) for year in years]
+#     keyboard.add(*buttons)
+#     await message.answer('Выберите год', reply_markup=keyboard)
+
+
+# @dp.callback_query_handler(Text(startswith='test_year_'))
+# async def get_test_year(call: types.CallbackQuery):
+#     _, _, year, user_id, department = call.data.split('_')
+#     await call.message.delete_reply_markup()
+#     queryset = list(plans.find({'year': year, 'department': department,}))
+#     workbook = Workbook()
+#     worksheet = workbook.active
+#     header_font = Font(name='Calibri', bold=True)
+#     centered_alignment = Alignment(
+#         horizontal='center',
+#         vertical='center',
+#         wrap_text=True
+#     )
+#     wrapped_alignment = Alignment(
+#         vertical='top',
+#         wrap_text=True
+#     )
+#     worksheet.title = f'Тестовые вопросы {department} {year} года'
+
+
+
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
     dp.register_message_handler(populate_plans, commands='pop_plan')
     dp.register_message_handler(show_themes, commands='themes')
+    # dp.register_message_handler(export_tests, commands='export_tests')

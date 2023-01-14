@@ -153,5 +153,8 @@ async def send_quiz_to_users(message: types.Message):
     await send_quiz_button()
 
 
+
+
+
 def register_handlers_quiz(dp: Dispatcher):
     dp.register_message_handler(send_quiz_to_users, commands='quiz')
