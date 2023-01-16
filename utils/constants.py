@@ -15,3 +15,7 @@ TEST_TYPE = {
     'output': 'выходной',
     'special': 'внеплановый',
 }
+
+TU = {
+    '16.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-16012023-01-14'
+}

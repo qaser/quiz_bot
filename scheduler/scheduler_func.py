@@ -4,8 +4,9 @@ from aiogram.utils.exceptions import CantInitiateConversation
 from config.bot_config import bot
 from config.mongo_config import plans, questions, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
-from utils.constants import TEST_TYPE
+from utils.constants import TEST_TYPE, TU
 from utils.utils import calc_date, calc_test_type
+import datetime as dt
 
 
 # формирование списка вопросов согласно тем плана
@@ -68,3 +69,12 @@ async def send_quiz_button():
                 ADMIN_TELEGRAM_ID,
                 f'Пользователь {missed_user} не доступен',
             )
+
+
+async def send_tu_material():
+    date_now = dt.datetime.now().strftime('%d.%m.%Y')
+    if date_now in TU.keys():
+        await bot.send_message(
+            ADMIN_TELEGRAM_ID,
+            TU.get(date_now),
+        )

@@ -1,7 +1,7 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import utils.constants as const
-from scheduler.scheduler_func import send_quiz_button
+from scheduler.scheduler_func import send_quiz_button, send_tu_material
 
 scheduler = AsyncIOScheduler()
 
@@ -34,13 +34,13 @@ def scheduler_jobs():
         minute=0,
         timezone=const.TIME_ZONE
     )
-    # scheduler.add_job(
-    #     send_quiz_button,
-    #     'cron',
-    #     hour=17,
-    #     minute=32,
-    #     timezone=const.TIME_ZONE
-    # )
+    scheduler.add_job(
+        send_tu_material,
+        'cron',
+        hour=10,
+        minute=36,
+        timezone=const.TIME_ZONE
+    )
     # scheduler.add_job(
     #     add_questions_in_plan,
     #     'cron',
