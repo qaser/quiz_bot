@@ -73,8 +73,17 @@ async def send_quiz_button():
 
 async def send_tu_material():
     date_now = dt.datetime.now().strftime('%d.%m.%Y')
+    users_ids = users.find({})
     if date_now in TU.keys():
-        await bot.send_message(
-            ADMIN_TELEGRAM_ID,
-            TU.get(date_now),
-        )
+        for id in users_ids:
+            try:
+                await bot.send_message(
+                    id,
+                    TU.get(date_now),
+                )
+            except CantInitiateConversation:
+                missed_user = users.find_one({'user_id': id}).get('full_name')
+                await bot.send_message(
+                    ADMIN_TELEGRAM_ID,
+                    f'Пользователь {missed_user} не доступен',
+                )

@@ -37,8 +37,8 @@ def scheduler_jobs():
     scheduler.add_job(
         send_tu_material,
         'cron',
-        hour=10,
-        minute=36,
+        hour=13,
+        minute=30,
         timezone=const.TIME_ZONE
     )
     # scheduler.add_job(
