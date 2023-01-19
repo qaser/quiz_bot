@@ -10,6 +10,7 @@ from config.mongo_config import users
 from config.telegram_config import PASSWORD
 from handlers.admin_registration import register_handlers_admin_registration
 from handlers.attentions import register_handlers_attentions
+from handlers.examen import register_handlers_examen
 from handlers.key_rules import register_handlers_key_rules
 from handlers.terms import register_handlers_terms
 from handlers.import_questions import register_handlers_excel
@@ -72,5 +73,6 @@ if __name__ == '__main__':
     register_handlers_reports(dp)
     register_handlers_key_rules(dp)
     register_handlers_attentions(dp)
+    register_handlers_examen(dp)
     register_handlers_terms(dp)  # всегда должен быть последним
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

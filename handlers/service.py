@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
-from config.mongo_config import offers, users, key_rules, attentions
+from config.mongo_config import offers, users, attentions
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.decorators import superuser_check
 

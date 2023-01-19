@@ -170,6 +170,10 @@ async def send_me_quiz(message: types.Message):
             ),
             reply_markup=keyboard,
         )
+        await bot.send_message(
+            ADMIN_TELEGRAM_ID,
+            'кнопка нажата'
+        )
 
 
 def register_handlers_quiz(dp: Dispatcher):
