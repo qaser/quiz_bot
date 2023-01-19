@@ -29,25 +29,11 @@ EXAMEN = {
             'Вопрос 3': 'https://telegra.ph/Bilet-1-Vopros-3-01-17',
             'Вопрос 4': 'https://telegra.ph/Bilet-1-Vopros-4-01-17',
             'Вопрос 5': 'https://telegra.ph/Bilet-1-Vopros-5-01-17',
-            'Вопрос 6': '',
+            'Вопрос 6': 'Ответ отсутствует',
             'Вопрос 7': 'https://telegra.ph/Bilet-1-Vopros-7-01-17',
-            'Вопрос 8': '',
+            'Вопрос 8': 'Ответ отсутствует',
             'Вопрос 9': 'https://telegra.ph/Bilet-1-Vopros-9-01-17',
             'Вопрос 10': 'https://telegra.ph/Bilet-1-Vopros-10-01-17',
         },
     },
-    'Слесарь РТУ': {
-        'Билет №1': {
-            'Вопрос 1': 'https://telegra.ph/Bilet-1-Vopros-1-01-17',
-            'Вопрос 2': 'https://telegra.ph/Bilet-1-Vopros-2-01-17',
-            'Вопрос 3': 'https://telegra.ph/Bilet-1-Vopros-3-01-17',
-            'Вопрос 4': 'https://telegra.ph/Bilet-1-Vopros-4-01-17',
-            'Вопрос 5': 'https://telegra.ph/Bilet-1-Vopros-5-01-17',
-            'Вопрос 6': '',
-            'Вопрос 7': 'https://telegra.ph/Bilet-1-Vopros-7-01-17',
-            'Вопрос 8': '',
-            'Вопрос 9': 'https://telegra.ph/Bilet-1-Vopros-9-01-17',
-            'Вопрос 10': 'https://telegra.ph/Bilet-1-Vopros-10-01-17',
-        },
-    }
 }

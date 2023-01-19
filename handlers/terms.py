@@ -102,7 +102,7 @@ async def menu_back(call: types.CallbackQuery):
         )
 
 
-async def answers_send(message: types.Message):
+async def tickets_send(message: types.Message):
     await message.answer('Запрос получен, ожидайте')
     await message.answer_document(open('static/answers/Билеты-ответы машинист ТК 2023.pdf', 'rb'))
     await message.answer_document(open('static/answers/Билеты-ответы слесарь РТУ 2023.pdf', 'rb'))
@@ -110,4 +110,4 @@ async def answers_send(message: types.Message):
 
 def register_handlers_terms(dp: Dispatcher):
     dp.register_message_handler(terms_request, commands='terms')
-    dp.register_message_handler(answers_send, commands='answers')
+    dp.register_message_handler(tickets_send, commands='tickets')
