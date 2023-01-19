@@ -27,13 +27,15 @@ async def stat_now(message: types.Message):
         }
     ))
     done = []
-    # undone = []
+    undone = []
     for user in dep_users:
         user_id = user.get('user_id')
         for res in queryset:
             if user_id == res.get('user_id'):
-                done.append(user.get('full_name'))
-    await message.answer(f'{done}')
+                done.append(user.get('user_id'))
+        if user_id not in done:
+            undone.append(user.get('full_name'))
+    await message.answer(f'{undone}')
 
 
 def register_handlers_statistic(dp: Dispatcher):
