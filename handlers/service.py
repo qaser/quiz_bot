@@ -8,6 +8,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from config.bot_config import bot, dp
 from config.mongo_config import offers, users, attentions
 from config.telegram_config import ADMIN_TELEGRAM_ID
+from utils.constants import HELP_TEXT
 from utils.decorators import superuser_check
 
 
@@ -126,9 +127,14 @@ async def upload_photo_attention(message: types.Message):
                 attentions.insert_one({'_id': file_id, 'year': int(year_dir)})
 
 
+async def help_handler(message: types.Message):
+    await message.answer(HELP_TEXT)
+
+
 def register_handlers_service(dp: Dispatcher):
     dp.register_message_handler(reset_handler, commands='reset', state='*')
     dp.register_message_handler(count_users, commands='users')
     dp.register_message_handler(send_logs, commands='log')
     dp.register_message_handler(bot_offer, commands='offer')
     dp.register_message_handler(upload_photo_attention, commands='upload_attention')
+    dp.register_message_handler(help_handler, commands='help')
