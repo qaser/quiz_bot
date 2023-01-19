@@ -34,8 +34,14 @@ async def stat_now(message: types.Message):
             if user_id == res.get('user_id'):
                 done.append(user.get('user_id'))
         if user_id not in done:
-            undone.append(user.get('full_name'))
-    await message.answer(f'{undone}')
+            undone.append(user)
+    if list(undone) == 0:
+        await message.answer(f'Текущие тесты прошли все пользователи')
+    else:
+        users_list = ''
+        for u in undone:
+            users_list = f'{users_list}\n{u.get("full_name")}'
+        await message.answer(f'Текущие тесты не прошли:\n{users_list}')
 
 
 def register_handlers_statistic(dp: Dispatcher):
