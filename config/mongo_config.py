@@ -16,6 +16,7 @@ terms = db['terms']
 key_rules = db['key_rules']
 attentions = db['attentions']
 plan_tu = db['plan_tu']
+buffer = db['buffer']
 
 
 '''

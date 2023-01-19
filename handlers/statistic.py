@@ -4,9 +4,11 @@ import os
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters import Text
+from bson.objectid import ObjectId
 
 from config.bot_config import bot, dp
-from config.mongo_config import offers, users, key_rules, attentions, results
+from config.mongo_config import offers, users, key_rules, attentions, results, buffer
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.decorators import superuser_check, admin_check
 from utils.utils import calc_date, calc_test_type
@@ -35,13 +37,29 @@ async def stat_now(message: types.Message):
                 done.append(user.get('user_id'))
         if user_id not in done:
             undone.append(user)
+    data = buffer.insert_one({'users_list': undone})
     if list(undone) == 0:
         await message.answer(f'Текущие тесты прошли все пользователи')
     else:
+        keyboard = types.InlineKeyboardMarkup()
+        keyboard.add(
+            # types.InlineKeyboardButton(text='Не отправлять', callback_data='exit'),
+            types.InlineKeyboardButton(text='Отправить', callback_data=f'buffer_{data.inserted_id}'),
+        )
         users_list = ''
         for u in undone:
             users_list = f'{users_list}\n{u.get("full_name")}'
-        await message.answer(f'Текущие тесты не прошли:\n{users_list}')
+        await message.answer(
+            text=f'Текущие тесты не прошли:\n{users_list}\n\n Хотите им отправить уведомления?',
+            reply_markup=keyboard,
+        )
+
+
+@dp.callback_query_handler(Text(startswith='buffer_'))
+async def send_notification(call: types.CallbackQuery):
+    _, buffer_id = call.data.split('_')
+    users_list = buffer.find_one({'_id': ObjectId(buffer_id)}).get('users_list')
+    await call.message.answer(users_list)
 
 
 def register_handlers_statistic(dp: Dispatcher):
