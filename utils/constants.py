@@ -29,7 +29,7 @@ TEST_TYPE = {
 
 TU = {
     '16.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-16012023-01-14',
-
+    '23.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-23012023-01-22',
 }
 
 EXAMEN = {
