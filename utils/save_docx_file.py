@@ -41,7 +41,7 @@ def create_docx_file(plan):
     header.alignment = WD_ALIGN_PARAGRAPH.CENTER
     header.style = document.styles['Normal']
 
-    table = document.add_table(rows=2, cols=6)
+    table = document.add_table(rows=2, cols=6, style='Table Grid')
     table_hdr = table.rows[0].cells  # заголовки таблицы
     table_num = table.rows[1].cells  # нумерация таблицы
     table.columns[0].width = Mm(10)
