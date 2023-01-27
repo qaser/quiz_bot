@@ -38,7 +38,10 @@ async def stat_now(message: types.Message):
         data = buffer.insert_one({'users_list': undone})
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-            types.InlineKeyboardButton(text='Отправить', callback_data=f'buffer_{data.inserted_id}'),
+            types.InlineKeyboardButton(
+                text='Отправить',
+                callback_data=f'buffer_{message.from_user.id}_{data.inserted_id}'
+            ),
         )
         users_list = ''
         for u in undone:
@@ -47,13 +50,14 @@ async def stat_now(message: types.Message):
             text=f'Текущие тесты не прошли:\n{users_list}\n\n Хотите отправить уведомления?',
             reply_markup=keyboard,
         )
+    await message.delete()
 
 
 @dp.callback_query_handler(Text(startswith='buffer_'))
 async def send_notification(call: types.CallbackQuery):
-    _, buffer_id = call.data.split('_')
+    _, admin_id, buffer_id = call.data.split('_')
     users_list = buffer.find_one({'_id': ObjectId(buffer_id)}).get('users_list')
-    admin = call.message.from_user.full_name
+    admin = users.find_one({'user_id': int(admin_id)}).get('full_name')
     for user in users_list:
         try:
             await bot.send_message(
@@ -66,6 +70,8 @@ async def send_notification(call: types.CallbackQuery):
                     text=f'Пользователь {user.get("full_name")} вероятно заблокировал бота.'
                 )
                 continue
+    await call.message.edit_text('Сообщения отправлены')
+    await call.message.delete_reply_markup()
 
 
 def register_handlers_statistic(dp: Dispatcher):

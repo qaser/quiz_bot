@@ -1,19 +1,18 @@
 import datetime as dt
+import os
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.bot_config import dp
+from config.bot_config import dp, bot
 from config.mongo_config import plans, questions, themes, users
 from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS
 from utils.decorators import admin_check, superuser_check
 
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font
-from openpyxl.utils import get_column_letter
+from utils.save_docx_file import create_docx_file
 
 
 class Plan(StatesGroup):
@@ -212,43 +211,64 @@ async def show_themes(message: types.Message):
 
 
 # экспорт вопросов в файл
-# @admin_check
-# async def export_tests(message: types.Message):
-#     keyboard = types.InlineKeyboardMarkup(row_width=3)
-#     user_id = message.from_user.id
-#     department = users.find_one({'user_id': user_id}).get('department')
-#     years = plans.distinct('year')
-#     buttons = [types.InlineKeyboardButton(
-#         text=str(year),
-#         callback_data=f'test_year_{year}_{user_id}_{department}'
-#     ) for year in years]
-#     keyboard.add(*buttons)
-#     await message.answer('Выберите год', reply_markup=keyboard)
+@admin_check
+async def export_tests(message: types.Message):
+    keyboard = types.InlineKeyboardMarkup(row_width=3)
+    user_id = message.from_user.id
+    department = users.find_one({'user_id': user_id}).get('department')
+    years = plans.find({'department': department}).distinct('year')
+    buttons = [types.InlineKeyboardButton(
+        text=str(year),
+        callback_data=f'plan_{year}_{user_id}_{department}'
+    ) for year in years]
+    keyboard.add(*buttons)
+    await message.delete()
+    await message.answer('Выберите год', reply_markup=keyboard)
 
 
-# @dp.callback_query_handler(Text(startswith='test_year_'))
-# async def get_test_year(call: types.CallbackQuery):
-#     _, _, year, user_id, department = call.data.split('_')
-#     await call.message.delete_reply_markup()
-#     queryset = list(plans.find({'year': year, 'department': department,}))
-#     workbook = Workbook()
-#     worksheet = workbook.active
-#     header_font = Font(name='Calibri', bold=True)
-#     centered_alignment = Alignment(
-#         horizontal='center',
-#         vertical='center',
-#         wrap_text=True
-#     )
-#     wrapped_alignment = Alignment(
-#         vertical='top',
-#         wrap_text=True
-#     )
-#     worksheet.title = f'Тестовые вопросы {department} {year} года'
+@dp.callback_query_handler(Text(startswith='plan_'))
+async def get_test_quarter(call: types.CallbackQuery):
+    _, year, user_id, department = call.data.split('_')
+    quarters = plans.find({'department': department, 'year': int(year)}).distinct('quarter')
+    keyboard = types.InlineKeyboardMarkup(row_width=4)
+    buttons = [
+        types.InlineKeyboardButton(
+            text=str(quarter),
+            callback_data=f'pln_{year}_{quarter}_{user_id}_{department}'
+        ) for quarter in quarters
+    ]
+    await call.message.delete_reply_markup()
+    keyboard.add(*buttons)
+    await call.message.edit_text(
+            'Выберите квартал:',
+            reply_markup=keyboard,
+        )
 
+
+@dp.callback_query_handler(Text(startswith='pln_'))
+async def get_test_document(call: types.CallbackQuery):
+    _, year, quarter, user_id, department = call.data.split('_')
+    plan = plans.find_one(
+        {
+            'department': department,
+            'year': int(year),
+            'quarter': int(quarter)
+        }
+    )
+    await call.message.delete_reply_markup()
+    await call.message.edit_text('Запрос получен')
+    create_docx_file(plan)
+    path = f'static/reports/Тест {department} ({quarter} кв. {year}г).docx'
+    await bot.send_document(
+        chat_id=user_id,
+        document=open(path, 'rb')
+    )
+    os.remove(path)
+    await call.message.delete()
 
 
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
-    dp.register_message_handler(populate_plans, commands='pop_plan')
+    # dp.register_message_handler(populate_plans, commands='pop_plan')
     dp.register_message_handler(show_themes, commands='themes')
-    # dp.register_message_handler(export_tests, commands='export_tests')
+    dp.register_message_handler(export_tests, commands='export_tests')
