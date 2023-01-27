@@ -223,7 +223,7 @@ async def export_tests(message: types.Message):
     ) for year in years]
     keyboard.add(*buttons)
     await message.delete()
-    await message.answer('Выберите год', reply_markup=keyboard)
+    await message.answer('Функция экспорта тестовых вопросов в файл. Выберите год', reply_markup=keyboard)
 
 
 @dp.callback_query_handler(Text(startswith='plan_'))

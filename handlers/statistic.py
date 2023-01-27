@@ -43,6 +43,12 @@ async def stat_now(message: types.Message):
                 callback_data=f'buffer_{message.from_user.id}_{data.inserted_id}'
             ),
         )
+        keyboard.add(
+            types.InlineKeyboardButton(
+                text='Отмена',
+                callback_data=f'exit'
+            ),
+        )
         users_list = ''
         for u in undone:
             users_list = f'{users_list}\n{u.get("full_name")}'
