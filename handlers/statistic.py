@@ -1,6 +1,7 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
 from bson.objectid import ObjectId
+import pprint
 
 from config.bot_config import bot, dp
 from config.mongo_config import buffer, results, users
@@ -80,5 +81,64 @@ async def send_notification(call: types.CallbackQuery):
     await call.message.delete_reply_markup()
 
 
+async def user_stat(user_id):
+    TEST_TRANSLATE = {
+        'input': 'входной тест',
+        'output': 'выходной тест'
+    }
+    QUARTER_TEXT = {
+        1: 'первый квартал',
+        2: 'второй квартал',
+        3: 'третий квартал',
+        4: 'четвёртый квартал',
+    }
+    queryset = results.find(
+        {'user_id': user_id, 'test_type': {'$ne': 'special'}}
+    )
+    years = queryset.distinct('year')
+    res_dict = {}
+    for res in list(queryset):
+        quiz_results = res.get('quiz_results')
+        len_test = len(quiz_results)
+        done_count = 0
+        for q in quiz_results:
+            if q[3] == 'true':
+                done_count += 1
+        if res_dict.get(res.get('year')) is None:
+            res_dict[res.get('year')] = {}
+        if res_dict.get(res.get('year')).get(res.get('quarter')) is None:
+            res_dict[res.get('year')][res.get('quarter')] = {}
+        res_dict[res.get('year')][res.get('quarter')][res.get('test_type')] = [
+            res.get('grade'),
+            len_test,
+            done_count
+        ]
+    final_text = ''
+    for year, quarters in res_dict.items():
+        year_text = ''
+        for quarter, test in quarters.items():
+            quarter_text = ''
+            for test_type, test_data in test.items():
+                grade, len_test, done_count = test_data
+                test_name = TEST_TRANSLATE.get(test_type)
+                text = (f'        <i>{test_name}</i>\n'
+                        f'              вопросов: {len_test}\n'
+                        f'              правильно: {done_count}\n'
+                        f'              результат: {grade}\n')
+                quarter_text = f'{quarter_text}{text}'
+            q_text = f'   <u>{QUARTER_TEXT.get(quarter)}</u>:\n{quarter_text}\n'
+            year_text = f'{year_text}{q_text}'
+        y_text = f'<b>{year} год</b>\n{year_text}\n'
+        final_text = f'{final_text}{y_text}'
+    return final_text
+
+
+async def my_stat(message: types.Message):
+    stat_text = await user_stat(message.from_user.id)
+    await message.delete()
+    await message.answer(stat_text, parse_mode=types.ParseMode.HTML)
+
+
 def register_handlers_statistic(dp: Dispatcher):
     dp.register_message_handler(stat_now, commands='unsolve_test')
+    dp.register_message_handler(my_stat, commands='my_stat')
