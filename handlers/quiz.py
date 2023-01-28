@@ -85,7 +85,7 @@ async def handle_quiz_answer(quiz_answer: types.PollAnswer):
     quiz_result.append(quiz_res)
     results.update_one(
         {'_id': data.get('_id')},
-        {'$set': {'quiz_results': quiz_result, 'done': 'true'}},
+        {'$set': {'quiz_results': quiz_result}},
         upsert=False
     )
     await send_quiz(data.get('_id'))
@@ -107,7 +107,7 @@ async def save_result(res_id):
     results.update_one(
         {'_id': res_id},
         {
-            '$set': {'date_end': date_end, 'grade': grade},
+            '$set': {'date_end': date_end, 'grade': grade, 'done': 'true'},
             '$unset': {
                 'q_len': True,
                 'count': True,

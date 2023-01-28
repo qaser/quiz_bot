@@ -150,7 +150,7 @@ async def users_stats(message:types.Message):
         keyboard.add(
             types.InlineKeyboardButton(
                 text=username,
-                callback_data=f'userstats_{username}_{user_id}'
+                callback_data=f'userstats_{user_id}'
             )
         )
     keyboard.add(
@@ -165,9 +165,10 @@ async def users_stats(message:types.Message):
 
 @dp.callback_query_handler(Text(startswith='userstats_'))
 async def send_user_stats(call: types.CallbackQuery):
-    _, username, user_id = call.data.split('_')
+    _, user_id = call.data.split('_')
+    username = users.find_one({'user_id': int(user_id)}).get('fullname')
     stat_text = await user_stat(int(user_id))
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text='< Выход >', callback_data='exit'))
     await call.message.delete()
     await call.message.answer(
