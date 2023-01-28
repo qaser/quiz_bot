@@ -167,7 +167,6 @@ async def send_user_stats(call: types.CallbackQuery):
     stat_text = await user_stat(int(user_id))
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text='< Закрыть >', callback_data='exit'))
-    # await call.message.delete()
     await call.message.edit_text(
         text=f'Статистика пользователя {username}:\n{stat_text}',
         parse_mode=types.ParseMode.HTML,
