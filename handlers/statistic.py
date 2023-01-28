@@ -133,12 +133,48 @@ async def user_stat(user_id):
     return final_text
 
 
-async def my_stat(message: types.Message):
+async def my_stats(message: types.Message):
     stat_text = await user_stat(message.from_user.id)
     await message.delete()
     await message.answer(stat_text, parse_mode=types.ParseMode.HTML)
 
 
+@admin_check
+async def users_stats(message:types.Message):
+    department = users.find_one({'user_id': message.from_user.id}).get('department')
+    users_queryset = users.find({'department': department})
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    for u in users_queryset:
+        username = u.get('full_name')
+        user_id = u.get('user_id')
+        keyboard.add(
+            types.InlineKeyboardButton(
+                text=username,
+                callback_data=f'userstats_{username}_{user_id}'
+            )
+        )
+    keyboard.row(
+        types.InlineKeyboardButton(text='< Отмена >', callback_data='exit'),
+    )
+    await message.delete()
+    await message.answer(
+        text=('Выберите пользователя для просмотра статистики:'),
+        reply_markup=keyboard,
+    )
+
+
+@dp.callback_query_handler(Text(startswith='userstats_'))
+async def send_user_stats(call: types.CallbackQuery):
+    _, username, user_id = call.data.split('_')
+    stat_text = await user_stat(int(user_id))
+    await call.message.delete()
+    await call.message.answer(
+        text=f'Статистика пользователя {username}:\n{stat_text}',
+        parse_mode=types.ParseMode.HTML
+    )
+
+
 def register_handlers_statistic(dp: Dispatcher):
     dp.register_message_handler(stat_now, commands='unsolve_test')
-    dp.register_message_handler(my_stat, commands='my_stats')
+    dp.register_message_handler(my_stats, commands='my_stats')
+    dp.register_message_handler(users_stats, commands='users_stats')
