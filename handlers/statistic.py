@@ -141,4 +141,4 @@ async def my_stat(message: types.Message):
 
 def register_handlers_statistic(dp: Dispatcher):
     dp.register_message_handler(stat_now, commands='unsolve_test')
-    dp.register_message_handler(my_stat, commands='my_stat')
+    dp.register_message_handler(my_stat, commands='my_stats')
