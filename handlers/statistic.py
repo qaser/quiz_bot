@@ -149,15 +149,6 @@ async def users_stats(message:types.Message):
             callback_data=f'userstats_{u.get("user_id")}'
         ) for u in users_queryset
     ]
-    # for u in users_queryset:
-    #     username = u.get('full_name')
-    #     user_id = u.get('user_id')
-    #     keyboard.add(
-    #         types.InlineKeyboardButton(
-    #             text=username,
-    #             callback_data=f'userstats_{user_id}'
-    #         )
-    #     )
     keyboard.add(*buttons)
     keyboard.add(
         types.InlineKeyboardButton(text='< Отмена >', callback_data='exit'),
@@ -175,9 +166,9 @@ async def send_user_stats(call: types.CallbackQuery):
     username = users.find_one({'user_id': int(user_id)}).get('full_name')
     stat_text = await user_stat(int(user_id))
     keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(types.InlineKeyboardButton(text='< Выход >', callback_data='exit'))
-    await call.message.delete()
-    await call.message.answer(
+    keyboard.add(types.InlineKeyboardButton(text='< Закрыть >', callback_data='exit'))
+    # await call.message.delete()
+    await call.message.edit_text(
         text=f'Статистика пользователя {username}:\n{stat_text}',
         parse_mode=types.ParseMode.HTML,
         reply_markup=keyboard
