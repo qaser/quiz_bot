@@ -95,7 +95,6 @@ async def user_stat(user_id):
     queryset = results.find(
         {'user_id': user_id, 'test_type': {'$ne': 'special'}}
     )
-    years = queryset.distinct('year')
     res_dict = {}
     for res in list(queryset):
         quiz_results = res.get('quiz_results')
@@ -144,15 +143,22 @@ async def users_stats(message:types.Message):
     department = users.find_one({'user_id': message.from_user.id}).get('department')
     users_queryset = users.find({'department': department})
     keyboard = types.InlineKeyboardMarkup(row_width=2)
-    for u in users_queryset:
-        username = u.get('full_name')
-        user_id = u.get('user_id')
-        keyboard.add(
-            types.InlineKeyboardButton(
-                text=username,
-                callback_data=f'userstats_{user_id}'
-            )
-        )
+    buttons = [
+        types.InlineKeyboardButton(
+            text=u.get('full_name'),
+            callback_data=f'userstats_{u.get("user_id")}'
+        ) for u in users_queryset
+    ]
+    # for u in users_queryset:
+    #     username = u.get('full_name')
+    #     user_id = u.get('user_id')
+    #     keyboard.add(
+    #         types.InlineKeyboardButton(
+    #             text=username,
+    #             callback_data=f'userstats_{user_id}'
+    #         )
+    #     )
+    keyboard.add(*buttons)
     keyboard.add(
         types.InlineKeyboardButton(text='< Отмена >', callback_data='exit'),
     )
