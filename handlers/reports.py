@@ -62,7 +62,7 @@ async def get_results(year, quarter, user_id):
                 'year': int(year),
                 'quarter': int(quarter),
                 'done': 'true',
-                'test_type': 'input'
+                'test_type': 'input',
             }
         )
         res_output = results.find_one(
@@ -75,12 +75,12 @@ async def get_results(year, quarter, user_id):
             }
         )
         res['user'] = u.get('full_name')
-        if res_input is not None:
-            res['date_input'] = res_input.get('date_end')
-            res['grade_input'] = res_input.get('grade')
-        else:
-            res['date_input'] = '-'
-            res['grade_input'] = '-'
+        # if res_input is not None:
+        res['date_input'] = res_input.get('date_end', '-')
+        res['grade_input'] = res_input.get('grade', '-')
+        # else:
+        #     res['date_input'] = '-'
+        #     res['grade_input'] = '-'
         if res_output is not None:
             res['date_output'] = res_output.get('date_end')
             res['grade_output'] = res_output.get('grade')
@@ -154,15 +154,21 @@ async def results_get_test_type(call: types.CallbackQuery):
     _, _, test_type, q, year, user_id = call.data.split('_')
     user = users.find_one({'user_id': int(user_id)})
     department = user.get('department')
-    queryset = results.find(
-        {
-            'year': int(year),
-            'quarter': int(q),
-            'test_type': TEST_TRANSLATE.get(test_type),
-            'department': department
-        }
-    )
-    pprint.pprint(list(queryset))
+    users_set = list(users.find({'department': department}))
+    results_set = []
+    for u in users_set:
+        res = results.find_one(
+            {
+                'user_id': u.get('user_id'),
+                'year': int(year),
+                'quarter': int(q),
+                'test_type': TEST_TRANSLATE.get(test_type),
+                'done': 'true'
+            }
+        )
+        results_set.append(res)
+
+
 
 
 def register_handlers_reports(dp: Dispatcher):
