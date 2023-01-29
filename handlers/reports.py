@@ -1,4 +1,5 @@
 import os
+import pprint
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
@@ -8,11 +9,6 @@ from config.bot_config import bot, dp
 from config.mongo_config import results, users
 from utils.decorators import admin_check
 from utils.make_pdf import report_department_pdf
-
-
-class DepartmentReport(StatesGroup):
-    waiting_year = State()
-    waiting_quarter = State()
 
 
 @admin_check
@@ -105,8 +101,68 @@ async def send_result(year, quarter, department, user_id, results_set):
     os.remove(path)
 
 
+@admin_check
 async def testing_results(message: types.Message):
-    pass
+    keyboard = types.InlineKeyboardMarkup(row_width=3)
+    user_id = message.from_user.id
+    years = results.distinct('year')
+    buttons = [types.InlineKeyboardButton(
+        text=str(year),
+        callback_data=f'results_y_{year}_{user_id}'
+    ) for year in years]
+    keyboard.add(*buttons)
+    await message.delete()
+    await message.answer('Выберите отчётный год', reply_markup=keyboard)
+
+
+@dp.callback_query_handler(Text(startswith='results_y_'))
+async def results_get_year(call: types.CallbackQuery):
+    _, _, year, user_id = call.data.split('_')
+    keyboard = types.InlineKeyboardMarkup(row_width=4)
+    buttons = [types.InlineKeyboardButton(
+        text=str(q),
+        callback_data=f'results_q_{q}_{year}_{user_id}'
+    ) for q in range(1, 5)]
+    keyboard.add(*buttons)
+    await call.message.edit_text(
+        text=f'Вы выбрали {year} год.\nВыберите квартал',
+        reply_markup=keyboard,
+    )
+
+
+@dp.callback_query_handler(Text(startswith='results_q_'))
+async def results_get_quarter(call: types.CallbackQuery):
+    _, _, q, year, user_id = call.data.split('_')
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    buttons = [types.InlineKeyboardButton(
+        text=str(t_type),
+        callback_data=f'results_t_{t_type}_{q}_{year}_{user_id}'
+    ) for t_type in ['входной', 'выходной']]
+    keyboard.add(*buttons)
+    await call.message.edit_text(
+        text=f'Вы выбрали {year} год, {q} квартал.\nВыберите тип теста',
+        reply_markup=keyboard,
+    )
+
+
+@dp.callback_query_handler(Text(startswith='results_t_'))
+async def results_get_test_type(call: types.CallbackQuery):
+    TEST_TRANSLATE = {
+        'входной': 'input',
+        'выходной': 'output'
+    }
+    _, _, test_type, q, year, user_id = call.data.split('_')
+    user = users.find_one({'user_id': int(user_id)})
+    department = user.get('department')
+    queryset = results.find(
+        {
+            'year': int(year),
+            'quarter': int(q),
+            'test_type': TEST_TRANSLATE.get(test_type),
+            'department': department
+        }
+    )
+    pprint.pprint(list(queryset))
 
 
 def register_handlers_reports(dp: Dispatcher):
