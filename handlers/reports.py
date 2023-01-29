@@ -48,9 +48,8 @@ async def get_year(call: types.CallbackQuery):
 async def get_quarter(call: types.CallbackQuery):
     _, _, q, year, user_id = call.data.split('_')
     await call.message.edit_text(
-        text=f'Вы выбрали {year} год, {q} квартал.\nОтчёт формируется, ожидайте'
+        f'Вы выбрали {year} год, {q} квартал.\nОтчёт формируется, ожидайте'
     )
-    await call.message.delete_reply_markup()
     await get_results(year, q, user_id)
 
 
