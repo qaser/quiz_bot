@@ -25,23 +25,22 @@ async def department_report(message: types.Message):
         callback_data=f'report_year_{year}_{user_id}'
     ) for year in years]
     keyboard.add(*buttons)
+    await message.delete()
     await message.answer('Выберите отчётный год', reply_markup=keyboard)
 
 
 @dp.callback_query_handler(Text(startswith='report_year_'))
 async def get_year(call: types.CallbackQuery):
     _, _, year, user_id = call.data.split('_')
-    await call.message.delete_reply_markup()
-    await bot.send_message(chat_id=user_id, text=f'Вы выбрали {year} год')
+    # await call.message.delete_reply_markup()
     keyboard = types.InlineKeyboardMarkup(row_width=4)
     buttons = [types.InlineKeyboardButton(
         text=str(q),
         callback_data=f'report_quarter_{q}_{year}_{user_id}'
     ) for q in range(1, 5)]
     keyboard.add(*buttons)
-    await bot.send_message(
-        chat_id=user_id,
-        text='Выберите квартал',
+    await call.message.edit_text(
+        text=f'Вы выбрали {year} год\nВыберите квартал',
         reply_markup=keyboard,
     )
 
