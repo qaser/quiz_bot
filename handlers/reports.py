@@ -164,7 +164,6 @@ async def get_results(year, quarter, test_type, user_id):
     user = users.find_one({'user_id': int(user_id)})
     department = user.get('department')
     users_set = list(users.find({'department': department}))
-    print(users_set)
     t_type, t_type_rus = TEST_TRANSLATE.get(test_type)
     results_set = []
     for u in users_set:
@@ -177,8 +176,8 @@ async def get_results(year, quarter, test_type, user_id):
                 'done': 'true'
             }
         )
-        print(res)
-        results_set.append(res)
+        if res is not None:
+            results_set.append(res)
     await send_results(year, quarter, t_type_rus, department, user_id, results_set)
 
 
