@@ -9,6 +9,7 @@ from config.bot_config import bot, dp
 from config.mongo_config import results, users
 from utils.decorators import admin_check
 from utils.make_pdf import report_department_pdf
+from utils.save_docx_file import create_results_docx_file
 
 
 @admin_check
@@ -46,10 +47,10 @@ async def get_quarter(call: types.CallbackQuery):
     await call.message.edit_text(
         f'Вы выбрали {year} год, {q} квартал.\nОтчёт формируется, ожидайте'
     )
-    await get_results(year, q, user_id)
+    await get_report(year, q, user_id)
 
 
-async def get_results(year, quarter, user_id):
+async def get_report(year, quarter, user_id):
     user = users.find_one({'user_id': int(user_id)})
     department = user.get('department')
     users_set = list(users.find({'department': department}))
@@ -75,12 +76,12 @@ async def get_results(year, quarter, user_id):
             }
         )
         res['user'] = u.get('full_name')
-        # if res_input is not None:
-        res['date_input'] = res_input.get('date_end', '-')
-        res['grade_input'] = res_input.get('grade', '-')
-        # else:
-        #     res['date_input'] = '-'
-        #     res['grade_input'] = '-'
+        if res_input is not None:
+            res['date_input'] = res_input.get('date_end')
+            res['grade_input'] = res_input.get('grade')
+        else:
+            res['date_input'] = '-'
+            res['grade_input'] = '-'
         if res_output is not None:
             res['date_output'] = res_output.get('date_end')
             res['grade_output'] = res_output.get('grade')
@@ -88,10 +89,10 @@ async def get_results(year, quarter, user_id):
             res['date_output'] = '-'
             res['grade_output'] = '-'
         results_set.append(res)
-    await send_result(year, quarter, department, user_id, results_set)
+    await send_report(year, quarter, department, user_id, results_set)
 
 
-async def send_result(year, quarter, department, user_id, results_set):
+async def send_report(year, quarter, department, user_id, results_set):
     report_department_pdf(year, quarter, department, results_set)
     path = f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
     await bot.send_document(
@@ -147,28 +148,46 @@ async def results_get_quarter(call: types.CallbackQuery):
 
 @dp.callback_query_handler(Text(startswith='results_t_'))
 async def results_get_test_type(call: types.CallbackQuery):
-    TEST_TRANSLATE = {
-        'входной': 'input',
-        'выходной': 'output'
-    }
     _, _, test_type, q, year, user_id = call.data.split('_')
+    await call.message.edit_text(
+        (f'Вы выбрали {year} год, {q} квартал, {test_type} тест.\n'
+          'Документация формируется, ожидайте.')
+    )
+    await get_results(year, q, test_type, user_id)
+
+
+async def get_results(year, quarter, test_type, user_id):
+    TEST_TRANSLATE = {
+        'входной': ('input', 'входного'),
+        'выходной': ('output', 'выходного')
+    }
     user = users.find_one({'user_id': int(user_id)})
     department = user.get('department')
     users_set = list(users.find({'department': department}))
+    t_type, t_type_rus = TEST_TRANSLATE.get(test_type)
     results_set = []
     for u in users_set:
         res = results.find_one(
             {
                 'user_id': u.get('user_id'),
                 'year': int(year),
-                'quarter': int(q),
-                'test_type': TEST_TRANSLATE.get(test_type),
+                'quarter': int(quarter),
+                'test_type': t_type,
                 'done': 'true'
             }
         )
         results_set.append(res)
+    await send_results(year, quarter, t_type_rus, department, user_id, results_set)
 
 
+async def send_results(year, quarter, test_type, department, user_id, results_set):
+    create_results_docx_file(year, quarter, test_type, department, results_set)
+    path = f'static/reports/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
+    await bot.send_document(
+        chat_id=user_id,
+        document=open(path, 'rb')
+    )
+    os.remove(path)
 
 
 def register_handlers_reports(dp: Dispatcher):
