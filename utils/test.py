@@ -1,11 +1,5 @@
-import os
+db.users.updateOne({'full_name': 'Сергей'},{'$set': {'full_name': 'Иванов С.Н.'}})
+db.results.findOne({'user_id': 1747036217})
+db.results.updateOne({'user_id': 1747036217},{$set: {'done': 'false'}})
 
-print(os.getcwd())
-for d in os.listdir():
-    os.chdir(f'{os.getcwd()}\{d}')
-    for f in os.listdir():
-        f_name, f_ext = os.path.splitext(f)
-        f_ext = '.cbr'
-        new_name = f'{f_name}{f_ext}'
-        os.rename(f, new_name)
-    os.chdir('..')
+db.users.findOne({'full_name': 'Егор'})

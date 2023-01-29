@@ -107,5 +107,10 @@ async def send_result(year, quarter, department, user_id, results_set):
     os.remove(path)
 
 
+async def testing_results(message: types.Message):
+    pass
+
+
 def register_handlers_reports(dp: Dispatcher):
     dp.register_message_handler(department_report, commands='report')
+    dp.register_message_handler(testing_results, commands='results')
