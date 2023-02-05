@@ -1,9 +1,7 @@
 import os
-import pprint
 
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
 from config.mongo_config import results, users

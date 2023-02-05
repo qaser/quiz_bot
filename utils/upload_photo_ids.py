@@ -1,10 +1,10 @@
-import os
 import asyncio
 import logging
-from aiogram import Bot
-import pymongo
-from aiogram.contrib.fsm_storage.mongo import MongoStorage
+import os
 
+import pymongo
+from aiogram import Bot
+from aiogram.contrib.fsm_storage.mongo import MongoStorage
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -11,15 +11,15 @@ from config.telegram_config import PASSWORD
 from handlers.admin_registration import register_handlers_admin_registration
 from handlers.attentions import register_handlers_attentions
 from handlers.examen import register_handlers_examen
-from handlers.key_rules import register_handlers_key_rules
-from handlers.statistic import register_handlers_statistic
-from handlers.terms import register_handlers_terms
 from handlers.import_questions import register_handlers_excel
+from handlers.key_rules import register_handlers_key_rules
 from handlers.plan import register_handlers_plan
 from handlers.quiz import register_handlers_quiz
 from handlers.registration import register_handlers_registration
 from handlers.reports import register_handlers_reports
 from handlers.service import register_handlers_service
+from handlers.statistic import register_handlers_statistic
+from handlers.terms import register_handlers_terms
 from scheduler.scheduler_jobs import scheduler, scheduler_jobs
 from texts.initial import INITIAL_TEXT
 

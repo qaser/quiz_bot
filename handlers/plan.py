@@ -6,12 +6,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from config.bot_config import dp, bot
+from config.bot_config import bot, dp
 from config.mongo_config import plans, questions, themes, users
 from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS
 from utils.decorators import admin_check, superuser_check
-
 from utils.save_docx_file import create_docx_file
 
 

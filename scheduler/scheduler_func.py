@@ -1,3 +1,5 @@
+import datetime as dt
+
 from aiogram import types
 from aiogram.utils.exceptions import CantInitiateConversation
 
@@ -6,7 +8,6 @@ from config.mongo_config import plans, questions, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from utils.constants import TEST_TYPE, TU
 from utils.utils import calc_date, calc_test_type
-import datetime as dt
 
 
 # формирование списка вопросов согласно тем плана

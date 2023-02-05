@@ -1,13 +1,14 @@
+import pprint
+
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
+from aiogram.utils.exceptions import CantInitiateConversation
 from bson.objectid import ObjectId
-import pprint
 
 from config.bot_config import bot, dp
 from config.mongo_config import buffer, results, users
 from utils.decorators import admin_check
 from utils.utils import calc_date, calc_test_type
-from aiogram.utils.exceptions import CantInitiateConversation
 
 
 @admin_check

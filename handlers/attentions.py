@@ -1,8 +1,8 @@
 import os
 
 from aiogram import Dispatcher, types
-from aiogram.types import InputMediaPhoto
 from aiogram.dispatcher.filters import Text
+from aiogram.types import InputMediaPhoto
 
 from config.bot_config import bot, dp
 from config.mongo_config import attentions

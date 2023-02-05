@@ -11,10 +11,10 @@ HELP_TEXT = (
     '/my_stats - Статистика проверки знаний\n\n'
     'Команды для администраторов:\n'
     '/unsolve_test - Пользователи, не прошедшие тестирование\n'
-    '/export_tests - Экспорт тестовых вопросов в docx-файл\n'
     '/users_stats - Просмотр статистики пользователей\n'
-    '/report - Отчёт о прохождении тестирования\n'
-    '/results - Результаты тестирования'
+    '/export_tests - Экспорт тестовых вопросов в docx-файл\n'
+    '/report - Экспорт квартального отчёта о прохождении тестирования в pdf-файл\n'
+    '/results - Экспорт результатов тестирования в docx-файл'
 )
 
 DEPARTMENTS = [
@@ -36,6 +36,7 @@ TU = {
     '16.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-16012023-01-14',
     '23.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-23012023-01-22',
     '30.01.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-30012023-01-22',
+    '06.02.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-06022023-02-05',
 }
 
 EXAMEN = {

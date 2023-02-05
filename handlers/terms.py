@@ -1,8 +1,9 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
+from bson.objectid import ObjectId
+
 from config.bot_config import bot, dp
 from config.mongo_config import terms
-from bson.objectid import ObjectId
 
 
 async def terms_request(message: types.Message):

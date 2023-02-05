@@ -1,11 +1,12 @@
 from aiogram import Dispatcher, types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from bson.objectid import ObjectId
+
 from config.bot_config import bot, dp
 from config.mongo_config import terms
-from bson.objectid import ObjectId
 from utils.constants import EXAMEN
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
 
 
 async def examen_request(message: types.Message):

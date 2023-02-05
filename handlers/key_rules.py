@@ -1,5 +1,3 @@
-import os
-
 from aiogram import Dispatcher, types
 from aiogram.types import InputMediaPhoto
 

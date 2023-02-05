@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.utils.exceptions import CantInitiateConversation
 
 from config.bot_config import bot, dp
-from config.mongo_config import plans, questions, results, users, themes
+from config.mongo_config import plans, questions, results, themes, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
