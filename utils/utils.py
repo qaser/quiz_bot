@@ -38,7 +38,7 @@ def calc_test_type(month: int) -> str:
     Определение типа теста по текущему месяцу.
     Тест может быть "входной", "выходной", "внеплановый"
     '''
-    if month in [1, 4, 7, 10]:
+    if month in [1, 2, 4, 5, 7, 8, 10, 11]:
         return 'input'
     elif month in [3, 6, 9, 12]:
         return 'output'
