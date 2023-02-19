@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 
-from config.bot_config import dp
+from config.bot_config import dp, bot
 from config.mongo_config import users
 from config.telegram_config import PASSWORD
 from handlers.admin_registration import register_handlers_admin_registration
