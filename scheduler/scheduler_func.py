@@ -39,12 +39,20 @@ async def send_quiz_button():
     test_type_name = TEST_TYPE.get(test_type)
     queryset = list(plans.find({'year': year, 'quarter': quarter}))
     departments = [dep.get('department') for dep in queryset]
-    user_ids = []
-    for dep in departments:
-        ids = [user.get('user_id') for user in list(
-            users.find({'department': dep})
-        )]
-        user_ids += ids
+    user_ids = [
+        440028496,
+        5303483860,
+        1078523396,
+        5079055032,
+        5446742270,
+        480818965,
+        935436102
+    ]
+    # for dep in departments:
+    #     ids = [user.get('user_id') for user in list(
+    #         users.find({'department': dep})
+    #     )]
+    #     user_ids += ids
     for user_id in user_ids:
         try:
             keyboard = types.InlineKeyboardMarkup()
