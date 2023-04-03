@@ -40,50 +40,40 @@ async def send_quiz_button():
     queryset = list(plans.find({'year': year, 'quarter': quarter}))
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
-    pass_user_ids = [  # убрать эту строку
-        440028496,
-        5303483860,
-        1078523396,
-        5079055032,
-        5446742270,
-        480818965,
-        935436102
-    ]
     for dep in departments:
         ids = [user.get('user_id') for user in list(
             users.find({'department': dep})
         )]
         user_ids += ids
     for user_id in user_ids:
-        if user_id not in pass_user_ids:  # убрать эту строчку
-            target_user = users.find_one({'user_id': user_id}).get('full_name')
-            try:
-                keyboard = types.InlineKeyboardMarkup()
-                keyboard.add(
-                    types.InlineKeyboardButton(
-                        text='Начать тестирование',
-                        callback_data=(
-                            f'quiz_{year}_{quarter}_{test_type}_{user_id}'
-                        )
+        target_user = users.find_one({'user_id': user_id}).get('full_name')
+        try:
+            keyboard = types.InlineKeyboardMarkup()
+            keyboard.add(
+                types.InlineKeyboardButton(
+                    text='Начать тестирование',
+                    callback_data=(
+                        f'quiz_{year}_{quarter}_{test_type}_{user_id}'
                     )
                 )
-                await bot.send_message(
-                    chat_id=user_id,
-                    text=(
-                        f'Пройдите {test_type_name} тест знаний по '
-                        f'плану технической учёбы {quarter}-го квартала.'
-                    ),
-                    reply_markup=keyboard,
-                )
-                await bot.send_message(
-                    ADMIN_TELEGRAM_ID,
-                    f'Пользователю {target_user} отправлен тест',
-                )
-            except (CantInitiateConversation, BotBlocked):
-                await bot.send_message(
-                    ADMIN_TELEGRAM_ID,
-                    f'Пользователь {target_user} не доступен',
-                )
+            )
+            await bot.send_message(
+                chat_id=user_id,
+                text=(
+                    f'Пройдите {test_type_name} тест знаний по '
+                    f'плану технической учёбы {quarter}-го квартала.'
+                ),
+                reply_markup=keyboard,
+            )
+            await bot.send_message(
+                ADMIN_TELEGRAM_ID,
+                f'Пользователю {target_user} отправлен тест',
+            )
+        except (CantInitiateConversation, BotBlocked):
+            await bot.send_message(
+                ADMIN_TELEGRAM_ID,
+                f'Пользователь {target_user} не доступен',
+            )
 
 
 async def send_tu_material():
