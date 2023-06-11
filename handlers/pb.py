@@ -48,7 +48,7 @@ async def learning_choice(call: types.CallbackQuery):
         )
         await call.message.delete()
     elif choice == 'next':
-        text = get_learning_question(int(count)+1)
+        text = get_learning_question(int(count))
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
             types.InlineKeyboardButton(text='Завершить', callback_data=f'learning_finish_{count}'),
@@ -61,6 +61,10 @@ async def learning_choice(call: types.CallbackQuery):
         )
 
 
+async def testing(message: types.Message):
+    await message.answer('Режим "Самопроверка" в разработке. Выберите режим "Обучение"\n\n/rpo')
+    await message.delete()
+
 
 async def learning(message: types.Message):
     user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
@@ -68,7 +72,7 @@ async def learning(message: types.Message):
         pb_users_stats.insert_one(
             {'user_id': message.from_user.id, 'question_count': 1}
         )
-        await message.delete()
+        # await message.delete()
         await send_learning_question(message, 1)
     else:
         keyboard = types.InlineKeyboardMarkup()
@@ -115,8 +119,7 @@ async def get_mode(call: types.CallbackQuery):
     if mode == 'learn':
         await learning(call.message)
     elif mode == 'test':
-        await call.message.answer('Режим "Самопроверка" в разработке. Выберите режим "Обучение"\n\n/rpo')
-        await call.message.delete()
+        await testing(call.message)
 
 
 
