@@ -17,6 +17,20 @@ key_rules = db['key_rules']
 attentions = db['attentions']
 plan_tu = db['plan_tu']
 buffer = db['buffer']
+# коллекции для тестов РПО
+pb_questions = db['pb_questions']
+pb_answers = db['pb_answers']
+pb_link = db['pb_link']
+pb_instruction_sections = db['pb_instruction_sections']
+pb_nd_documents = db['pb_nd_documents']
+pb_nd = db['pb_nd']
+pb_program_groups = db['pb_program_groups']
+pb_users_stats = db['pb_users_stats']
+pb_programs = db['pb_programs']
+# отдельная выборка по РПО
+pb_rpo_program = db['pb_rpo_program']
+
+
 
 
 '''
