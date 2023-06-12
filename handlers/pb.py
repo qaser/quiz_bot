@@ -172,7 +172,7 @@ async def testing(message: types.Message):
 async def testing_choice(call: types.CallbackQuery):
     _, choice = call.data.split('_')
     if choice == 'exit':
-        call.message.delete()
+        await call.message.delete()
     elif choice == 'start':
         # await start_testing(call.message)
         await get_testing_questions(call.message)
