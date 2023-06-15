@@ -1,17 +1,10 @@
-import datetime as dt
-
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
-from aiogram.utils.exceptions import CantInitiateConversation
 
-from config.bot_config import bot, dp
-from config.mongo_config import (pb_answers, pb_instruction_sections, pb_link,
-                                 pb_nd, pb_nd_documents, pb_program_groups,
-                                 pb_questions, pb_users_stats, pb_programs, users, pb_rpo_program)
-from config.telegram_config import ADMIN_TELEGRAM_ID
-from scheduler.scheduler_func import send_quiz_button
+from config.bot_config import dp
+from config.mongo_config import (pb_answers, pb_program_groups,
+                                 pb_questions, pb_users_stats, pb_rpo_program)
 from utils.constants import TEST_TEXT
-from utils.utils import calc_grade, word_conjugate
 
 
 def get_learning_question(count):
@@ -232,7 +225,6 @@ async def get_mode(call: types.CallbackQuery):
         await learning(call.message)
     elif mode == 'test':
         await testing(call.message)
-
 
 
 def register_handlers_pb(dp: Dispatcher):
