@@ -144,7 +144,7 @@ async def answer_check(call: types.CallbackQuery):
 
 
 @dp.callback_query_handler(Text(startswith='testing_'))
-async def answer_check(call: types.CallbackQuery):
+async def testing_check_choice(call: types.CallbackQuery):
     _, choice = call.data.split('_')
     user_id = call.message.from_user.id
     if choice == 'exit':
