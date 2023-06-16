@@ -29,8 +29,14 @@ def get_full_learning_question(id, count):
 async def send_learning_question(message:types.Message, count):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
-        types.InlineKeyboardButton(text='Завершить', callback_data=f'learning_finish_{count}'),
-        types.InlineKeyboardButton(text='Следующий', callback_data=f'learning_next_{count+1}'),
+        types.InlineKeyboardButton(
+            text='Завершить',
+            callback_data=f'learning_finish_{count}'
+        ),
+        types.InlineKeyboardButton(
+            text='Следующий',
+            callback_data=f'learning_next_{count+1}'
+        ),
     )
     pb_users_stats.update_one(
         {'user_id': message.from_user.id},
@@ -57,8 +63,14 @@ async def learning_choice(call: types.CallbackQuery):
         text = get_learning_question(int(count))
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-            types.InlineKeyboardButton(text='Завершить', callback_data=f'learning_finish_{count}'),
-            types.InlineKeyboardButton(text='Следующий', callback_data=f'learning_next_{int(count)+1}'),
+            types.InlineKeyboardButton(
+                text='Завершить',
+                callback_data=f'learning_finish_{count}'
+            ),
+            types.InlineKeyboardButton(
+                text='Следующий',
+                callback_data=f'learning_next_{int(count)+1}'
+            ),
         )
         await call.message.edit_text(
             text,
@@ -105,7 +117,10 @@ async def test_send_question(message: types.Message):
             sort_num = ans.get('sort_number')
             text = ans.get('answer')
             a_text = f'{a_text}\n<b>{sort_num}</b>. {text}'
-            btn = types.InlineKeyboardButton(text=sort_num, callback_data=f'answer_{ans.get("p_id")}_{question.get("p_id")}')
+            btn = types.InlineKeyboardButton(
+                text=sort_num,
+                callback_data=f'answer_{ans.get("p_id")}_{question.get("p_id")}'
+            )
             buttons.append(btn)
         keyboard.row(*buttons)
         q_text = question.get('text')
@@ -131,15 +146,27 @@ async def answer_check(call: types.CallbackQuery):
     )
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
-        types.InlineKeyboardButton(text='Завершить', callback_data='testing_exit'),
-        types.InlineKeyboardButton(text='Следующий', callback_data='testing_next'),
+        types.InlineKeyboardButton(
+            text='Завершить',
+            callback_data='testing_exit'
+        ),
+        types.InlineKeyboardButton(
+            text='Следующий',
+            callback_data='testing_next'
+        ),
     )
     if ans_check == 1:
         text = 'Ответ верный'
     else:
-        correct_ans = pb_answers.find_one({'id_questions': int(q_id), 'correct_answer': 1}).get('answer')
+        correct_ans = pb_answers.find_one(
+            {'id_questions': int(q_id), 'correct_answer': 1}
+        ).get('answer')
         text = f'Ответ неверный\n\n<b>Правильный ответ:</b>\n{correct_ans}'
-    await call.message.edit_text(text, reply_markup=keyboard, parse_mode=types.ParseMode.HTML)
+    await call.message.edit_text(
+        text,
+        reply_markup=keyboard,
+        parse_mode=types.ParseMode.HTML
+    )
 
 
 @dp.callback_query_handler(Text(startswith='testing_'))
@@ -157,8 +184,6 @@ async def testing_check_choice(call: types.CallbackQuery):
 
 
 async def testing(message: types.Message):
-    # await message.answer('Режим "Самопроверка" в разработке. Выберите режим "Обучение"\n\n/rpo')
-    # await message.delete()
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
         types.InlineKeyboardButton(text='Отмена', callback_data='test_exit'),
@@ -188,8 +213,14 @@ async def learning(message: types.Message):
     else:
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
-            types.InlineKeyboardButton(text='Начать заново', callback_data='learn_new'),
-            types.InlineKeyboardButton(text='Продолжить', callback_data='learn_continue'),
+            types.InlineKeyboardButton(
+                text='Начать заново',
+                callback_data='learn_new'
+            ),
+            types.InlineKeyboardButton(
+                text='Продолжить',
+                callback_data='learn_continue'
+            ),
         )
         learn_count = user_stats.get('question_count')
         await message.edit_text(
@@ -210,7 +241,9 @@ async def learn_choice(call: types.CallbackQuery):
 
 async def searching(message: types.Message):
     await message.answer(
-        text='Данная функция работает в тестовом режиме. Введите и отправьте текст вопроса для поиска. Чем больше слов Вы введете тем точнее выполнится поиск.',
+        text=('Данная функция работает в тестовом режиме. '
+              'Введите и отправьте текст вопроса для поиска. '
+              'Чем больше слов Вы введете тем точнее выполнится поиск.'),
     )
     await message.delete()
     await Searching.waiting_search_text.set()
@@ -252,7 +285,9 @@ async def question_search(message: types.Message, state: FSMContext):
                 f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
             )
         await message.answer(
-            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже и дополнить его.',
+            (f'Найдено вопросов: {len_search}. Выше показаны первые два результата.'
+            ' Для уточнения результата попробуйте ввести больше слов.'
+            '\nМожете скопировать Ваш запрос ниже и дополнить его.'),
             reply_markup=keyboard
         )
         await message.answer(message.text)
@@ -271,17 +306,25 @@ async def searching_choice(call: types.CallbackQuery):
 async def pb_select(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
-        types.InlineKeyboardButton(text='Поиск ответа по тексту вопроса', callback_data='rpo_search')
+        types.InlineKeyboardButton(
+            text='Поиск ответа по тексту вопроса',
+            callback_data='rpo_search'
+        )
     )
     keyboard.add(
-        types.InlineKeyboardButton(text='Обучение', callback_data='rpo_learn'),
-        types.InlineKeyboardButton(text='Самопроверка', callback_data='rpo_test'),
+        types.InlineKeyboardButton(
+            text='Обучение',
+            callback_data='rpo_learn'
+        ),
+        types.InlineKeyboardButton(
+            text='Самопроверка',
+            callback_data='rpo_test'
+        ),
     )
     # для нескольких програм обучения "p_id" нужно будет запрашивать у пользователя
     program_name = pb_program_groups.find_one({'p_id': 100000227}).get('title')
     await message.answer(
-        text=(f'{program_name}\n\n'
-              'Выберите режим:'),
+        text=f'{program_name}\n\nВыберите режим:',
         reply_markup=keyboard,
     )
     await message.delete()
