@@ -255,6 +255,7 @@ async def question_search(message: types.Message, state: FSMContext):
             f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже.',
             reply_markup=keyboard
         )
+        await message.answer(message.text)
 
 
 
