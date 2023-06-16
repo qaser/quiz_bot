@@ -226,10 +226,9 @@ async def question_search(message: types.Message, state: FSMContext):
     len_search = len(q_search)
     if len_search == 0:
         await message.answer(
-            f'Вопросов с таким текстом не найдено, попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже.',
+            f'Вопросов с таким текстом не найдено, попробуйте ввести больше слов.',
             reply_markup=keyboard
         )
-        await message.answer(message.text)
     elif len_search == 1:
         q_id = q_search[0].get('p_id')
         ans = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1})
@@ -253,7 +252,7 @@ async def question_search(message: types.Message, state: FSMContext):
                 f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
             )
         await message.answer(
-            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.',
+            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже.',
             reply_markup=keyboard
         )
 
