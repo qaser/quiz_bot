@@ -1,10 +1,16 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
 
 from config.bot_config import dp
 from config.mongo_config import (pb_answers, pb_program_groups,
                                  pb_questions, pb_users_stats, pb_rpo_program)
 from utils.constants import TEST_TEXT
+
+
+class Searching(StatesGroup):
+    waiting_search_text = State()
 
 
 def get_learning_question(count):
@@ -202,8 +208,71 @@ async def learn_choice(call: types.CallbackQuery):
         await send_learning_question(call.message, count)
 
 
+async def searching(message: types.Message):
+    await message.answer(
+        text='Данная функция работает в тестовом режиме. Введите и отправьте текст вопроса для поиска. Чем больше слов Вы введете тем точнее выполнится поиск.',
+    )
+    await message.delete()
+    await Searching.waiting_search_text.set()
+
+
+async def question_search(message: types.Message, state: FSMContext):
+    await state.finish()
+    q_search = list(pb_questions.find(
+        {'$text': {'$search': f'\"{message.text}\"'}}
+    ))
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(types.InlineKeyboardButton(text='Найти ещё', callback_data='search_next'),)
+    len_search = len(q_search)
+    if len_search == 0:
+        await message.answer(
+            f'Вопросов с таким текстом не найдено, попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже.',
+            reply_markup=keyboard
+        )
+        await message.answer(message.text)
+    elif len_search == 1:
+        q_id = q_search[0].get('p_id')
+        ans = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1})
+        q_text = pb_questions.find_one({'p_id': q_id}).get('text')
+        ans_text = ans.get('answer')
+        ans_id = ans.get('sort_number')
+        await message.answer(
+            f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
+            reply_markup=keyboard
+        )
+    else:
+        for id, q in enumerate(q_search):
+            if id == 2:
+                break
+            q_id = q.get('p_id')
+            ans = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1})
+            q_text = pb_questions.find_one({'p_id': q_id}).get('text')
+            ans_text = ans.get('answer')
+            ans_id = ans.get('sort_number')
+            await message.answer(
+                f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
+            )
+        await message.answer(
+            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.',
+            reply_markup=keyboard
+        )
+
+
+
+@dp.callback_query_handler(Text(startswith='search_'))
+async def searching_choice(call: types.CallbackQuery):
+    _, choice = call.data.split('_')
+    if choice == 'exit':
+        await call.message.delete()
+    elif choice == 'next':
+        await searching(call.message)
+
+
 async def pb_select(message: types.Message):
     keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(
+        types.InlineKeyboardButton(text='Поиск ответа по тексту вопроса', callback_data='rpo_search')
+    )
     keyboard.add(
         types.InlineKeyboardButton(text='Обучение', callback_data='rpo_learn'),
         types.InlineKeyboardButton(text='Самопроверка', callback_data='rpo_test'),
@@ -225,7 +294,13 @@ async def get_mode(call: types.CallbackQuery):
         await learning(call.message)
     elif mode == 'test':
         await testing(call.message)
+    elif mode == 'search':
+        await searching(call.message)
 
 
 def register_handlers_pb(dp: Dispatcher):
     dp.register_message_handler(pb_select, commands='rpo')
+    dp.register_message_handler(
+        question_search,
+        state=Searching.waiting_search_text,
+    )
