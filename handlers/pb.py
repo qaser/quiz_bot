@@ -252,7 +252,7 @@ async def question_search(message: types.Message, state: FSMContext):
                 f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
             )
         await message.answer(
-            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже.',
+            f'Найдено вопросов: {len_search}. Выше показаны первые два результата. Для уточнения результата попробуйте ввести больше слов.\nМожете скопировать Ваш запрос ниже и дополнить его.',
             reply_markup=keyboard
         )
         await message.answer(message.text)
