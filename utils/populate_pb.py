@@ -21,6 +21,7 @@ divisions = db['pb_divisions']
 nd_types = db['pb_nd_types']
 programs = db['pb_programs']
 rpo_program = db['pb_rpo_program']
+rpo_isp_program = db['pb_rpo_isp_program']
 # quiz_count = quiz.count_documents({})
 # answer_num = quiz_count
 
@@ -36,6 +37,7 @@ for filename in os.listdir(cur_path):
         data = json.load(f)
         db[coll_name].insert_many(data)
 
+
 # отдельная выборка по РПО
 program_id = programs.find_one({'id_program_groups': 100000227}).get('p_id')
 links = list(link.find({'id_programs': program_id}))
@@ -45,3 +47,14 @@ for link in links:
     res = res + pb_questions
 for id, q in enumerate(res):
     rpo_program.insert_one({'count': (id + 1), 'id_question': q.get('p_id')})
+
+
+# отдельная выборка по РПО ИСП
+program_id = programs.find_one({'id_program_groups': 100000230}).get('p_id')
+links = list(link.find({'id_programs': program_id}))
+res = []
+for link in links:
+    pb_questions = list(questions.find({'id_instruction_sections': link.get('id_instruction_sections')}))
+    res = res + pb_questions
+for id, q in enumerate(res):
+    rpo_isp_program.insert_one({'count': (id + 1), 'id_question': q.get('p_id')})

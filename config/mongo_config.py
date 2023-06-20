@@ -29,6 +29,7 @@ pb_users_stats = db['pb_users_stats']
 pb_programs = db['pb_programs']
 # отдельная выборка по РПО
 pb_rpo_program = db['pb_rpo_program']
+pb_rpo_isp_program = db['pb_rpo_isp_program']
 
 
 

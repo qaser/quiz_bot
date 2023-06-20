@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 
 from config.bot_config import dp
 from config.mongo_config import (pb_answers, pb_program_groups,
-                                 pb_questions, pb_users_stats, pb_rpo_program)
+                                 pb_questions, pb_users_stats, pb_rpo_program, pb_rpo_isp_program)
 from utils.constants import TEST_TEXT
 
 
@@ -13,11 +13,16 @@ class Searching(StatesGroup):
     waiting_search_text = State()
 
 
-def get_learning_question(count):
-    q_id = pb_rpo_program.find_one({'count': count}).get('id_question')
+def get_learning_question(count, employee):
+    if employee == 'isp':
+        q_id = pb_rpo_isp_program.find_one({'count': count}).get('id_question')
+        num = 129
+    else:
+        q_id = pb_rpo_program.find_one({'count': count}).get('id_question')
+        num = 2243
     q_text = pb_questions.find_one({'p_id': q_id}).get('text')
     a_text = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1}).get('answer')
-    return f'Вопрос №{count} из 2243\n\n<b>{q_text}</b>\n\n{a_text}'
+    return f'Вопрос №{count} из {num}\n\n<b>{q_text}</b>\n\n{a_text}'
 
 
 def get_full_learning_question(id, count):
@@ -26,23 +31,23 @@ def get_full_learning_question(id, count):
     return f'Вопрос №{count} из 2243\n\n<b>{q_text}</b>\n\n{a_text}'
 
 
-async def send_learning_question(message:types.Message, count):
+async def send_learning_question(message:types.Message, count, employee):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
         types.InlineKeyboardButton(
             text='Завершить',
-            callback_data=f'learning_finish_{count}'
+            callback_data=f'learning_finish_{employee}_{count}'
         ),
         types.InlineKeyboardButton(
             text='Следующий',
-            callback_data=f'learning_next_{count+1}'
+            callback_data=f'learning_next_{employee}_{count+1}'
         ),
     )
     pb_users_stats.update_one(
         {'user_id': message.from_user.id},
         {'$set': {'question_count': count}}
     )
-    text = get_learning_question(count)
+    text = get_learning_question(count, employee)
     await message.edit_text(
         text,
         reply_markup=keyboard,
@@ -52,7 +57,7 @@ async def send_learning_question(message:types.Message, count):
 
 @dp.callback_query_handler(Text(startswith='learning_'))
 async def learning_choice(call: types.CallbackQuery):
-    _, choice, count = call.data.split('_')
+    _, choice, employee, count = call.data.split('_')
     if choice == 'finish':
         pb_users_stats.update_one(
             {'user_id': call.message.from_user.id},
@@ -60,16 +65,16 @@ async def learning_choice(call: types.CallbackQuery):
         )
         await call.message.delete()
     elif choice == 'next':
-        text = get_learning_question(int(count))
+        text = get_learning_question(int(count), employee)
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
             types.InlineKeyboardButton(
                 text='Завершить',
-                callback_data=f'learning_finish_{count}'
+                callback_data=f'learning_finish_{employee}_{count}'
             ),
             types.InlineKeyboardButton(
                 text='Следующий',
-                callback_data=f'learning_next_{int(count)+1}'
+                callback_data=f'learning_next_{employee}_{int(count)+1}'
             ),
         )
         await call.message.edit_text(
@@ -79,14 +84,17 @@ async def learning_choice(call: types.CallbackQuery):
         )
 
 
-async def get_testing_questions(message: types.Message):
+async def get_testing_questions(message: types.Message, employee):
     user_id = message.from_user.id
     user_stats = pb_users_stats.find_one({'user_id': user_id})
     if user_stats is None:
         pb_users_stats.insert_one(
             {'user_id': user_id, 'test_question_count': 0, 'test_result': []}
         )
-    rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': 20 } }]))
+    if employee == 'isp':
+        rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': 20 } }]))
+    else:
+        rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': 20 } }]))
     rand_questions_ids = [q.get('id_question') for q in rand_questions_query]
     pb_users_stats.update_one(
         {'user_id': user_id},
@@ -183,43 +191,41 @@ async def testing_check_choice(call: types.CallbackQuery):
         await test_send_question(call.message)
 
 
-async def testing(message: types.Message):
+async def testing(message: types.Message, employee):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(
-        types.InlineKeyboardButton(text='Отмена', callback_data='test_exit'),
-        types.InlineKeyboardButton(text='Начать', callback_data='test_start'),
+        types.InlineKeyboardButton(text='Отмена', callback_data=f'test_{employee}_exit'),
+        types.InlineKeyboardButton(text='Начать', callback_data=f'test_{employee}_start'),
     )
     await message.edit_text(TEST_TEXT, reply_markup=keyboard)
 
 
 @dp.callback_query_handler(Text(startswith='test_'))
 async def testing_choice(call: types.CallbackQuery):
-    _, choice = call.data.split('_')
+    _, employee, choice = call.data.split('_')
     if choice == 'exit':
         await call.message.delete()
     elif choice == 'start':
-        # await start_testing(call.message)
-        await get_testing_questions(call.message)
+        await get_testing_questions(call.message, employee)
 
 
-async def learning(message: types.Message):
+async def learning(message: types.Message, employee):
     user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
     if user_stats is None:
         pb_users_stats.insert_one(
             {'user_id': message.from_user.id, 'question_count': 1}
         )
-        # await message.delete()
-        await send_learning_question(message, 1)
+        await send_learning_question(message, 1, employee)
     else:
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
             types.InlineKeyboardButton(
                 text='Начать заново',
-                callback_data='learn_new'
+                callback_data=f'learn_{employee}_new'
             ),
             types.InlineKeyboardButton(
                 text='Продолжить',
-                callback_data='learn_continue'
+                callback_data=f'learn_{employee}_continue'
             ),
         )
         learn_count = user_stats.get('question_count')
@@ -231,18 +237,17 @@ async def learning(message: types.Message):
 
 @dp.callback_query_handler(Text(startswith='learn_'))
 async def learn_choice(call: types.CallbackQuery):
-    _, choice = call.data.split('_')
+    _, employee, choice = call.data.split('_')
     if choice == 'new':
-        await send_learning_question(call.message, count=1)
+        await send_learning_question(call.message, count=1, employee=employee)
     elif choice == 'continue':
         count = pb_users_stats.find_one({'user_id': call.message.from_user.id}).get('question_count')
-        await send_learning_question(call.message, count)
+        await send_learning_question(call.message, count, employee)
 
 
 async def searching(message: types.Message):
     await message.answer(
-        text=('Данная функция работает в тестовом режиме. '
-              'Введите и отправьте текст вопроса для поиска. '
+        text=('Введите и отправьте текст вопроса для поиска. '
               'Чем больше слов Вы введете тем точнее выполнится поиск.'),
     )
     await message.delete()
@@ -308,18 +313,32 @@ async def pb_select(message: types.Message):
     keyboard.row(
         types.InlineKeyboardButton(
             text='Поиск ответа по тексту вопроса',
-            callback_data='rpo_search'
+            callback_data='rpo_none_search'
         )
     )
-    keyboard.add(
+    keyboard.row(
         types.InlineKeyboardButton(
-            text='Обучение',
-            callback_data='rpo_learn'
-        ),
+            text='Обучение для рабочих',
+            callback_data='rpo_isp_learn'
+        )
+    )
+    keyboard.row(
         types.InlineKeyboardButton(
-            text='Самопроверка',
-            callback_data='rpo_test'
-        ),
+            text='Самопроверка для рабочих',
+            callback_data='rpo_isp_test'
+        )
+    )
+    keyboard.row(
+        types.InlineKeyboardButton(
+            text='Обучение для ИТР',
+            callback_data='rpo_itr_learn'
+        )
+    )
+    keyboard.row(
+        types.InlineKeyboardButton(
+            text='Самопроверка для ИТР',
+            callback_data='rpo_itr_test'
+        )
     )
     # для нескольких програм обучения "p_id" нужно будет запрашивать у пользователя
     program_name = pb_program_groups.find_one({'p_id': 100000227}).get('title')
@@ -332,11 +351,11 @@ async def pb_select(message: types.Message):
 
 @dp.callback_query_handler(Text(startswith='rpo_'))
 async def get_mode(call: types.CallbackQuery):
-    _, mode = call.data.split('_')
+    _, employee, mode = call.data.split('_')
     if mode == 'learn':
-        await learning(call.message)
+        await learning(call.message, employee)
     elif mode == 'test':
-        await testing(call.message)
+        await testing(call.message, employee)
     elif mode == 'search':
         await searching(call.message)
 
