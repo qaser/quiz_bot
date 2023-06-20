@@ -31,19 +31,21 @@ cur_path = os.path.join(script_dir, rel_path)
 
 
 for filename in os.listdir(cur_path):
-   with open(os.path.join(cur_path, filename), 'r', encoding="utf-8") as f:
-        name, _ = filename.split('.')
-        coll_name = f'pb_{name}'
-        data = json.load(f)
-        db[coll_name].insert_many(data)
+    if filename == 'answers.json' or filename == 'questions.json':
+        with open(os.path.join(cur_path, filename), 'r', encoding="utf-8") as f:
+            print(filename)
+            name, _ = filename.split('.')
+            coll_name = f'pb_{name}'
+            data = json.load(f)
+            db[coll_name].insert_many(data)
 
 
 # отдельная выборка по РПО
 program_id = programs.find_one({'id_program_groups': 100000227}).get('p_id')
 links = list(link.find({'id_programs': program_id}))
 res = []
-for link in links:
-    pb_questions = list(questions.find({'id_instruction_sections': link.get('id_instruction_sections')}))
+for lk in links:
+    pb_questions = list(questions.find({'id_instruction_sections': lk.get('id_instruction_sections')}))
     res = res + pb_questions
 for id, q in enumerate(res):
     rpo_program.insert_one({'count': (id + 1), 'id_question': q.get('p_id')})
@@ -53,8 +55,8 @@ for id, q in enumerate(res):
 program_id = programs.find_one({'id_program_groups': 100000230}).get('p_id')
 links = list(link.find({'id_programs': program_id}))
 res = []
-for link in links:
-    pb_questions = list(questions.find({'id_instruction_sections': link.get('id_instruction_sections')}))
+for lk in links:
+    pb_questions = list(questions.find({'id_instruction_sections': lk.get('id_instruction_sections')}))
     res = res + pb_questions
 for id, q in enumerate(res):
     rpo_isp_program.insert_one({'count': (id + 1), 'id_question': q.get('p_id')})
