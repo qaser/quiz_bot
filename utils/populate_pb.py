@@ -22,8 +22,6 @@ nd_types = db['pb_nd_types']
 programs = db['pb_programs']
 rpo_program = db['pb_rpo_program']
 rpo_isp_program = db['pb_rpo_isp_program']
-# quiz_count = quiz.count_documents({})
-# answer_num = quiz_count
 
 script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
 rel_path = "../db"
@@ -31,13 +29,13 @@ cur_path = os.path.join(script_dir, rel_path)
 
 
 for filename in os.listdir(cur_path):
-    if filename == 'answers.json' or filename == 'questions.json':
-        with open(os.path.join(cur_path, filename), 'r', encoding="utf-8") as f:
-            print(filename)
-            name, _ = filename.split('.')
-            coll_name = f'pb_{name}'
-            data = json.load(f)
-            db[coll_name].insert_many(data)
+    # if filename == 'answers.json' or filename == 'questions.json':
+    with open(os.path.join(cur_path, filename), 'r', encoding="utf-8") as f:
+        print(filename)
+        name, _ = filename.split('.')
+        coll_name = f'pb_{name}'
+        data = json.load(f)
+        db[coll_name].insert_many(data)
 
 
 # отдельная выборка по РПО

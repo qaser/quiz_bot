@@ -15,20 +15,18 @@ class Searching(StatesGroup):
 
 def get_learning_question(count, employee):
     if employee == 'isp':
+        num = pb_rpo_isp_program.count_documents({})
+        if count > num:
+            count = 1
         q_id = pb_rpo_isp_program.find_one({'count': count}).get('id_question')
-        num = 129
     else:
+        num = pb_rpo_program.count_documents({})
+        if count > num:
+            count = 1
         q_id = pb_rpo_program.find_one({'count': count}).get('id_question')
-        num = 2243
     q_text = pb_questions.find_one({'p_id': q_id}).get('text')
     a_text = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1}).get('answer')
     return f'Вопрос №{count} из {num}\n\n<b>{q_text}</b>\n\n{a_text}'
-
-
-def get_full_learning_question(id, count):
-    q_text = pb_questions.find_one({'p_id': id}).get('text')
-    a_text = list(pb_answers.find({'id_questions': id, 'correct_answer': 1}))
-    return f'Вопрос №{count} из 2243\n\n<b>{q_text}</b>\n\n{a_text}'
 
 
 async def send_learning_question(message:types.Message, count, employee):
@@ -45,7 +43,7 @@ async def send_learning_question(message:types.Message, count, employee):
     )
     pb_users_stats.update_one(
         {'user_id': message.from_user.id},
-        {'$set': {'question_count': count}}
+        {'$set': {f'question_{employee}_count': count}}
     )
     text = get_learning_question(count, employee)
     await message.edit_text(
@@ -61,10 +59,18 @@ async def learning_choice(call: types.CallbackQuery):
     if choice == 'finish':
         pb_users_stats.update_one(
             {'user_id': call.message.from_user.id},
-            {'$set': {'question_count': int(count)}}
+            {'$set': {f'question_{employee}_count': int(count)}}
         )
         await call.message.delete()
     elif choice == 'next':
+        if employee == 'isp':
+            num = pb_rpo_isp_program.count_documents({})
+            if int(count) > num:
+                count = 1
+        else:
+            num = pb_rpo_program.count_documents({})
+            if int(count) > num:
+                count = 1
         text = get_learning_question(int(count), employee)
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(
@@ -213,7 +219,7 @@ async def learning(message: types.Message, employee):
     user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
     if user_stats is None:
         pb_users_stats.insert_one(
-            {'user_id': message.from_user.id, 'question_count': 1}
+            {'user_id': message.from_user.id, 'question_itr_count': 1, 'question_isp_count': 1}
         )
         await send_learning_question(message, 1, employee)
     else:
@@ -228,7 +234,7 @@ async def learning(message: types.Message, employee):
                 callback_data=f'learn_{employee}_continue'
             ),
         )
-        learn_count = user_stats.get('question_count')
+        learn_count = user_stats.get(f'question_{employee}_count', 1)
         await message.edit_text(
             text=(f'В прошлый раз Вы остановились на вопросе #{learn_count}'),
             reply_markup=keyboard,
@@ -241,7 +247,7 @@ async def learn_choice(call: types.CallbackQuery):
     if choice == 'new':
         await send_learning_question(call.message, count=1, employee=employee)
     elif choice == 'continue':
-        count = pb_users_stats.find_one({'user_id': call.message.from_user.id}).get('question_count')
+        count = pb_users_stats.find_one({'user_id': call.message.from_user.id}).get(f'question_{employee}_count', 1)
         await send_learning_question(call.message, count, employee)
 
 
@@ -269,12 +275,15 @@ async def question_search(message: types.Message, state: FSMContext):
         )
     elif len_search == 1:
         q_id = q_search[0].get('p_id')
-        ans = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1})
+        ans = pb_answers.find({'id_questions': q_id, 'correct_answer': 1})
         q_text = pb_questions.find_one({'p_id': q_id}).get('text')
-        ans_text = ans.get('answer')
-        ans_id = ans.get('sort_number')
+        ans_text = ''
+        for i in list(ans):
+            text = i.get('answer')
+            ans_id = i.get('sort_number')
+            ans_text = f'{ans_text}\n{ans_id}. {text}'
         await message.answer(
-            f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_id}\n{ans_text}',
+            f'Вопрос: {q_text}\n\nПравильный вариант ответа: {ans_text}',
             reply_markup=keyboard
         )
     else:
