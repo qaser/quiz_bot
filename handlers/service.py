@@ -4,6 +4,7 @@ import os
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.exceptions import CantInitiateConversation, BotBlocked
 
 from config.bot_config import bot, dp
 from config.mongo_config import attentions, offers, users
@@ -131,6 +132,23 @@ async def help_handler(message: types.Message):
     await message.answer(HELP_TEXT)
 
 
+async def subscribe_handler(message: types.Message):
+    all_users = list(users.find({}))
+    for user in all_users:
+        try:
+            await bot.send_message(
+                chat_id=user.get('user_id'),
+                text=(
+                    'Уважаемый пользователь, в функционал бота добавлена программа РПО для рабочих специальностей'
+                ),
+            )
+        except (CantInitiateConversation, BotBlocked):
+            await bot.send_message(
+                ADMIN_TELEGRAM_ID,
+                f'Пользователь {user.get("full_name")} не доступен',
+            )
+
+
 def register_handlers_service(dp: Dispatcher):
     dp.register_message_handler(reset_handler, commands='reset', state='*')
     dp.register_message_handler(count_users, commands='users')
@@ -138,3 +156,4 @@ def register_handlers_service(dp: Dispatcher):
     dp.register_message_handler(bot_offer, commands='offer')
     dp.register_message_handler(upload_photo_attention, commands='upload_attention')
     dp.register_message_handler(help_handler, commands='help')
+    dp.register_message_handler(subscribe_handler, commands='sub')
