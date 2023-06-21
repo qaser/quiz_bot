@@ -1,2 +1,10 @@
 2. Сделать тесты для электробезопасности
 3. Добавить термины из СТО "Термины"
+
+
+db.pb_questions.drop()
+db.pb_answers.drop()
+db.pb_rpo_isp_program.drop()
+db.pb_rpo_program.drop()
+db.pb_questions.dropIndex({text: 'text'})
+db.pb_questions.createIndex({ "text": "text"})
