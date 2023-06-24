@@ -2,6 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from bson.objectid import ObjectId
 
 from config.bot_config import dp
 from config.mongo_config import (pb_answers, pb_program_groups, pb_questions,
@@ -45,7 +46,7 @@ async def send_learning_question(message:types.Message, count, employee):
         ),
     )
     pb_users_stats.update_one(
-        {'user_id': message.from_user.id},
+        {'user_id': message.chat.id},
         {'$set': {f'question_{employee}_count': count}}
     )
     text = get_learning_question(count, employee)
@@ -61,7 +62,7 @@ async def learning_choice(call: types.CallbackQuery):
     _, choice, employee, count = call.data.split('_')
     if choice == 'finish':
         pb_users_stats.update_one(
-            {'user_id': call.message.from_user.id},
+            {'user_id': call.message.chat.id},
             {'$set': {f'question_{employee}_count': int(count)}}
         )
         await call.message.delete()
@@ -94,7 +95,7 @@ async def learning_choice(call: types.CallbackQuery):
 
 
 async def get_testing_questions(message: types.Message, employee):
-    user_id = message.from_user.id
+    user_id = message.chat.id
     user_stats = pb_users_stats.find_one({'user_id': user_id})
     if user_stats is None:
         pb_users_stats.insert_one(
@@ -103,6 +104,7 @@ async def get_testing_questions(message: types.Message, employee):
     if employee == 'isp':
         # rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ISP } }]))
         rand_questions_query = list(pb_rpo_isp_program.find({}))
+        print(len(rand_questions_query))
     elif employee == 'itr':
         rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ITR } }]))
     rand_questions_ids = [q.get('id_question') for q in rand_questions_query]
@@ -114,14 +116,14 @@ async def get_testing_questions(message: types.Message, employee):
 
 
 async def test_send_question(message: types.Message, employee):
-    user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
+    user_stats = pb_users_stats.find_one({'user_id': message.chat.id})
     count = user_stats.get('test_question_count')
     q_num = TEST_SIZE_ITR if employee == 'itr' else TEST_SIZE_ISP
     if count == q_num:
         test_result = user_stats.get('test_result')
         res = sum(1 for i in test_result if i == 1)
         pb_users_stats.update_one(
-            {'user_id': message.from_user.id},
+            {'user_id': message.chat.id},
             {'$set': {'test_result': [], 'test_question_count': 0}}
         )
         await message.edit_text(f'Тест завершён.\nПравильных ответов: {res} из {q_num}-ти')
@@ -154,7 +156,7 @@ async def test_send_question(message: types.Message, employee):
 async def answer_check(call: types.CallbackQuery):
     _, employee, ans_id, q_id = call.data.split('_')
     ans_check = pb_answers.find_one({'p_id': int(ans_id)}).get('correct_answer')
-    user_id = call.message.from_user.id
+    user_id = call.message.chat.id
     user_stats = pb_users_stats.find_one({'user_id': user_id})
     test_result = user_stats.get('test_result')
     test_result.append(ans_check)
@@ -191,7 +193,7 @@ async def answer_check(call: types.CallbackQuery):
 @dp.callback_query_handler(Text(startswith='testing_'))
 async def testing_check_choice(call: types.CallbackQuery):
     _, employee, choice = call.data.split('_')
-    user_id = call.message.from_user.id
+    user_id = call.message.chat.id
     if choice == 'exit':
         pb_users_stats.update_one(
             {'user_id': user_id},
@@ -225,10 +227,10 @@ async def testing_choice(call: types.CallbackQuery):
 
 
 async def learning(message: types.Message, employee):
-    user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
+    user_stats = pb_users_stats.find_one({'user_id': message.chat.id})
     if user_stats is None:
         pb_users_stats.insert_one(
-            {'user_id': message.from_user.id, 'question_itr_count': 1, 'question_isp_count': 1}
+            {'user_id': message.chat.id, 'question_itr_count': 1, 'question_isp_count': 1}
         )
         await send_learning_question(message, 1, employee)
     else:
@@ -256,7 +258,7 @@ async def learn_choice(call: types.CallbackQuery):
     if choice == 'new':
         await send_learning_question(call.message, count=1, employee=employee)
     elif choice == 'continue':
-        count = pb_users_stats.find_one({'user_id': call.message.from_user.id}).get(f'question_{employee}_count', 1)
+        count = pb_users_stats.find_one({'user_id': call.message.chat.id}).get(f'question_{employee}_count', 1)
         await send_learning_question(call.message, count, employee)
 
 
