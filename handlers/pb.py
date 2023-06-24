@@ -101,7 +101,8 @@ async def get_testing_questions(message: types.Message, employee):
             {'user_id': user_id, 'test_question_count': 0, 'test_result': []}
         )
     if employee == 'isp':
-        rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ISP } }]))
+        # rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ISP } }]))
+        rand_questions_query = list(pb_rpo_isp_program.find({}))
     elif employee == 'itr':
         rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ITR } }]))
     rand_questions_ids = [q.get('id_question') for q in rand_questions_query]
