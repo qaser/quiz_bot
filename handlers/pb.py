@@ -1,12 +1,12 @@
 from aiogram import Dispatcher, types
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
 
 from config.bot_config import dp
-from config.mongo_config import (pb_answers, pb_program_groups,
-                                 pb_questions, pb_users_stats, pb_rpo_program, pb_rpo_isp_program)
-
+from config.mongo_config import (pb_answers, pb_program_groups, pb_questions,
+                                 pb_rpo_isp_program, pb_rpo_program,
+                                 pb_users_stats)
 
 TEST_SIZE_ISP = 149
 TEST_SIZE_ITR = 20
