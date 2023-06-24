@@ -6,7 +6,10 @@ from aiogram.dispatcher import FSMContext
 from config.bot_config import dp
 from config.mongo_config import (pb_answers, pb_program_groups,
                                  pb_questions, pb_users_stats, pb_rpo_program, pb_rpo_isp_program)
-from utils.constants import TEST_TEXT
+
+
+TEST_SIZE_ISP = 149
+TEST_SIZE_ITR = 20
 
 
 class Searching(StatesGroup):
@@ -98,28 +101,29 @@ async def get_testing_questions(message: types.Message, employee):
             {'user_id': user_id, 'test_question_count': 0, 'test_result': []}
         )
     if employee == 'isp':
-        rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': 20 } }]))
-    else:
-        rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': 20 } }]))
+        rand_questions_query = list(pb_rpo_isp_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ISP } }]))
+    elif employee == 'itr':
+        rand_questions_query = list(pb_rpo_program.aggregate([{ '$sample': { 'size': TEST_SIZE_ITR } }]))
     rand_questions_ids = [q.get('id_question') for q in rand_questions_query]
     pb_users_stats.update_one(
         {'user_id': user_id},
         {'$set': {'test_quiz': rand_questions_ids, 'test_question_count': 0, 'test_result': []}}
     )
-    await test_send_question(message)
+    await test_send_question(message, employee)
 
 
-async def test_send_question(message: types.Message):
+async def test_send_question(message: types.Message, employee):
     user_stats = pb_users_stats.find_one({'user_id': message.from_user.id})
     count = user_stats.get('test_question_count')
-    if count == 19:
+    q_num = TEST_SIZE_ITR if employee == 'itr' else TEST_SIZE_ISP
+    if count == q_num:
         test_result = user_stats.get('test_result')
         res = sum(1 for i in test_result if i == 1)
         pb_users_stats.update_one(
             {'user_id': message.from_user.id},
             {'$set': {'test_result': [], 'test_question_count': 0}}
         )
-        await message.edit_text(f'Тест завершён.\nПравильных ответов: {res} из 20-ти')
+        await message.edit_text(f'Тест завершён.\nПравильных ответов: {res} из {q_num}-ти')
     else:
         keyboard = types.InlineKeyboardMarkup(row_width=5)
         question_id = user_stats.get('test_quiz')[count]
@@ -133,7 +137,7 @@ async def test_send_question(message: types.Message):
             a_text = f'{a_text}\n<b>{sort_num}</b>. {text}'
             btn = types.InlineKeyboardButton(
                 text=sort_num,
-                callback_data=f'answer_{ans.get("p_id")}_{question.get("p_id")}'
+                callback_data=f'answer_{employee}_{ans.get("p_id")}_{question.get("p_id")}'
             )
             buttons.append(btn)
         keyboard.row(*buttons)
@@ -147,7 +151,7 @@ async def test_send_question(message: types.Message):
 
 @dp.callback_query_handler(Text(startswith='answer_'))
 async def answer_check(call: types.CallbackQuery):
-    _, ans_id, q_id = call.data.split('_')
+    _, employee, ans_id, q_id = call.data.split('_')
     ans_check = pb_answers.find_one({'p_id': int(ans_id)}).get('correct_answer')
     user_id = call.message.from_user.id
     user_stats = pb_users_stats.find_one({'user_id': user_id})
@@ -162,11 +166,11 @@ async def answer_check(call: types.CallbackQuery):
     keyboard.add(
         types.InlineKeyboardButton(
             text='Завершить',
-            callback_data='testing_exit'
+            callback_data=f'testing_{employee}_exit'
         ),
         types.InlineKeyboardButton(
             text='Следующий',
-            callback_data='testing_next'
+            callback_data=f'testing_{employee}_next'
         ),
     )
     if ans_check == 1:
@@ -185,7 +189,7 @@ async def answer_check(call: types.CallbackQuery):
 
 @dp.callback_query_handler(Text(startswith='testing_'))
 async def testing_check_choice(call: types.CallbackQuery):
-    _, choice = call.data.split('_')
+    _, employee, choice = call.data.split('_')
     user_id = call.message.from_user.id
     if choice == 'exit':
         pb_users_stats.update_one(
@@ -194,7 +198,7 @@ async def testing_check_choice(call: types.CallbackQuery):
         )
         await call.message.edit_text('Тест завершён, прогресс сброшен')
     elif choice == 'next':
-        await test_send_question(call.message)
+        await test_send_question(call.message, employee)
 
 
 async def testing(message: types.Message, employee):
@@ -203,7 +207,11 @@ async def testing(message: types.Message, employee):
         types.InlineKeyboardButton(text='Отмена', callback_data=f'test_{employee}_exit'),
         types.InlineKeyboardButton(text='Начать', callback_data=f'test_{employee}_start'),
     )
-    await message.edit_text(TEST_TEXT, reply_markup=keyboard)
+    q_num = TEST_SIZE_ITR if employee == 'itr' else TEST_SIZE_ISP
+    await message.edit_text(
+        f'Тестовое задание для самопроверки состоит из {q_num}-ти вопросов.',
+        reply_markup=keyboard
+    )
 
 
 @dp.callback_query_handler(Text(startswith='test_'))
