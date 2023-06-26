@@ -29,8 +29,17 @@ def get_learning_question(count, employee):
             count = 1
         q_id = pb_rpo_program.find_one({'count': count}).get('id_question')
     q_text = pb_questions.find_one({'p_id': q_id}).get('text')
-    a_text = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1}).get('answer')
-    return f'Вопрос №{count} из {num}\n\n<b>{q_text}</b>\n\n{a_text}'
+    # a_text = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1}).get('answer')
+    answers = list(pb_answers.find({'id_questions': q_id}))
+    ans_text = ''
+    for ans in answers:
+        a_text = ans.get('answer')
+        a_num = ans.get('sort_number')
+        if ans.get('correct_answer'):
+            ans_text = f'{ans_text}\n\n<b>{a_num}. {a_text}</b>'
+        else:
+            ans_text = f'{ans_text}\n\n{a_num}. {a_text}'
+    return f'Вопрос №{count} из {num}\n\n<i>{q_text}</i>{ans_text}'
 
 
 async def send_learning_question(message:types.Message, count, employee):
