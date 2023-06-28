@@ -22,11 +22,15 @@ def get_learning_question(count, employee):
         num = pb_rpo_isp_program.count_documents({})
         if count > num:
             count = 1
+        elif count == 0:
+            count = num
         q_id = pb_rpo_isp_program.find_one({'count': count}).get('id_question')
     else:
         num = pb_rpo_program.count_documents({})
         if count > num:
             count = 1
+        elif count == 0:
+            count = num
         q_id = pb_rpo_program.find_one({'count': count}).get('id_question')
     q_text = pb_questions.find_one({'p_id': q_id}).get('text')
     # a_text = pb_answers.find_one({'id_questions': q_id, 'correct_answer': 1}).get('answer')
@@ -35,7 +39,7 @@ def get_learning_question(count, employee):
     for ans in answers:
         a_text = ans.get('answer')
         a_num = ans.get('sort_number')
-        if ans.get('correct_answer'):
+        if ans.get('correct_answer') == 1:
             ans_text = f'{ans_text}\n\n<b>{a_num}. {a_text}</b>'
         else:
             ans_text = f'{ans_text}\n\n{a_num}. {a_text}'
@@ -49,6 +53,12 @@ async def send_learning_question(message:types.Message, count, employee):
             text='Завершить',
             callback_data=f'learning_finish_{employee}_{count}'
         ),
+    )
+    keyboard.row(
+        # types.InlineKeyboardButton(
+        #     text='Предыдущий',
+        #     callback_data=f'learning_next_{employee}_{count-1}'
+        # ),
         types.InlineKeyboardButton(
             text='Следующий',
             callback_data=f'learning_next_{employee}_{count+1}'
@@ -91,6 +101,12 @@ async def learning_choice(call: types.CallbackQuery):
                 text='Завершить',
                 callback_data=f'learning_finish_{employee}_{count}'
             ),
+        )
+        keyboard.row(
+            # types.InlineKeyboardButton(
+            #     text='Предыдущий',
+            #     callback_data=f'learning_next_{employee}_{int(count)-1}'
+            # ),
             types.InlineKeyboardButton(
                 text='Следующий',
                 callback_data=f'learning_next_{employee}_{int(count)+1}'
