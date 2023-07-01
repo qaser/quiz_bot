@@ -12,8 +12,8 @@ def scheduler_jobs():
         'cron',
         month='1,4,7,10',
         day=1,
-        hour=8,
-        minute=0,
+        hour=11,
+        minute=25,
         timezone=const.TIME_ZONE
     )
     scheduler.add_job(
