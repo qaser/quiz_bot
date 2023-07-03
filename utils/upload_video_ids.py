@@ -33,10 +33,10 @@ async def uploadVideoFiles(folder, method, file_attr):
             continue
         with open(os.path.join(folder_path, filename), 'rb') as file:
             msg = await method(ADMIN_TELEGRAM_ID, file, disable_notification=True)
-            if file_attr == 'video':
-                file_id = msg.video[-1].file_id
-            else:
-                file_id = getattr(msg, file_attr).file_id
+            # if file_attr == 'video':
+            #     file_id = msg.video[-1].file_id
+            # else:
+            file_id = getattr(msg, file_attr).file_id
             videos.insert_one(
                 {
                     'theme': 'Охрана труда',
