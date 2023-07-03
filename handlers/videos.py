@@ -177,5 +177,5 @@ async def videos_exit(call: types.CallbackQuery):
     await call.message.delete()
 
 
-def register_handlers_terms(dp: Dispatcher):
+def register_handlers_videos(dp: Dispatcher):
     dp.register_message_handler(videos_request, commands='videos')

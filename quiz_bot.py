@@ -21,6 +21,7 @@ from handlers.reports import register_handlers_reports
 from handlers.service import register_handlers_service
 from handlers.statistic import register_handlers_statistic
 from handlers.terms import register_handlers_terms
+from handlers.videos import register_handlers_videos
 from scheduler.scheduler_jobs import scheduler, scheduler_jobs
 from texts.initial import INITIAL_TEXT
 
@@ -78,5 +79,6 @@ if __name__ == '__main__':
     register_handlers_statistic(dp)
     register_handlers_examen(dp)
     register_handlers_pb(dp)
+    register_handlers_videos(dp)
     register_handlers_terms(dp)  # всегда должен быть последним
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
