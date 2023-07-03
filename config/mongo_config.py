@@ -17,6 +17,7 @@ key_rules = db['key_rules']
 attentions = db['attentions']
 plan_tu = db['plan_tu']
 buffer = db['buffer']
+videos = db['videos']
 # коллекции для тестов РПО
 pb_questions = db['pb_questions']
 pb_answers = db['pb_answers']
@@ -30,8 +31,6 @@ pb_programs = db['pb_programs']
 # отдельная выборка по РПО
 pb_rpo_program = db['pb_rpo_program']
 pb_rpo_isp_program = db['pb_rpo_isp_program']
-
-
 
 
 '''

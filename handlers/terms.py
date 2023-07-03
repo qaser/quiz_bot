@@ -70,7 +70,7 @@ async def show_term(call: types.CallbackQuery):
     )
     keyboard.row(
         types.InlineKeyboardButton(text='< Выход >', callback_data='exit'),
-        types.InlineKeyboardButton(text='< Назад >', callback_data=f'back_term_{term_id}'),
+        types.InlineKeyboardButton(text='<< Назад', callback_data=f'back_term_{term_id}'),
     )
     await call.message.delete()
     await call.message.answer(text, reply_markup=keyboard)
@@ -95,7 +95,7 @@ async def menu_back(call: types.CallbackQuery):
             )
         keyboard.row(
             types.InlineKeyboardButton(text='< Выход >', callback_data='exit'),
-            types.InlineKeyboardButton(text='< Назад >', callback_data='back_theme_id'),
+            types.InlineKeyboardButton(text='<< Назад', callback_data='back_theme_id'),
         )
         await call.message.edit_text(
             'Выберите термин:',
