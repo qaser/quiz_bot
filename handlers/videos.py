@@ -48,10 +48,8 @@ async def videos_request(message: types.Message):
 async def get_subtheme(call: types.CallbackQuery):
     _, theme_code = call.data.split('_')
     pipeline = [
-        {
-            '$match': {'theme_code': theme_code},
-            '$group': {'_id': {'subtheme_code': '$subtheme_code', 'subtheme': '$subtheme'}}
-        }
+        {'$match': {'theme_code': theme_code}},
+        {'$group': {'_id': {'subtheme_code': '$subtheme_code', 'subtheme': '$subtheme'}}}
     ]
     keyboard = types.InlineKeyboardMarkup()
     queryset = list(videos.aggregate(pipeline=pipeline))
@@ -78,7 +76,7 @@ async def get_subtheme(call: types.CallbackQuery):
 async def get_videos(call: types.CallbackQuery):
     _, subtheme_code = call.data.split('_')
     keyboard = types.InlineKeyboardMarkup()
-    queryset = list(videos.find({'subtheme': subtheme_code}))
+    queryset = list(videos.find({'subtheme_code': subtheme_code}))
     for video in queryset:
         vid_id = video['_id']
         keyboard.add(
@@ -105,7 +103,7 @@ async def send_video(call: types.CallbackQuery):
     link = vid.get('link')
     title = vid.get('title')
     keyboard.row(
-        # types.InlineKeyboardButton(text='< Выход >', callback_data='vid-exit'),
+        types.InlineKeyboardButton(text='< Выход >', callback_data='vid-exit'),
         types.InlineKeyboardButton(text='<< Назад', callback_data=f'vid-back_show_{vid_id}'),
     )
     await call.message.delete()
@@ -125,10 +123,8 @@ async def videos_menu_back(call: types.CallbackQuery):
         # здесь value == subtheme_code
         theme_code = videos.find_one({'subtheme_code': value}).get('theme_code')
         pipeline = [
-            {
-                '$match': {'theme_code': theme_code},
-                '$group': {'_id': {'subtheme_code': '$subtheme_code', 'subtheme': '$subtheme'}}
-            }
+            {'$match': {'theme_code': theme_code}},
+            {'$group': {'_id': {'subtheme_code': '$subtheme_code', 'subtheme': '$subtheme'}}}
         ]
         keyboard = types.InlineKeyboardMarkup()
         queryset = list(videos.aggregate(pipeline=pipeline))
@@ -143,10 +139,11 @@ async def videos_menu_back(call: types.CallbackQuery):
             )
         keyboard.row(
             types.InlineKeyboardButton(text='< Выход >', callback_data='exit'),
-            types.InlineKeyboardButton(text='<< К разделам', callback_data='vid-back_theme_id'),
+            types.InlineKeyboardButton(text='<< К разделам', callback_data='vid-back_subtheme_id'),
         )
+        # await call.message.delete()
         await call.message.edit_text(
-            'Выберите подраздел:',
+            text='Выберите подраздел:',
             reply_markup=keyboard,
         )
     elif level == 'show':
@@ -166,8 +163,9 @@ async def videos_menu_back(call: types.CallbackQuery):
             types.InlineKeyboardButton(text='< Выход >', callback_data='vid-exit'),
             types.InlineKeyboardButton(text='<< К подразделам', callback_data=f'vid-back_videos_{subtheme_code}'),
         )
-        await call.message.edit_text(
-            'Выберите видео по названию:',
+        await call.message.delete()
+        await call.message.answer(
+            text='Выберите видео по названию:',
             reply_markup=keyboard,
         )
 
