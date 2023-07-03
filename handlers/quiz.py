@@ -159,14 +159,14 @@ async def send_me_quiz(message: types.Message):
             types.InlineKeyboardButton(
                 text='Начать тестирование',
                 callback_data=(
-                    f'quiz_2023_2_output_{message.from_user.id}'
+                    f'quiz_2023_3_input_{message.from_user.id}'
                 )
             )
         )
         await message.answer(
             text=(
-                f'Пройдите выходной тест знаний по '
-                f'плану технической учёбы 2-го квартала.'
+                f'Пройдите входной тест знаний по '
+                f'плану технической учёбы 3-го квартала.'
             ),
             reply_markup=keyboard,
         )
