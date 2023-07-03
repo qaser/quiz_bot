@@ -13,8 +13,7 @@ client = pymongo.MongoClient('localhost', 27017)
 storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
 db = client['quiz_db']
 videos = db['videos']
-# terms = db['terms']
-# key_rules = db['key_rules']
+
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 ADMIN_TELEGRAM_ID = os.getenv('ADMIN_TELEGRAM_ID')
