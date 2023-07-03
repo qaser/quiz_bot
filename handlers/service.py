@@ -9,6 +9,7 @@ from aiogram.utils.exceptions import CantInitiateConversation, BotBlocked
 from config.bot_config import bot, dp
 from config.mongo_config import attentions, offers, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
+from texts.initial import SUB_TEXT
 from utils.constants import HELP_TEXT
 from utils.decorators import superuser_check
 
@@ -138,13 +139,7 @@ async def subscribe_handler(message: types.Message):
         try:
             await bot.send_message(
                 chat_id=user.get('user_id'),
-                text=(
-                    'Уважаемый пользователь, в бот внесены следующие изменения:\n'
-                    '1. В функционале "Обучение для ИТР" количество вопросов изменено до 1572 (изменена программа РПО)\n'
-                    '2. При обучении теперь видны все варианты ответов, правильный ответ(ы) выделен(ы)\n'
-                    '3. Исправлено множество ошибок\n'
-                    '4. Те кто уже сдал экзамен, не спешите удалять бота - в перспективе будет обновляться функционал.'
-                ),
+                text=SUB_TEXT
             )
         except (CantInitiateConversation, BotBlocked):
             await bot.send_message(
