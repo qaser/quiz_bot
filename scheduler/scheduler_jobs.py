@@ -7,24 +7,24 @@ scheduler = AsyncIOScheduler()
 
 
 def scheduler_jobs():
-    scheduler.add_job(
-        add_questions_in_plan,
-        'cron',
-        month='1,4,7,10',
-        day=1,
-        hour=8,
-        minute=0,
-        timezone=const.TIME_ZONE
-    )
-    scheduler.add_job(
-        send_quiz_button,
-        'cron',
-        month='1,4,7,10',
-        day=3,
-        hour=10,
-        minute=0,
-        timezone=const.TIME_ZONE
-    )
+    # scheduler.add_job(
+    #     add_questions_in_plan,
+    #     'cron',
+    #     month='1,4,7,10',
+    #     day=1,
+    #     hour=8,
+    #     minute=0,
+    #     timezone=const.TIME_ZONE
+    # )
+    # scheduler.add_job(
+    #     send_quiz_button,
+    #     'cron',
+    #     month='1,4,7,10',
+    #     day=3,
+    #     hour=10,
+    #     minute=0,
+    #     timezone=const.TIME_ZONE
+    # )
     scheduler.add_job(
         send_quiz_button,
         'cron',
@@ -34,18 +34,18 @@ def scheduler_jobs():
         minute=0,
         timezone=const.TIME_ZONE
     )
-    scheduler.add_job(
-        send_tu_material,
-        'cron',
-        hour=10,
-        minute=0,
-        timezone=const.TIME_ZONE
-    )
-    scheduler.add_job(
-        add_questions_in_plan,
-        'cron',
-        day=26,
-        hour=13,
-        minute=35,
-        timezone=const.TIME_ZONE
-    )
+    # scheduler.add_job(
+    #     send_tu_material,
+    #     'cron',
+    #     hour=10,
+    #     minute=0,
+    #     timezone=const.TIME_ZONE
+    # )
+    # scheduler.add_job(
+    #     add_questions_in_plan,
+    #     'cron',
+    #     day=26,
+    #     hour=13,
+    #     minute=35,
+    #     timezone=const.TIME_ZONE
+    # )
