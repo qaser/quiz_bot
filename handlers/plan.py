@@ -268,6 +268,6 @@ async def get_test_document(call: types.CallbackQuery):
 
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
-    # dp.register_message_handler(populate_plans, commands='pop_plan')
+    dp.register_message_handler(populate_plans, commands='pop_plan')
     dp.register_message_handler(show_themes, commands='themes')
     dp.register_message_handler(export_tests, commands='export_tests')

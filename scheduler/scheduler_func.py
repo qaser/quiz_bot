@@ -13,7 +13,7 @@ from utils.utils import calc_date, calc_test_type
 # формирование списка вопросов согласно тем плана
 async def add_questions_in_plan():
     year, _, quarter = calc_date()
-    plans_queryset = list(plans.find({'year': year, 'quarter': quarter}))
+    plans_queryset = list(plans.find({'year': 2024, 'quarter': 1}))
     for plan in plans_queryset:
         themes = plan.get('themes')
         res = []
