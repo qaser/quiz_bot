@@ -68,7 +68,7 @@ async def main():
         month='1,4,7,10',
         day=5,
         hour=2,
-        minute=36,
+        minute=46,
         timezone=const.TIME_ZONE
     )
     scheduler.add_job(

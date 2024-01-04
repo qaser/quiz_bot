@@ -37,25 +37,7 @@ async def get_questions(call: CallbackQuery):
             show_alert=True
         )
     else:
-        count_employee = int(count)+1
-        kb = InlineKeyboardBuilder()
-        kb.button(
-            text='Начать тестирование',
-            callback_data=(f'quiz_{year}_{quarter}_{test_type}_{count_employee}')
-        )
-        try:
-            await call.message.edit_text(
-                text=(
-                    f'Пройдите <u>{test_type_name}</u> тест знаний по '
-                    f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
-                    f'{QUIZ_HELLO_TEXT}'
-                    f'Проходят тестирование {count} чел.'
-                ),
-                parse_mode='HTML',
-                reply_markup=kb.as_markup(),
-            )
-        except AiogramError as err:
-            pass
+        count = int(count) + 1
         department = users.find_one({'user_id': user_id}).get('department')
         questions_ids = plans.find_one({
             'year': int(year),
@@ -78,6 +60,24 @@ async def get_questions(call: CallbackQuery):
         })
         await call.message.delete_reply_markup()
         await send_quiz(res_id.inserted_id)
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text='Начать тестирование',
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{count}')
+    )
+    try:
+        await call.message.edit_text(
+            text=(
+                f'Пройдите <u>{test_type_name}</u> тест знаний по '
+                f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+                f'{QUIZ_HELLO_TEXT}\n'
+                f'Проходят тестирование {count} чел.'
+            ),
+            parse_mode='HTML',
+            reply_markup=kb.as_markup(),
+        )
+    except AiogramError as err:
+        pass
 
 
 async def send_quiz(res_id):
