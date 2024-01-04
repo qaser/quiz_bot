@@ -1,18 +1,22 @@
 import datetime as dt
+from aiogram import F, Router
+from aiogram.types import Message, CallbackQuery, PollAnswer
+from aiogram.filters import Command
 
-from aiogram import Dispatcher, types
-from aiogram.dispatcher.filters import Text
-from aiogram.utils.exceptions import CantInitiateConversation
+from aiogram.exceptions import AiogramError
 
-from config.bot_config import bot, dp
-from config.mongo_config import plans, questions, results, themes, users
+from config.bot_config import bot
+from config.mongo_config import plans, questions, results, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
 
 
-@dp.callback_query_handler(Text(startswith='quiz_'))
-async def get_questions(call: types.CallbackQuery):
+router = Router()
+
+
+@router.callback_query(F.data.startswith('quiz_'))
+async def get_questions(call: CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
@@ -62,15 +66,21 @@ async def send_quiz(res_id):
         )
         results.update_one(
             {'_id': res_id},
-            {'$set': {'quiz': quiz.poll.id, 'count': count + 1, 'message_id': quiz.message_id}},
+            {
+                '$set': {
+                    'quiz': quiz.poll.id,
+                    'count': count + 1,
+                    'message_id': quiz.message_id
+                }
+            },
             upsert=False
         )
     else:
         await save_result(res_id)
 
 
-@dp.poll_answer_handler()
-async def handle_quiz_answer(quiz_answer: types.PollAnswer):
+@router.poll_answer()
+async def handle_quiz_answer(quiz_answer: PollAnswer):
     data = results.find_one({
         'user_id': quiz_answer.user.id,
         'quiz': quiz_answer.poll_id
@@ -90,7 +100,10 @@ async def handle_quiz_answer(quiz_answer: types.PollAnswer):
     )
     await send_quiz(data.get('_id'))
     if data.get('test_type') == 'input':
-        await bot.delete_message(chat_id=quiz_answer.user.id, message_id=data.get('message_id'))
+        await bot.delete_message(
+            chat_id=quiz_answer.user.id,
+            message_id=data.get('message_id')
+        )
 
 
 async def save_result(res_id):
@@ -141,7 +154,7 @@ async def send_admin_notification(user_id):
                     chat_id=admin.get('user_id'),
                     text=f'Пользователь {user_name} прошёл тестирование'
                 )
-            except CantInitiateConversation:
+            except AiogramError:
                 await bot.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=f'Пользователь "{user_name}" недоступен.'
@@ -149,33 +162,6 @@ async def send_admin_notification(user_id):
                 continue
 
 
-async def send_quiz_to_users(message: types.Message):
+@router.message(Command('quiz'))
+async def send_quiz_to_users(message: Message):
     await send_quiz_button()
-
-
-# async def send_me_quiz(message: types.Message):
-#         keyboard = types.InlineKeyboardMarkup()
-#         keyboard.add(
-#             types.InlineKeyboardButton(
-#                 text='Начать тестирование',
-#                 callback_data=(
-#                     f'quiz_2023_3_input_{message.from_user.id}'
-#                 )
-#             )
-#         )
-#         await message.answer(
-#             text=(
-#                 f'Пройдите входной тест знаний по '
-#                 f'плану технической учёбы 3-го квартала.'
-#             ),
-#             reply_markup=keyboard,
-#         )
-#         await bot.send_message(
-#             ADMIN_TELEGRAM_ID,
-#             'кнопка нажата'
-#         )
-
-
-def register_handlers_quiz(dp: Dispatcher):
-    dp.register_message_handler(send_quiz_to_users, commands='quiz')
-    # dp.register_message_handler(send_me_quiz, commands='quiz_me')

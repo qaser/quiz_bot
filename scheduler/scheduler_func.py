@@ -1,7 +1,8 @@
 import datetime as dt
 
 from aiogram import types
-from aiogram.utils.exceptions import CantInitiateConversation, BotBlocked
+from aiogram.exceptions import AiogramError
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config.bot_config import bot
 from config.mongo_config import plans, users
@@ -24,12 +25,10 @@ async def send_quiz_button():
     for user_id in user_ids:
         target_user = users.find_one({'user_id': user_id}).get('full_name')
         try:
-            keyboard = types.InlineKeyboardMarkup()
-            keyboard.add(
-                types.InlineKeyboardButton(
-                    text='Начать тестирование',
-                    callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}')
-                )
+            kb = InlineKeyboardBuilder()
+            kb.button(
+                text='Начать тестирование',
+                callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}')
             )
             await bot.send_message(
                 chat_id=user_id,
@@ -37,13 +36,13 @@ async def send_quiz_button():
                     f'Пройдите {test_type_name} тест знаний по '
                     f'плану технической учёбы {quarter}-го квартала.'
                 ),
-                reply_markup=keyboard,
+                reply_markup=kb.as_markup(),
             )
             await bot.send_message(
                 ADMIN_TELEGRAM_ID,
                 f'Пользователю {target_user} отправлен тест',
             )
-        except (CantInitiateConversation, BotBlocked):
+        except AiogramError:
             await bot.send_message(
                 ADMIN_TELEGRAM_ID,
                 f'Пользователь {target_user} не доступен',
@@ -55,13 +54,10 @@ async def send_quiz_button_in_chat():
     year, month, quarter = calc_date()
     test_type = calc_test_type(month)
     test_type_name = TEST_TYPE.get(test_type)
-    queryset = plans.find_one({'year': year, 'quarter': quarter, 'department': 'КЦ-5,6'})
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(
-        types.InlineKeyboardButton(
-            text='Начать тестирование',
-            callback_data=(f'quiz_{year}_{quarter}_{test_type}')
-        )
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text='Начать тестирование',
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}')
     )
     await bot.send_message(
         chat_id=CHAT_56_ID,
@@ -76,8 +72,9 @@ async def send_quiz_button_in_chat():
             'Разблокируйте бота или пройдите процедуру регистрации '
             'повторно перейдя по ссылке @quiz_blpu_bot'
         ),
-        reply_markup=keyboard,
-        parse_mode=types.ParseMode.HTML
+        protect_content=True,
+        reply_markup=kb.as_markup(),
+        parse_mode='HTML'
     )
 
 

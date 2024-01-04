@@ -1,9 +1,8 @@
 import pymongo
-from aiogram.contrib.fsm_storage.mongo import MongoStorage
 
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
-storage = MongoStorage(host='localhost', port=27017, db_name='aiogram_fsm')
+
 db = client['quiz_db']
 themes = db['themes']
 users = db['users']
