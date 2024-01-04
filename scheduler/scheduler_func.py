@@ -4,32 +4,10 @@ from aiogram import types
 from aiogram.utils.exceptions import CantInitiateConversation, BotBlocked
 
 from config.bot_config import bot
-from config.mongo_config import plans, questions, users
-from config.telegram_config import ADMIN_TELEGRAM_ID
+from config.mongo_config import plans, users
+from config.telegram_config import ADMIN_TELEGRAM_ID, CHAT_56_ID, QUIZ_THREAD_ID
 from utils.constants import TEST_TYPE, TU
 from utils.utils import calc_date, calc_test_type
-
-
-# формирование списка вопросов согласно тем плана
-async def add_questions_in_plan():
-    year, _, quarter = calc_date()
-    plans_queryset = list(plans.find({'year': 2024, 'quarter': 1}))
-    for plan in plans_queryset:
-        themes = plan.get('themes')
-        res = []
-        num_themes = len(themes)
-        num_q = 30 // num_themes
-        for theme in themes:
-            list_questions = list(questions.aggregate(
-                [{'$match': {'theme': theme}}, {'$sample': {'size': num_q}}]
-            ))
-            q_ids = [q.get('_id') for q in list_questions]
-            res = res + q_ids
-        plans.update_one(
-            {'_id': plan.get('_id')},
-            {'$set': {'questions': res}}
-        )
-    await bot.send_message(ADMIN_TELEGRAM_ID, 'Тесты сформированы')
 
 
 # отправка кнопки для начала тестирования
@@ -41,9 +19,7 @@ async def send_quiz_button():
     departments = [dep.get('department') for dep in queryset]
     user_ids = []
     for dep in departments:
-        ids = [user.get('user_id') for user in list(
-            users.find({'department': dep})
-        )]
+        ids = [user.get('user_id') for user in list(users.find({'department': dep}))]
         user_ids += ids
     for user_id in user_ids:
         target_user = users.find_one({'user_id': user_id}).get('full_name')
@@ -52,9 +28,7 @@ async def send_quiz_button():
             keyboard.add(
                 types.InlineKeyboardButton(
                     text='Начать тестирование',
-                    callback_data=(
-                        f'quiz_{year}_{quarter}_{test_type}_{user_id}'
-                    )
+                    callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}')
                 )
             )
             await bot.send_message(
@@ -74,6 +48,37 @@ async def send_quiz_button():
                 ADMIN_TELEGRAM_ID,
                 f'Пользователь {target_user} не доступен',
             )
+
+
+# отправка кнопки для начала тестирования в чат
+async def send_quiz_button_in_chat():
+    year, month, quarter = calc_date()
+    test_type = calc_test_type(month)
+    test_type_name = TEST_TYPE.get(test_type)
+    queryset = plans.find_one({'year': year, 'quarter': quarter, 'department': 'КЦ-5,6'})
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(
+        types.InlineKeyboardButton(
+            text='Начать тестирование',
+            callback_data=(f'quiz_{year}_{quarter}_{test_type}')
+        )
+    )
+    await bot.send_message(
+        chat_id=CHAT_56_ID,
+        message_thread_id=QUIZ_THREAD_ID,
+        text=(
+            f'Пройдите <u>{test_type_name}</u> тест знаний по '
+            f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+            'После нажатия кнопки Вам, личным сообщением, '
+            'будут направлены тестовые вопросы.\n'
+            'Если Вы не получили сообщение с тестом, '
+            'то вероятно Вы заблокировали бота.\n'
+            'Разблокируйте бота или пройдите процедуру регистрации '
+            'повторно перейдя по ссылке @quiz_blpu_bot'
+        ),
+        reply_markup=keyboard,
+        parse_mode=types.ParseMode.HTML
+    )
 
 
 async def send_tu_material():

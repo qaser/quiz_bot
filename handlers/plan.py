@@ -8,10 +8,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from config.bot_config import bot, dp
 from config.mongo_config import plans, questions, themes, users
-from scheduler.scheduler_func import add_questions_in_plan
 from utils.constants import DEPARTMENTS
-from utils.decorators import admin_check, superuser_check
+from utils.decorators import admin_check
 from utils.save_docx_file import create_docx_file
+
+
+NUM_QUESTIONS = 30
 
 
 class Plan(StatesGroup):
@@ -28,10 +30,7 @@ async def create_plan(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for dep in DEPARTMENTS:
         keyboard.add(dep)
-    await message.answer(
-        text='Выберите службу',
-        reply_markup=keyboard,
-    )
+    await message.answer('Выберите службу', reply_markup=keyboard)
     await Plan.waiting_department.set()
 
 
@@ -46,10 +45,7 @@ async def choose_year(message: types.Message, state: FSMContext):
     now_year = dt.datetime.now().year
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(str(now_year), str(now_year + 1))
-    await message.answer(
-        text='Выберите год планирования',
-        reply_markup=keyboard,
-    )
+    await message.answer('Выберите год планирования', reply_markup=keyboard)
     await Plan.waiting_year.set()
 
 
@@ -57,18 +53,13 @@ async def choose_year(message: types.Message, state: FSMContext):
 async def choose_quarter(message: types.Message, state: FSMContext):
     now_year = dt.datetime.now().year
     if message.text not in [str(now_year), str(now_year + 1)]:
-        await message.answer(
-            'Пожалуйста, выберите год, используя список ниже.'
-        )
+        await message.answer('Пожалуйста, выберите год, используя список ниже.')
         return
     await state.update_data(year=message.text)
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add('1', '2')
     keyboard.add('3', '4')
-    await message.answer(
-        text='Выберите квартал планирования',
-        reply_markup=keyboard,
-    )
+    await message.answer('Выберите квартал планирования', reply_markup=keyboard)
     await Plan.waiting_quarter.set()
 
 
@@ -76,9 +67,7 @@ async def choose_quarter(message: types.Message, state: FSMContext):
 async def choose_themes(message: types.Message, state: FSMContext):
     # TODO сделать проверку на наличие плана на эти даты
     if message.text not in ['1', '2', '3', '4']:
-        await message.answer(
-            'Пожалуйста, выберите квартал, используя список ниже.'
-        )
+        await message.answer('Пожалуйста, выберите квартал, используя список ниже.')
         return
     await state.update_data(quarter=message.text)
     await state.update_data(themes=[])
@@ -102,9 +91,7 @@ async def create_list_themes(message: types.Message, state: FSMContext):
     themes_queryset = themes.distinct('name')
     if message.text.lower() != '<< завершить выбор >>':
         if message.text not in themes_queryset:
-            await message.answer(
-                'Пожалуйста, выберите тему, используя список ниже.'
-            )
+            await message.answer('Пожалуйста, выберите тему, используя список ниже.')
             return
         for value in themes_queryset:
             if value == message.text:
@@ -147,23 +134,29 @@ async def create_list_themes(message: types.Message, state: FSMContext):
 async def plan_save(message: types.Message, state: FSMContext):
     # TODO сделать ограничение на количество тем (10)
     if message.text.lower() not in ['нет', 'да']:
-        await message.answer(
-            'Пожалуйста, отправьте "Да" или "Нет"'
-        )
+        await message.answer('Пожалуйста, отправьте "Да" или "Нет"')
         return
     if message.text.lower() == 'да':
+        pipeline = [{'$match': {'theme': theme}}, {'$sample': {'size': num_q}}]
         data = await state.get_data()
         dep, year = data['department'], int(data['year'])
         quarter = int(data['quarter'])
         themes = data['themes']
         user_id = message.from_user.id
+        q_list = []
+        num_themes = len(themes)
+        num_q = NUM_QUESTIONS // num_themes
+        for theme in themes:
+            list_questions = list(questions.aggregate(pipeline))
+            q_ids = [q.get('_id') for q in list_questions]
+            q_list = q_list + q_ids
         plan_check = plans.find_one(
             {'year': year, 'quarter': quarter, 'department': dep}
         )
         if plan_check is not None:
             plans.update_one(
                 {'year': year, 'quarter': quarter, 'department': dep},
-                {'$set': {'owner': user_id, 'themes': themes}}
+                {'$set': {'owner': user_id, 'themes': themes, 'questions': q_list}}
             )
         else:
             plans.insert_one(
@@ -172,12 +165,12 @@ async def plan_save(message: types.Message, state: FSMContext):
                     'quarter': quarter,
                     'department': dep,
                     'owner': user_id,
-                    'themes': themes
-
+                    'themes': themes,
+                    'questions': q_list
                 }
             )
         await message.answer(
-            'Запись успешно добавлена',
+            'Запись успешно добавлена. Тесты сформированы',
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.finish()
@@ -187,12 +180,6 @@ async def plan_save(message: types.Message, state: FSMContext):
             reply_markup=types.ReplyKeyboardRemove()
         )
         await state.reset_state()
-
-
-@superuser_check
-async def populate_plans(message: types.Message):
-    await add_questions_in_plan()
-    await message.answer('Вопросы для тестов сформированы')
 
 
 @admin_check
@@ -222,7 +209,10 @@ async def export_tests(message: types.Message):
     ) for year in years]
     keyboard.add(*buttons)
     await message.delete()
-    await message.answer('Функция экспорта тестовых вопросов в файл. Выберите год', reply_markup=keyboard)
+    await message.answer(
+        'Функция экспорта тестовых вопросов в файл. Выберите год',
+        reply_markup=keyboard
+    )
 
 
 @dp.callback_query_handler(Text(startswith='plan_'))
@@ -238,10 +228,7 @@ async def get_test_quarter(call: types.CallbackQuery):
     ]
     await call.message.delete_reply_markup()
     keyboard.add(*buttons)
-    await call.message.edit_text(
-            'Выберите квартал:',
-            reply_markup=keyboard,
-        )
+    await call.message.edit_text('Выберите квартал:', reply_markup=keyboard)
 
 
 @dp.callback_query_handler(Text(startswith='pln_'))
@@ -258,16 +245,12 @@ async def get_test_document(call: types.CallbackQuery):
     await call.message.edit_text('Запрос получен')
     create_docx_file(plan)
     path = f'static/reports/Тест {department} ({quarter} кв. {year}г).docx'
-    await bot.send_document(
-        chat_id=user_id,
-        document=open(path, 'rb')
-    )
+    await bot.send_document(chat_id=user_id, document=open(path, 'rb'))
     os.remove(path)
     await call.message.delete()
 
 
 def register_handlers_plan(dp: Dispatcher):
     dp.register_message_handler(create_plan, commands='plan')
-    dp.register_message_handler(populate_plans, commands='pop_plan')
     dp.register_message_handler(show_themes, commands='themes')
     dp.register_message_handler(export_tests, commands='export_tests')

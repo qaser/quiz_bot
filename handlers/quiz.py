@@ -16,8 +16,8 @@ async def get_questions(call: types.CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    _, year, quarter, test_type, id = call.data.split('_')
-    user_id = int(id)
+    _, year, quarter, test_type = call.data.split('_')
+    user_id = int(call.from_user.id)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({
         'year': int(year),
@@ -153,29 +153,29 @@ async def send_quiz_to_users(message: types.Message):
     await send_quiz_button()
 
 
-async def send_me_quiz(message: types.Message):
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(
-            types.InlineKeyboardButton(
-                text='Начать тестирование',
-                callback_data=(
-                    f'quiz_2023_3_input_{message.from_user.id}'
-                )
-            )
-        )
-        await message.answer(
-            text=(
-                f'Пройдите входной тест знаний по '
-                f'плану технической учёбы 3-го квартала.'
-            ),
-            reply_markup=keyboard,
-        )
-        await bot.send_message(
-            ADMIN_TELEGRAM_ID,
-            'кнопка нажата'
-        )
+# async def send_me_quiz(message: types.Message):
+#         keyboard = types.InlineKeyboardMarkup()
+#         keyboard.add(
+#             types.InlineKeyboardButton(
+#                 text='Начать тестирование',
+#                 callback_data=(
+#                     f'quiz_2023_3_input_{message.from_user.id}'
+#                 )
+#             )
+#         )
+#         await message.answer(
+#             text=(
+#                 f'Пройдите входной тест знаний по '
+#                 f'плану технической учёбы 3-го квартала.'
+#             ),
+#             reply_markup=keyboard,
+#         )
+#         await bot.send_message(
+#             ADMIN_TELEGRAM_ID,
+#             'кнопка нажата'
+#         )
 
 
 def register_handlers_quiz(dp: Dispatcher):
     dp.register_message_handler(send_quiz_to_users, commands='quiz')
-    dp.register_message_handler(send_me_quiz, commands='quiz_me')
+    # dp.register_message_handler(send_me_quiz, commands='quiz_me')
