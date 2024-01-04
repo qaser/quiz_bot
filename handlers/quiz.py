@@ -22,13 +22,14 @@ async def get_questions(call: CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
+    print(call.data)
     _, year, quarter, test_type, count = call.data.split('_')
     user_id = int(call.from_user.id)
     test_type_name = TEST_TYPE.get(test_type)
     kb = InlineKeyboardBuilder()
     kb.button(
         text='Начать тестирование',
-        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}_{int(count)+1}')
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{int(count)+1}')
     )
     try:
         await call.message.edit_text(
