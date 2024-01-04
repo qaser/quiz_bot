@@ -71,12 +71,12 @@ async def get_questions(call: CallbackQuery):
                 f'Пройдите <u>{test_type_name}</u> тест знаний по '
                 f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
                 f'{QUIZ_HELLO_TEXT}\n'
-                f'Проходят тестирование {count} чел.'
+                f'Проходят тестирование: {count} чел.'
             ),
             parse_mode='HTML',
             reply_markup=kb.as_markup(),
         )
-    except AiogramError as err:
+    except AiogramError:
         pass
 
 
