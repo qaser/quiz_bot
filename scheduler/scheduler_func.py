@@ -7,7 +7,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from config.bot_config import bot
 from config.mongo_config import plans, users
 from config.telegram_config import ADMIN_TELEGRAM_ID, CHAT_56_ID, QUIZ_THREAD_ID
-from utils.constants import TEST_TYPE, TU
+from utils.constants import TEST_TYPE, TU, QUIZ_HELLO_TEXT
 from utils.utils import calc_date, calc_test_type
 
 
@@ -65,6 +65,7 @@ async def send_quiz_button_in_chat():
         text=(
             f'Пройдите <u>{test_type_name}</u> тест знаний по '
             f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+            f'{QUIZ_HELLO_TEXT}'
         ),
         protect_content=True,
         reply_markup=kb.as_markup(),

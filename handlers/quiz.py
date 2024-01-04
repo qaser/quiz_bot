@@ -11,7 +11,7 @@ from config.mongo_config import plans, questions, results, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
-from utils.constants import TEST_TYPE
+from utils.constants import TEST_TYPE, QUIZ_HELLO_TEXT
 
 
 router = Router()
@@ -22,56 +22,62 @@ async def get_questions(call: CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    print(call.data)
     _, year, quarter, test_type, count = call.data.split('_')
     user_id = int(call.from_user.id)
     test_type_name = TEST_TYPE.get(test_type)
-    kb = InlineKeyboardBuilder()
-    kb.button(
-        text='Начать тестирование',
-        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{int(count)+1}')
-    )
-    try:
-        await call.message.edit_text(
-            text=(
-                f'Пройдите <u>{test_type_name}</u> тест знаний по '
-                f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
-            ),
-            parse_mode='HTML',
-            reply_markup=kb.as_markup(),
-        )
-    except AiogramError as err:
-        pass
-    await call.answer(
-        text=('Вам отправлены тестовые вопросы личным сообщением'
-              'Если Вы не получили сообщение с тестом, '
-              'то вероятно Вы заблокировали бота.\n'
-              'Разблокируйте бота или пройдите процедуру регистрации '
-              'повторно перейдя по ссылке @quiz_blpu_bot'),
-        show_alert=True
-    )
-    department = users.find_one({'user_id': user_id}).get('department')
-    questions_ids = plans.find_one({
-        'year': int(year),
-        'quarter': int(quarter),
-        'department': department
-    }).get('questions')
-    res_id = results.insert_one({
+    test_check = results.find_one({
         'user_id': user_id,
         'year': int(year),
         'quarter': int(quarter),
         'test_type': test_type,
-        'done': 'false',
-        'q_len': len(questions_ids),
-        'count': 0,
-        'q_ids': questions_ids,
-        'quiz': '',
-        'message_id': '',
-        'quiz_results': [],
-        'date_start': date_start,
     })
-    await call.message.delete_reply_markup()
-    await send_quiz(res_id.inserted_id)
+    if test_check:
+        await call.answer(
+            text='Вы уже проходите или прошли этот тест',
+            show_alert=True
+        )
+    else:
+        count_employee = int(count)+1
+        kb = InlineKeyboardBuilder()
+        kb.button(
+            text='Начать тестирование',
+            callback_data=(f'quiz_{year}_{quarter}_{test_type}_{count_employee}')
+        )
+        try:
+            await call.message.edit_text(
+                text=(
+                    f'Пройдите <u>{test_type_name}</u> тест знаний по '
+                    f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+                    f'{QUIZ_HELLO_TEXT}'
+                    f'Проходят тестирование {count} чел.'
+                ),
+                parse_mode='HTML',
+                reply_markup=kb.as_markup(),
+            )
+        except AiogramError as err:
+            pass
+        department = users.find_one({'user_id': user_id}).get('department')
+        questions_ids = plans.find_one({
+            'year': int(year),
+            'quarter': int(quarter),
+            'department': department
+        }).get('questions')
+        res_id = results.insert_one({
+            'user_id': user_id,
+            'year': int(year),
+            'quarter': int(quarter),
+            'test_type': test_type,
+            'done': 'false',
+            'q_len': len(questions_ids),
+            'count': 0,
+            'q_ids': questions_ids,
+            'quiz': '',
+            'message_id': '',
+            'quiz_results': [],
+            'date_start': date_start,
+        })
+        await call.message.delete_reply_markup()
+        await send_quiz(res_id.inserted_id)
 
 
 async def send_quiz(res_id):
