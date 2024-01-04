@@ -11,6 +11,7 @@ from config.mongo_config import plans, questions, results, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
+from utils.constants import TEST_TYPE
 
 
 router = Router()
@@ -18,14 +19,35 @@ router = Router()
 
 @router.callback_query(F.data.startswith('quiz_'))
 async def get_questions(call: CallbackQuery):
-    await call.answer(
-        text="Спасибо, что воспользовались ботом!",
-        show_alert=True
-    )
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    _, year, quarter, test_type = call.data.split('_')
+    _, year, quarter, test_type, count = call.data.split('_')
+    test_type_name = TEST_TYPE.get(test_type)
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text='Начать тестирование',
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}_{int(count)+1}')
+    )
+    try:
+        await call.message.edit_text(
+            text=(
+                f'Пройдите <u>{test_type_name}</u> тест знаний по '
+                f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+            ),
+            parse_mode='HTML',
+            reply_markup=kb.as_markup(),
+        )
+    except AiogramError as err:
+        pass
+    await call.answer(
+        text=('Вам отправлены тестовые вопросы личным сообщением'
+              'Если Вы не получили сообщение с тестом, '
+              'то вероятно Вы заблокировали бота.\n'
+              'Разблокируйте бота или пройдите процедуру регистрации '
+              'повторно перейдя по ссылке @quiz_blpu_bot'),
+        show_alert=True
+    )
     user_id = int(call.from_user.id)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({

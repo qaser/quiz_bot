@@ -28,7 +28,7 @@ async def send_quiz_button():
             kb = InlineKeyboardBuilder()
             kb.button(
                 text='Начать тестирование',
-                callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}')
+                callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}_0')
             )
             await bot.send_message(
                 chat_id=user_id,
@@ -65,12 +65,6 @@ async def send_quiz_button_in_chat():
         text=(
             f'Пройдите <u>{test_type_name}</u> тест знаний по '
             f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
-            'После нажатия кнопки Вам, личным сообщением, '
-            'будут направлены тестовые вопросы.\n'
-            'Если Вы не получили сообщение с тестом, '
-            'то вероятно Вы заблокировали бота.\n'
-            'Разблокируйте бота или пройдите процедуру регистрации '
-            'повторно перейдя по ссылке @quiz_blpu_bot'
         ),
         protect_content=True,
         reply_markup=kb.as_markup(),
