@@ -4,6 +4,7 @@ from aiogram.types import Message, CallbackQuery, PollAnswer
 from aiogram.filters import Command
 
 from aiogram.exceptions import AiogramError
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config.bot_config import bot
 from config.mongo_config import plans, questions, results, users
@@ -21,6 +22,25 @@ async def get_questions(call: CallbackQuery):
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
     _, year, quarter, test_type = call.data.split('_')
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text='Начать тестирование',
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}')
+    )
+    await call.message.edit_text(
+        text=(
+            f'Пройдите <u>{test_type}</u> тест знаний по '
+            f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+            'После нажатия кнопки Вам, личным сообщением, '
+            'будут направлены тестовые вопросы.\n'
+            'Если Вы не получили сообщение с тестом, '
+            'то вероятно Вы заблокировали бота.\n'
+            'Разблокируйте бота или пройдите процедуру регистрации '
+            'повторно перейдя по ссылке @quiz_blpu_bot'
+        ),
+        parse_mode='HTML',
+        reply_markup=kb.as_markup(),
+    )
     user_id = int(call.from_user.id)
     department = users.find_one({'user_id': user_id}).get('department')
     questions_ids = plans.find_one({
