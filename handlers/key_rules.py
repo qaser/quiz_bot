@@ -21,6 +21,7 @@ async def send_key_rules(message: Message):
         if group_count >= 6:
             await bot.send_media_group(chat_id=message.chat.id, media=album_builder.build())
             group_count = 0
+            album_builder = MediaGroupBuilder(caption='Ключевые правила безопасности')
     if 0 < group_count < 10:
         await bot.send_media_group(chat_id=message.chat.id, media=album_builder.build())
     await message.delete()
