@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.types import InputMediaPhoto, Message
+from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.utils.media_group import MediaGroupBuilder
 
@@ -8,7 +8,6 @@ from config.mongo_config import key_rules
 
 
 router = Router()
-
 
 @router.message(Command('key_rules'))
 async def send_key_rules(message: Message):

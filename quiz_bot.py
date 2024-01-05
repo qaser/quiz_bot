@@ -97,7 +97,7 @@ async def main():
     dp.include_router(quiz.router)
     # dp.include_router(import_questions.router)
     dp.include_router(reports.router)
-    # dp.include_router(key_rules.router)
+    dp.include_router(key_rules.router)
     # dp.include_router(attentions.router)
     # dp.include_router(statistic.router)
     # dp.include_router(examen.router)
