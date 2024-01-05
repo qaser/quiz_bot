@@ -11,9 +11,9 @@ def scheduler_jobs():
         send_quiz_button_in_chat,
         'cron',
         month='1,4,7,10',
-        day=3,
-        hour=15,
-        minute=56,
+        day=5,
+        hour=13,
+        minute=15,
         timezone=const.TIME_ZONE
     )
     scheduler.add_job(

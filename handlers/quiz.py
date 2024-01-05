@@ -39,8 +39,8 @@ async def get_questions(call: CallbackQuery):
         'test_type': test_type,
         'done': 'false',
     })
-    count_complete = len(list(test_complete_check))
-    count_uncomplete = len(list(test_uncomplete_check))
+    count_complete = len(list(test_complete_check)) if test_complete_check else 0
+    count_uncomplete = len(list(test_uncomplete_check)) if test_uncomplete_check else 0
     if test_complete_check:
         await call.answer(
             text='Вы уже прошли этот тест',
