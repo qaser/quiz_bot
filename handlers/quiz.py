@@ -25,7 +25,7 @@ async def get_questions(call: CallbackQuery):
     _, year, quarter, test_type = call.data.split('_')
     user_id = int(call.from_user.id)
     test_type_name = TEST_TYPE.get(test_type)
-    test_complete_check = results.find_one({
+    test_check = results.find_one({
         'user_id': user_id,
         'year': int(year),
         'quarter': int(quarter),
@@ -39,16 +39,28 @@ async def get_questions(call: CallbackQuery):
         'test_type': test_type,
         'done': 'false',
     })
-    count_complete = len(list(test_complete_check)) if test_complete_check else 0
-    count_uncomplete = len(list(test_uncomplete_check)) if test_uncomplete_check else 0
-    if test_complete_check:
+    count_test = results.find({
+        'year': int(year),
+        'quarter': int(quarter),
+        'test_type': test_type,
+        'done': 'true',
+    })
+    count_uncomplete = results.find({
+        'year': int(year),
+        'quarter': int(quarter),
+        'test_type': test_type,
+        'done': 'false',
+    })
+    count_test = len(list(count_test)) if count_test else 0
+    count_uncomplete = len(list(count_uncomplete)) if count_uncomplete else 0
+    if test_check:
         await call.answer(
             text='Вы уже прошли этот тест',
             show_alert=True
         )
     elif test_uncomplete_check:
         await call.answer(
-            text='Вы уже проходите этот тест, перейдите по ссылке @quiz_blpu_bot',
+            text='Вы уже проходите этот тест, перейдите в чат к боту',
             show_alert=True
         )
     else:
@@ -86,8 +98,8 @@ async def get_questions(call: CallbackQuery):
                 f'Пройдите <u>{test_type_name}</u> тест знаний по '
                 f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
                 f'{QUIZ_HELLO_TEXT}\n'
-                f'Проходят тестирование: {count_uncomplete} чел.'
-                f'Прошли тестирование: {count_complete} чел.'
+                f'Проходят тестирование: {count_uncomplete} чел.\n'
+                f'Прошли тестирование: {count_test} чел.'
             ),
             parse_mode='HTML',
             reply_markup=kb.as_markup(),
