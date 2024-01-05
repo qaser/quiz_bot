@@ -22,22 +22,37 @@ async def get_questions(call: CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    _, year, quarter, test_type, count = call.data.split('_')
+    _, year, quarter, test_type = call.data.split('_')
     user_id = int(call.from_user.id)
     test_type_name = TEST_TYPE.get(test_type)
-    test_check = results.find_one({
+    test_complete_check = results.find_one({
         'user_id': user_id,
         'year': int(year),
         'quarter': int(quarter),
         'test_type': test_type,
+        'done': 'true',
     })
-    if test_check:
+    test_uncomplete_check = results.find_one({
+        'user_id': user_id,
+        'year': int(year),
+        'quarter': int(quarter),
+        'test_type': test_type,
+        'done': 'false',
+    })
+    count_complete = len(list(test_complete_check))
+    count_uncomplete = len(list(test_uncomplete_check))
+    if test_complete_check:
         await call.answer(
-            text='Вы уже проходите или прошли этот тест',
+            text='Вы уже прошли этот тест',
+            show_alert=True
+        )
+    elif test_uncomplete_check:
+        await call.answer(
+            text='Вы уже проходите этот тест, перейдите по ссылке @quiz_blpu_bot',
             show_alert=True
         )
     else:
-        count = int(count) + 1
+        count_uncomplete = int(count_uncomplete) + 1
         department = users.find_one({'user_id': user_id}).get('department')
         questions_ids = plans.find_one({
             'year': int(year),
@@ -63,7 +78,7 @@ async def get_questions(call: CallbackQuery):
     kb = InlineKeyboardBuilder()
     kb.button(
         text='Начать тестирование',
-        callback_data=(f'quiz_{year}_{quarter}_{test_type}_{count}')
+        callback_data=(f'quiz_{year}_{quarter}_{test_type}')
     )
     try:
         await call.message.edit_text(
@@ -71,7 +86,8 @@ async def get_questions(call: CallbackQuery):
                 f'Пройдите <u>{test_type_name}</u> тест знаний по '
                 f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
                 f'{QUIZ_HELLO_TEXT}\n'
-                f'Проходят тестирование: {count} чел.'
+                f'Проходят тестирование: {count_uncomplete} чел.'
+                f'Прошли тестирование: {count_complete} чел.'
             ),
             parse_mode='HTML',
             reply_markup=kb.as_markup(),

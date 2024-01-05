@@ -4,7 +4,7 @@ import logging
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.bot_config import dp, bot
@@ -52,6 +52,16 @@ async def check_password(message: Message, state: FSMContext):
         return
 
 
+@dp.message(Command('reset'))
+async def cmd_reset(message: Message, state: FSMContext):
+    await message.delete()
+    await state.clear()
+    await message.answer(
+        'Текущее состояние бота сброшено',
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+
 async def main():
     scheduler = AsyncIOScheduler()
     # scheduler.add_job(
@@ -89,7 +99,7 @@ async def main():
     # )
     scheduler.start()
     # dp.include_router(service.router)
-    # dp.include_router(registration.router)
+    dp.include_router(registration.router)
     dp.include_router(admin_registration.router)
     # dp.include_router(plan.router)
     dp.include_router(quiz.router)
