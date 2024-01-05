@@ -1,5 +1,5 @@
 from aiogram import F, Router
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile
 from aiogram.filters import Command
 
 from config.bot_config import bot
@@ -25,11 +25,9 @@ async def count_users(message: Message):
 @superuser_check
 @router.message(Command('log'))
 async def send_logs(message: Message):
-    file = 'logs_bot.log'
-    with open(file, 'rb') as f:
-        content = f.read()
-        await bot.delete_message(message.chat.id, message.message_id)
-        await bot.send_document(chat_id=ADMIN_TELEGRAM_ID, document=content)
+    document = FSInputFile(path=r'logs_bot.log')
+    await message.answer_document(document=document)
+    await message.delete()
 
 
 @router.message(Command('help'))

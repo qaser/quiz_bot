@@ -1,7 +1,7 @@
 import os
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 
 from config.bot_config import bot
 from config.mongo_config import results, users
@@ -89,7 +89,8 @@ async def get_report(year, quarter, user_id):
 async def send_report(year, quarter, department, user_id, results_set):
     report_department_pdf(year, quarter, department, results_set)
     path = f'static/reports/Отчёт ТУ {department} ({quarter} кв. {year}г).pdf'
-    await bot.send_document(chat_id=user_id, document=open(path, 'rb'))
+    document = FSInputFile(path=path)
+    await bot.send_document(chat_id=user_id, document=document)
     os.remove(path)
 
 
@@ -161,5 +162,6 @@ async def get_results(year, quarter, test_type, user_id):
 async def send_results(year, quarter, test_type, department, user_id, results_set):
     create_results_docx_file(year, quarter, test_type, department, results_set)
     path = f'static/reports/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
-    await bot.send_document(chat_id=user_id, document=open(path, 'rb'))
+    document = FSInputFile(path=path)
+    await bot.send_document(chat_id=user_id, document=document)
     os.remove(path)
