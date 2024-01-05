@@ -1,7 +1,7 @@
 from math import ceil
 
 from docx import Document
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
@@ -51,7 +51,7 @@ def create_docx_file(plan):
     font.size = Pt(12)
 
     header = document.add_paragraph(DOC_HEADER)
-    header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    header.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
     header.style = document.styles['Normal']
 
     table = document.add_table(rows=2, cols=6, style='Table Grid')
@@ -122,7 +122,7 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
         len_test = len(results)
         num_rows = ceil(len_test / 10) * 2
         header = document.add_paragraph(DOC_HEADER)
-        header.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        header.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         header.style = document.styles['Normal']
 
         table = document.add_table(rows=num_rows, cols=11, style='Table Grid')
@@ -134,7 +134,7 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
         for id, cell in enumerate(table_hdr):
             cell_id = id % 2  # определение нечётных полей
             cell.text = TABLE_HEADERS[cell_id]
-            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
         for id, data in enumerate(results):
             _, _, ans, correct = data
@@ -143,9 +143,9 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
             cell_hdr = table.rows[row_id].cells[cell_id+1]
             cell_value = table.rows[row_id+1].cells[cell_id+1]
             cell_hdr.text = str(id + 1)
-            cell_hdr.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cell_hdr.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             cell_value.text = str(ans + 1)
-            cell_value.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cell_value.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
             if correct == 'true':
                 set_cell_color(cell_value, 'addfad')
 

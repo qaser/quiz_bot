@@ -161,8 +161,5 @@ async def get_results(year, quarter, test_type, user_id):
 async def send_results(year, quarter, test_type, department, user_id, results_set):
     create_results_docx_file(year, quarter, test_type, department, results_set)
     path = f'static/reports/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
-    await bot.send_document(
-        chat_id=user_id,
-        document=open(path, 'rb')
-    )
+    await bot.send_document(chat_id=user_id, document=open(path, 'rb'))
     os.remove(path)

@@ -13,7 +13,7 @@ from config.telegram_config import PASSWORD
 from handlers import (admin_registration, key_rules, pb, plan,
                       quiz, registration, reports, service, statistic, terms, videos)
 from texts.initial import INITIAL_TEXT
-from scheduler.scheduler_func import send_quiz_button, send_quiz_button_in_chat
+from scheduler.scheduler_func import send_quiz_button_in_chat
 import utils.constants as const
 
 
@@ -64,29 +64,21 @@ async def cmd_reset(message: Message, state: FSMContext):
 
 async def main():
     scheduler = AsyncIOScheduler()
-    # scheduler.add_job(
-    #     send_remainder,
-    #     'cron',
-    #     day_of_week='mon, fri',
-    #     hour=9,
-    #     minute=0,
-    #     timezone=constants.TIME_ZONE
-    # )
     scheduler.add_job(
         send_quiz_button_in_chat,
         'cron',
         month='1,4,7,10',
-        day=5,
-        hour=2,
-        minute=46,
+        day=12,
+        hour=8,
+        minute=0,
         timezone=const.TIME_ZONE
     )
     scheduler.add_job(
-        send_quiz_button,
+        send_quiz_button_in_chat,
         'cron',
         month='3,6,9,12',
         day=29,
-        hour=10,
+        hour=8,
         minute=0,
         timezone=const.TIME_ZONE
     )
@@ -98,7 +90,7 @@ async def main():
     #     timezone=const.TIME_ZONE
     # )
     scheduler.start()
-    # dp.include_router(service.router)
+    dp.include_router(service.router)
     dp.include_router(registration.router)
     dp.include_router(admin_registration.router)
     # dp.include_router(plan.router)
@@ -111,7 +103,7 @@ async def main():
     # dp.include_router(examen.router)
     dp.include_router(pb.router)
     # dp.include_router(videos.router)
-    # dp.include_router(terms.router)  # всегда должен быть последним
+    dp.include_router(terms.router)  # всегда должен быть последним
     await dp.start_polling(bot)
 
 
