@@ -75,10 +75,10 @@ async def send_quiz_button_in_chat():
 
 async def send_tu_material():
     date_now = dt.datetime.now().strftime('%d.%m.%Y')
-    users_ids = list(users.find({}))
     if date_now in TU.keys():
-        for id in users_ids:
-            await bot.send_message(
-                id.get('user_id'),
-                TU.get(date_now),
-            )
+        await bot.send_message(
+            chat_id=CHAT_56_ID,
+            message_thread_id=QUIZ_THREAD_ID,
+            text=TU.get(date_now),
+            protect_content=True,
+        )

@@ -13,7 +13,7 @@ from config.telegram_config import PASSWORD
 from handlers import (admin_registration, key_rules, pb, plan,
                       quiz, registration, reports, service, statistic, terms, videos)
 from texts.initial import INITIAL_TEXT
-from scheduler.scheduler_func import send_quiz_button_in_chat
+from scheduler.scheduler_func import send_quiz_button_in_chat, send_tu_material
 import utils.constants as const
 
 
@@ -82,13 +82,13 @@ async def main():
         minute=0,
         timezone=const.TIME_ZONE
     )
-    # scheduler.add_job(
-    #     send_tu_material,
-    #     'cron',
-    #     hour=10,
-    #     minute=0,
-    #     timezone=const.TIME_ZONE
-    # )
+    scheduler.add_job(
+        send_tu_material,
+        'cron',
+        hour=8,
+        minute=0,
+        timezone=const.TIME_ZONE
+    )
     scheduler.start()
     dp.include_router(service.router)
     dp.include_router(registration.router)
@@ -102,7 +102,7 @@ async def main():
     # dp.include_router(statistic.router)
     # dp.include_router(examen.router)
     dp.include_router(pb.router)
-    # dp.include_router(videos.router)
+    dp.include_router(videos.router)
     dp.include_router(terms.router)  # всегда должен быть последним
     await dp.start_polling(bot)
 
