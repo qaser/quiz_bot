@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message, FSInputFile
 from bson.objectid import ObjectId
 
+from config.bot_config import bot
 from config.mongo_config import videos
 import keyboards.for_videos as kb
 
@@ -109,7 +110,7 @@ async def videos_exit(call: CallbackQuery):
 async def uploadVideoFiles(message: Message):
     path = f'static/videos/kontrol_vrz.mp4'
     video = FSInputFile(path=path)
-    msg = await message.answer_video(video)
+    msg = await bot.send_video(message.chat.id, video)
     file_id = getattr(msg).file_id
     videos.insert_one(
         {
