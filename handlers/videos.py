@@ -118,7 +118,7 @@ async def uploadVideoFiles(message: Message):
             'theme_code': 'ot',
             'subtheme': 'Контроль ВРЗ',
             'subtheme_code': 'vrz',
-            'title': 'Периодический контроль',
+            'title': 'Периодический контроль ВРЗ',
             'link': file_id,
         }
     )
