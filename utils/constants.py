@@ -53,6 +53,7 @@ TU = {
     '27.02.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-27022023-02-27',
     '13.03.2023': 'https://telegra.ph/Tehnicheskaya-uchyoba-13032023-03-13',
     '12.01.2024': 'https://telegra.ph/Tehnicheskaya-ucheba-KC-56-ot-12012024-01-09',
+    '19.01.2024': 'https://telegra.ph/Tehnicheskaya-uchyoba-ba-KC-56-ot-19012024-01-19',
 }
 
 EXAMEN = {
