@@ -22,6 +22,10 @@ async def get_questions(call: CallbackQuery):
     # TODO сделать разделение на составление вопросов при типе теста 'special'
     # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
+    await bot.send_message(
+        ADMIN_TELEGRAM_ID,
+        call.data
+    )
     _, year, quarter, test_type = call.data.split('_')
     user_id = int(call.from_user.id)
     test_type_name = TEST_TYPE.get(test_type)
