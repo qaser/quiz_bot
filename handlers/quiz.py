@@ -12,104 +12,133 @@ from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
 from utils.utils import calc_grade, word_conjugate
 from utils.constants import TEST_TYPE, QUIZ_HELLO_TEXT
+import keyboards.for_quiz as kb
 
 
 router = Router()
 
 
+@router.message(Command('quiz'))
+async def send_special_quiz(message: Message):
+    test_type = 'special'
+    user_id = message.from_user.id
+    message.answer(
+        'Вы хотите пройти тестирование по всем вопросам в базе даннных?',
+        reply_markup=kb.quiz_menu(test_type, user_id)
+    )
+
+
 @router.callback_query(F.data.startswith('quiz_'))
 async def get_questions(call: CallbackQuery):
-    # TODO сделать разделение на составление вопросов при типе теста 'special'
-    # когда 'special' направить пользователя на выбор тем
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    await bot.send_message(
-        ADMIN_TELEGRAM_ID,
-        call.data
-    )
+    # await bot.send_message(ADMIN_TELEGRAM_ID, call.data)
     _, year, quarter, test_type = call.data.split('_')
     user_id = int(call.from_user.id)
-    test_type_name = TEST_TYPE.get(test_type)
-    test_check = results.find_one({
-        'user_id': user_id,
-        'year': int(year),
-        'quarter': int(quarter),
-        'test_type': test_type,
-        'done': 'true',
-    })
-    test_uncomplete_check = results.find_one({
-        'user_id': user_id,
-        'year': int(year),
-        'quarter': int(quarter),
-        'test_type': test_type,
-        'done': 'false',
-    })
-    count_test = results.find({
-        'year': int(year),
-        'quarter': int(quarter),
-        'test_type': test_type,
-        'done': 'true',
-    })
-    count_uncomplete = results.find({
-        'year': int(year),
-        'quarter': int(quarter),
-        'test_type': test_type,
-        'done': 'false',
-    })
-    count_test = len(list(count_test)) if count_test else 0
-    count_uncomplete = len(list(count_uncomplete)) if count_uncomplete else 0
-    if test_check:
-        await call.answer(
-            text='Вы уже прошли этот тест',
-            show_alert=True
-        )
-    elif test_uncomplete_check:
-        await call.answer(
-            text='Вы уже проходите этот тест, перейдите в чат к боту',
-            show_alert=True
-        )
+    if test_type == 'special':
+        await get_special_quiz(user_id, year, quarter, test_type, date_start, call)
     else:
-        count_uncomplete = int(count_uncomplete) + 1
-        department = users.find_one({'user_id': user_id}).get('department')
-        questions_ids = plans.find_one({
+        test_type_name = TEST_TYPE.get(test_type)
+        test_check = results.find_one({
+            'user_id': user_id,
             'year': int(year),
             'quarter': int(quarter),
-            'department': department
-        }).get('questions')
-        res_id = results.insert_one({
+            'test_type': test_type,
+            'done': 'true',
+        })
+        test_uncomplete_check = results.find_one({
             'user_id': user_id,
             'year': int(year),
             'quarter': int(quarter),
             'test_type': test_type,
             'done': 'false',
-            'q_len': len(questions_ids),
-            'count': 0,
-            'q_ids': questions_ids,
-            'quiz': '',
-            'message_id': '',
-            'quiz_results': [],
-            'date_start': date_start,
         })
-        await call.message.delete_reply_markup()
-        await send_quiz(res_id.inserted_id)
-    kb = InlineKeyboardBuilder()
-    kb.button(
-        text='Начать тестирование',
-        callback_data=(f'quiz_{year}_{quarter}_{test_type}')
-    )
-    try:
-        await call.message.edit_text(
-            text=(
-                f'Пройдите <u>{test_type_name}</u> тест знаний по '
-                f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
-                f'{QUIZ_HELLO_TEXT}\n'
-                f'Проходят тестирование: {count_uncomplete} чел.\n'
-                f'Прошли тестирование: {count_test} чел.'
-            ),
-            parse_mode='HTML',
-            reply_markup=kb.as_markup(),
+        count_test = results.find({
+            'year': int(year),
+            'quarter': int(quarter),
+            'test_type': test_type,
+            'done': 'true',
+        })
+        count_uncomplete = results.find({
+            'year': int(year),
+            'quarter': int(quarter),
+            'test_type': test_type,
+            'done': 'false',
+        })
+        count_test = len(list(count_test)) if count_test else 0
+        count_uncomplete = len(list(count_uncomplete)) if count_uncomplete else 0
+        if test_check:
+            await call.answer(
+                text='Вы уже прошли этот тест',
+                show_alert=True
+            )
+        elif test_uncomplete_check:
+            await call.answer(
+                text='Вы уже проходите этот тест, перейдите в чат к боту',
+                show_alert=True
+            )
+        else:
+            count_uncomplete = int(count_uncomplete) + 1
+            department = users.find_one({'user_id': user_id}).get('department')
+            questions_ids = plans.find_one({
+                'year': int(year),
+                'quarter': int(quarter),
+                'department': department
+            }).get('questions')
+            res_id = results.insert_one({
+                'user_id': user_id,
+                'year': int(year),
+                'quarter': int(quarter),
+                'test_type': test_type,
+                'done': 'false',
+                'q_len': len(questions_ids),
+                'count': 0,
+                'q_ids': questions_ids,
+                'quiz': '',
+                'message_id': '',
+                'quiz_results': [],
+                'date_start': date_start,
+            })
+            await call.message.delete_reply_markup()
+            await send_quiz(res_id.inserted_id)
+        kb = InlineKeyboardBuilder()
+        kb.button(
+            text='Начать тестирование',
+            callback_data=(f'quiz_{year}_{quarter}_{test_type}')
         )
-    except AiogramError:
-        pass
+        try:
+            await call.message.edit_text(
+                text=(
+                    f'Пройдите <u>{test_type_name}</u> тест знаний по '
+                    f'плану технической учёбы <u>{quarter}-го квартала</u>.\n'
+                    f'{QUIZ_HELLO_TEXT}\n'
+                    f'Проходят тестирование: {count_uncomplete} чел.\n'
+                    f'Прошли тестирование: {count_test} чел.'
+                ),
+                parse_mode='HTML',
+                reply_markup=kb.as_markup(),
+            )
+        except AiogramError:
+            pass
+
+
+async def get_special_quiz(user_id, year, quarter, test_type, date_start, call):
+    questions_ids = [q['_id'] for q in questions.find({})]
+    res_id = results.insert_one({
+        'user_id': user_id,
+        'year': int(year),
+        'quarter': int(quarter),
+        'test_type': test_type,
+        'done': 'false',
+        'q_len': len(questions_ids),
+        'count': 0,
+        'q_ids': questions_ids,
+        'quiz': '',
+        'message_id': '',
+        'quiz_results': [],
+        'date_start': date_start,
+    })
+    await call.message.delete_reply_markup()
+    await send_quiz(res_id.inserted_id)
 
 
 async def send_quiz(res_id):
@@ -124,7 +153,7 @@ async def send_quiz(res_id):
         quiz = await bot.send_poll(
             chat_id=data.get('user_id'),
             type='quiz',
-            question=q.get('question'),
+            question=f'Вопрос №{count+1} из {q_len}\n{q.get("question")}',
             options=q.get('answers'),
             is_anonymous=False,
             correct_option_id=correct_id,
@@ -132,13 +161,11 @@ async def send_quiz(res_id):
         )
         results.update_one(
             {'_id': res_id},
-            {
-                '$set': {
-                    'quiz': quiz.poll.id,
-                    'count': count + 1,
-                    'message_id': quiz.message_id
-                }
-            },
+            {'$set': {
+                'quiz': quiz.poll.id,
+                'count': count + 1,
+                'message_id': quiz.message_id
+            }},
             upsert=False
         )
     else:
