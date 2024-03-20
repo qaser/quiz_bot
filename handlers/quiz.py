@@ -7,10 +7,10 @@ from aiogram.exceptions import AiogramError
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config.bot_config import bot
-from config.mongo_config import plans, questions, results, users
+from config.mongo_config import plans, questions, results, users, themes
 from config.telegram_config import ADMIN_TELEGRAM_ID
 from scheduler.scheduler_func import send_quiz_button
-from utils.utils import calc_grade, word_conjugate
+from utils.utils import calc_date, calc_grade, word_conjugate
 from utils.constants import TEST_TYPE, QUIZ_HELLO_TEXT
 import keyboards.for_quiz as kb
 
@@ -21,21 +21,19 @@ router = Router()
 @router.message(Command('quiz'))
 async def send_special_quiz(message: Message):
     test_type = 'special'
-    user_id = message.from_user.id
     await message.answer(
-        'Вы хотите пройти тестирование по всем вопросам в базе даннных?',
-        reply_markup=kb.quiz_menu(test_type, user_id)
+        'Вы хотите пройти самоподготовку по всем вопросам?',
+        reply_markup=kb.quiz_menu(test_type)
     )
 
 
 @router.callback_query(F.data.startswith('quiz_'))
 async def get_questions(call: CallbackQuery):
     date_start = dt.datetime.now().strftime('%d.%m.%Y')
-    # await bot.send_message(ADMIN_TELEGRAM_ID, call.data)
     _, year, quarter, test_type = call.data.split('_')
     user_id = int(call.from_user.id)
     if test_type == 'special':
-        await get_special_quiz(user_id, year, quarter, test_type, date_start, call)
+        await get_themes_quiz(call)
     else:
         test_type_name = TEST_TYPE.get(test_type)
         test_check = results.find_one({
@@ -121,13 +119,29 @@ async def get_questions(call: CallbackQuery):
             pass
 
 
-async def get_special_quiz(user_id, year, quarter, test_type, date_start, call):
-    questions_ids = [q['_id'] for q in questions.find({})]
+async def get_themes_quiz(call: CallbackQuery):
+    themes_list = list(themes.find({}))
+    await call.message.edit_text(
+        'Выберите тему тестирования или испытайте себя на всех вопросах:',
+        reply_markup=kb.themes_menu(themes_list),
+    )
+
+
+@router.callback_query(F.data.startswith('special__'))
+async def get_special_quiz_questions(call: CallbackQuery):
+    date_start = dt.datetime.now().strftime('%d.%m.%Y')
+    year, _, quarter = calc_date()
+    _, theme = call.data.split('__')
+    user_id = int(call.from_user.id)
+    if theme == 'all':
+        questions_ids = [q['_id'] for q in questions.find({})]
+    else:
+        questions_ids = [q['_id'] for q in questions.find({'theme': theme})]
     res_id = results.insert_one({
         'user_id': user_id,
         'year': int(year),
         'quarter': int(quarter),
-        'test_type': test_type,
+        'test_type': 'special',
         'done': 'false',
         'q_len': len(questions_ids),
         'count': 0,
@@ -137,7 +151,7 @@ async def get_special_quiz(user_id, year, quarter, test_type, date_start, call):
         'quiz_results': [],
         'date_start': date_start,
     })
-    await call.message.delete_reply_markup()
+    await call.message.delete()
     await send_quiz(res_id.inserted_id)
 
 
