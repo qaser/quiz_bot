@@ -14,9 +14,9 @@ def quiz_menu(test_type) -> InlineKeyboardMarkup:
 
 def themes_menu(themes) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text='Все вопросы!!!', callback_data=f'special__all')
+    kb.button(text='!!! Все вопросы !!!', callback_data=f'special__all')
     for theme in themes:
         kb.button(text=f'{theme["name"]}', callback_data=f'special__{theme["code"]}')
     kb.button(text='< Отмена >', callback_data='exit')
-    kb.adjust(1)
+    kb.adjust(2)
     return kb.as_markup()
