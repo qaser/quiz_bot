@@ -22,7 +22,7 @@ router = Router()
 async def send_special_quiz(message: Message):
     test_type = 'special'
     user_id = message.from_user.id
-    message.answer(
+    await message.answer(
         'Вы хотите пройти тестирование по всем вопросам в базе даннных?',
         reply_markup=kb.quiz_menu(test_type, user_id)
     )

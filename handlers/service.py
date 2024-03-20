@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from config.bot_config import bot
 from config.mongo_config import users
 from config.telegram_config import ADMIN_TELEGRAM_ID
+from handlers.quiz import get_special_quiz
 from utils.constants import HELP_TEXT
 from utils.decorators import superuser_check
 
