@@ -28,7 +28,7 @@ async def send_quiz_button():
             kb = InlineKeyboardBuilder()
             kb.button(
                 text='Начать тестирование',
-                callback_data=(f'quiz_{year}_{quarter}_{test_type}_{user_id}')
+                callback_data=(f'quiz_{year}_{quarter}_{test_type}')
             )
             await bot.send_message(
                 chat_id=user_id,
