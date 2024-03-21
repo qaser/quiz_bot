@@ -249,26 +249,26 @@ async def save_result(res_id):
     await send_admin_notification(user_id)
 
 
-async def send_admin_notification(user_id):
-    user = users.find_one({'user_id': user_id})
-    user_name = user.get('full_name')
-    department = user.get('department')
-    admins = list(users.find({'department': department, 'is_admin': 'true'}))
-    if len(admins) > 0:
-        for admin in admins:
-            try:
-                await bot.send_message(
-                    chat_id=admin.get('user_id'),
-                    text=f'Пользователь {user_name} прошёл тестирование'
-                )
-            except AiogramError:
-                await bot.send_message(
-                    chat_id=ADMIN_TELEGRAM_ID,
-                    text=f'Пользователь "{user_name}" недоступен.'
-                )
-                continue
+# async def send_admin_notification(user_id):
+#     user = users.find_one({'user_id': user_id})
+#     user_name = user.get('full_name')
+#     department = user.get('department')
+#     admins = list(users.find({'department': department, 'is_admin': 'true'}))
+#     if len(admins) > 0:
+#         for admin in admins:
+#             try:
+#                 await bot.send_message(
+#                     chat_id=admin.get('user_id'),
+#                     text=f'Пользователь {user_name} прошёл тестирование'
+#                 )
+#             except AiogramError:
+#                 await bot.send_message(
+#                     chat_id=ADMIN_TELEGRAM_ID,
+#                     text=f'Пользователь "{user_name}" недоступен.'
+#                 )
+#                 continue
 
 
-@router.message(Command('quiz'))
+# @router.message(Command('quiz'))
 async def send_quiz_to_users(message: Message):
     await send_quiz_button()
