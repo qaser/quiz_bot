@@ -246,7 +246,7 @@ async def save_result(res_id):
             f'Ваш результат: {grade} {g_word}\n'
         )
     )
-    await send_admin_notification(user_id)
+    # await send_admin_notification(user_id)
 
 
 # async def send_admin_notification(user_id):
