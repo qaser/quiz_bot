@@ -3,57 +3,18 @@ import logging
 
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message, ReplyKeyboardRemove
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+# from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.bot_config import dp, bot
-from config.mongo_config import users
-from config.telegram_config import PASSWORD
-from handlers import (admin_registration, key_rules, pb, plan,
-                      quiz, registration, reports, service, statistic, terms, videos)
-from texts.initial import INITIAL_TEXT
-from scheduler.scheduler_func import send_quiz_button_in_chat, send_tu_material
-import utils.constants as const
+from handlers import start, service, terms, quiz
+from utils.constants import HELP_TEXT, TIME_ZONE
 
-
-logging.basicConfig(
-    filename='logs_bot.log',
-    level=logging.INFO,
-    filemode='a',
-    format='%(asctime)s - %(message)s',
-    datefmt='%d.%m.%y %H:%M:%S',
-    encoding='utf-8',
-)
-
-
-class PasswordCheck(StatesGroup):
-    password = State()
-
-
-@dp.message(Command('start'))
-async def cmd_start(message: Message, state: FSMContext):
-    user_id = message.from_user.id
-    check_user = users.find_one({'user_id': user_id})
-    if check_user is not None:
-        await message.answer(INITIAL_TEXT)
-    else:
-        await message.answer('Введите пароль')
-        await state.set_state(PasswordCheck.password)
-
-
-@dp.message(PasswordCheck.password)
-async def check_password(message: Message, state: FSMContext):
-    if message.text == PASSWORD:
-        await message.answer(INITIAL_TEXT)
-        await state.clear()
-    else:
-        await message.answer('Пароль неверный, повторите попытку')
-        return
+from aiogram_dialog import setup_dialogs
 
 
 @dp.message(Command('reset'))
-async def cmd_reset(message: Message, state: FSMContext):
+async def reset_handler(message: Message, state: FSMContext):
     await message.delete()
     await state.clear()
     await message.answer(
@@ -62,48 +23,48 @@ async def cmd_reset(message: Message, state: FSMContext):
     )
 
 
+@dp.message(Command('help'))
+async def help_handler(message: Message):
+    await message.answer(HELP_TEXT)
+
+
 async def main():
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(
-        send_quiz_button_in_chat,
-        'cron',
-        month='1,4,7,10',
-        day=12,
-        hour=8,
-        minute=0,
-        timezone=const.TIME_ZONE
+    # scheduler = AsyncIOScheduler()
+    # scheduler.add_job(
+    #     send_quiz_button_in_chat,
+    #     'cron',
+    #     month='1,4,7,10',
+    #     day=12,
+    #     hour=8,
+    #     minute=0,
+    #     timezone=TIME_ZONE
+    # )
+    # scheduler.add_job(
+    #     send_quiz_button_in_chat,
+    #     'cron',
+    #     month='3,6,9,12',
+    #     day=29,
+    #     hour=8,
+    #     minute=0,
+    #     timezone=TIME_ZONE
+    # )
+    # scheduler.add_job(
+    #     send_tu_material,
+    #     'cron',
+    #     hour=8,
+    #     minute=0,
+    #     timezone=TIME_ZONE
+    # )
+    # scheduler.start()
+    dp.include_routers(
+        service.router,
+        start.router,
+        terms.router,
+        quiz.router,
+        terms.dialog,
+        quiz.dialog,
     )
-    scheduler.add_job(
-        send_quiz_button_in_chat,
-        'cron',
-        month='3,6,9,12',
-        day=29,
-        hour=8,
-        minute=0,
-        timezone=const.TIME_ZONE
-    )
-    scheduler.add_job(
-        send_tu_material,
-        'cron',
-        hour=8,
-        minute=0,
-        timezone=const.TIME_ZONE
-    )
-    scheduler.start()
-    dp.include_router(service.router)
-    dp.include_router(registration.router)
-    dp.include_router(admin_registration.router)
-    # dp.include_router(plan.router)
-    dp.include_router(quiz.router)
-    # dp.include_router(import_questions.router)
-    dp.include_router(reports.router)
-    dp.include_router(key_rules.router)
-    # dp.include_router(attentions.router)
-    # dp.include_router(statistic.router)
-    # dp.include_router(examen.router)
-    dp.include_router(pb.router)
-    dp.include_router(videos.router)
-    dp.include_router(terms.router)  # всегда должен быть последним
+    setup_dialogs(dp)
     await dp.start_polling(bot)
 
 

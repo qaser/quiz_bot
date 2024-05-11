@@ -213,35 +213,29 @@ LABOR_SAFETY = {
 
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
-db = client['quiz_db']
-themes = db['themes']
-users = db['users']
-admin_requests = db['admin_requests']
-offers = db['offers']
-results = db['results']
-questions = db['questions']
-plans = db['plans']
+db = client['camarada_db']
 terms = db['terms']
 
 TERMS = {
-    'risk': RISKS,
-    'pb': INDUSTRIAL_SAFETY,
-    'gas': SUBSTANCES,
-    'ot': LABOR_SAFETY,
+    'risk_theory': RISKS,
+    'pb_theory': INDUSTRIAL_SAFETY,
+    'gas_theory': SUBSTANCES,
+    'ot_theory': LABOR_SAFETY,
 }
 
 TERMS_VALUE = {
-    'risk': 'Идентификация опасностей и управление рисками',
-    'pb': 'Промышленная безопасность',
-    'gas': 'Свойства вредных и опасных веществ',
-    'ot': 'Охрана труда и пожарная безопасность',
+    'risk_theory': 'Идентификация опасностей и управление рисками',
+    'pb_theory': 'Промышленная безопасность',
+    'gas_theory': 'Свойства вредных и опасных веществ',
+    'ot_theory': 'Охрана труда и пожарная безопасность',
 }
 
 for key, value in TERMS.items():
     for term, description in value.items():
         terms.insert_one({
-            'theme_code': key,
-            'theme': TERMS_VALUE[key],
+            # 'theme_code': key,
+            'theme': key,
             'name': term.capitalize(),
             'description': description,
+            'is_active': True
         })
