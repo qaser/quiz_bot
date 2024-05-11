@@ -65,8 +65,8 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
     score = context.dialog_data['user_result']['count']
     users_num = users.count_documents({})
     place = context.dialog_data.get('place', users_num)
-    move_num = context.dialog_data['move_num']
-    move_sign = context.dialog_data['move_sign']
+    move_num = context.dialog_data.get('move_num', '0')
+    move_sign = context.dialog_data.get('move_sign', '')
     move_sign = '📌' if move_num == '0' else move_sign
     move_num = '' if move_num == '0' else move_num
     errors_themes = Counter(context.dialog_data['user_result']['errors_themes']).most_common(1)
