@@ -64,7 +64,7 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
     questions_count = context.dialog_data['quiz_params']['len']
     score = context.dialog_data['user_result']['count']
     users_num = users.count_documents({})
-    place = context.dialog_data['place']
+    place = context.dialog_data.get('place', users_num)
     move_num = context.dialog_data['move_num']
     move_sign = context.dialog_data['move_sign']
     move_sign = '📌' if move_num == '0' else move_sign
