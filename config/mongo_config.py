@@ -19,7 +19,6 @@ admin_requests = db['admin_requests']
 offers = db['offers']
 plans = db['plans']
 key_rules = db['key_rules']
-attentions = db['attentions']
 plan_tu = db['plan_tu']
 videos = db['videos']
 
