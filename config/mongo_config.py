@@ -3,7 +3,7 @@ import pymongo
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
 
-db = client['camarada_db']
+db = client['quiz_db']
 themes = db['themes']
 users = db['users']
 terms = db['terms']
