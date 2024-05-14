@@ -74,7 +74,7 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
         theme_code, errors_num = errors_themes[0]
         theme_name = themes.find_one({'code': theme_code})['name']
         with_errors = True
-        articles_num = articles.count_documents({'theme': theme_name})
+        articles_num = articles.count_documents({'theme': theme_code})
         have_articles = True if articles_num > 0 else False
         no_articles = not have_articles
     else:
@@ -101,7 +101,6 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
 
 async def get_quiz_report(dialog_manager: DialogManager, **middleware_data):
     context = dialog_manager.current_context()
-    # pprint.pprint(context)
     q_id = context.dialog_data['report_q_id']
     ans_id = context.dialog_data['report_ans_id']
     current_q = questions.find_one({'_id': ObjectId(q_id)})
@@ -121,6 +120,15 @@ async def get_quiz_report(dialog_manager: DialogManager, **middleware_data):
         'options': [(num+1, id, ans_correct[num]) for num, id in enumerate(qs)],
     }
     return data
+
+
+async def get_articles_data(dialog_manager: DialogManager, **middleware_data):
+    context = dialog_manager.current_context()
+    errors_themes = Counter(context.dialog_data['user_result']['errors_themes']).most_common(1)
+    theme_code, _ = errors_themes[0]
+    articles_qs = list(articles.find({'theme': theme_code}))
+    articles_list = [(a['title'], a['link'], str(a['_id'])) for a in articles_qs]
+    return {'articles': articles_list}
 
 
 async def get_stats(dialog_manager: DialogManager, **middleware_data):

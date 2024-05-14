@@ -1,5 +1,5 @@
 from aiogram_dialog.widgets.kbd import (Radio, Column, Button,
-                                        ScrollingGroup, Multiselect, Row)
+                                        ScrollingGroup, Multiselect, Row, Url, ListGroup)
 from aiogram_dialog.widgets.text import Format, Const
 
 from . import selected
@@ -99,6 +99,24 @@ def result_buttons():
             on_click=selected.on_main_menu
         ),
         id='result_btns'
+    )
+
+
+def result_articles_buttons():
+    return ScrollingGroup(
+        ListGroup(
+            Url(
+                Format('{item[0]}'),
+                Format('{item[1]}'),
+            ),
+            id='report_select_article',
+            item_id_getter=lambda i: i[2],
+            items='articles',
+        ),
+        id='report_articles',
+        hide_on_single_page = True,
+        height=SCROLLING_HEIGHT,
+        width=1
     )
 
 

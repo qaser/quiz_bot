@@ -3,7 +3,7 @@ import pymongo
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
 
-db = client['quiz_db']
+db = client['camarada_db']
 themes = db['themes']
 users = db['users']
 terms = db['terms']
@@ -70,6 +70,7 @@ videos = db['videos']
     'theme': код темы
     'tags': список тегов
     'title': название статьи
+    'date': дата добавления в БД
     'link': ссылка
 
 структура данных results_ks

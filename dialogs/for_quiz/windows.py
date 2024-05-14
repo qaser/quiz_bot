@@ -104,7 +104,7 @@ def quiz_result_window():
                   'Вы совершили на вопросах по теме "{theme_name}"\n'),
             when='with_errors'
         ),
-        Const(texts.QUIZ_REPORT_WARNING,  when='no_articles'),
+        Const(texts.QUIZ_ARTICLES_WARNING,  when='no_articles'),
         Format('🏆 Ваше место в рейтинге: {place} из {users} 👷🏼 ({move_sign}{move_num})'),
         keyboards.result_buttons(),
         state=states.Quiz.quiz_result,
@@ -168,6 +168,17 @@ def analysis_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.analysis,
         getter=getters.get_analysis_data,
+        parse_mode='HTML'
+    )
+
+
+def articles_window():
+    return Window(
+        Const(texts.ARTICLES_TITLE),
+        keyboards.result_articles_buttons(),
+        Back(Const(texts.BACK_BUTTON)),
+        state=states.Quiz.articles,
+        getter=getters.get_articles_data,
         parse_mode='HTML'
     )
 

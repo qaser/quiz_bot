@@ -20,6 +20,7 @@ dialog =  Dialog(
     windows.quiz_report_window(),
     windows.stats_window(),
     windows.analysis_window(),
+    windows.articles_window(),
 )
 
 

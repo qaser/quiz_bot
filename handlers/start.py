@@ -57,7 +57,7 @@ async def check_password(message: Message, state: FSMContext):
                 unblock_date = dt.datetime.now() + dt.timedelta(minutes=5)
                 await state.update_data(unblock_date=unblock_date)
                 await state.update_data(trying=3)
-                await message.answer(f'Пароль неверный. Попыток не осталось, попробуйте через 5 минут')
+                await message.answer(f'Пароль неверный. Попыток не осталось 😔, попробуйте через 5 минут')
             else:
                 await message.answer(f'Пароль неверный. Осталось попыток: {trying}')
                 return

@@ -155,8 +155,8 @@ def user_stats_update(manager: DialogManager):
     else:
         q_count = questions_count + res['questions_count']
         user_score = score + res['score']
-        rating = int((user_score / q_count) * 100000)
         quiz_count = res['quiz_count'] + 1
+        rating = int((user_score / q_count) * 100000) + quiz_count
         new_place = results.count_documents({'rating': {'$gt': rating}})
         new_place = 1 if new_place == 0 else new_place
         old_place = res['place']
@@ -180,11 +180,6 @@ def user_stats_update(manager: DialogManager):
         )
 
 
-async def on_quiz_guideline(callback, widget, manager: DialogManager):
-    context = manager.current_context()
-    context.dialog_data.update(category='report')
-
-
 async def on_quiz_report(callback, widget, manager: DialogManager, data=None):
     context = manager.current_context()
     if data is None:
@@ -204,8 +199,11 @@ async def on_stats(callback, widget, manager: DialogManager):
 
 
 async def on_analysis(callback, widget, manager: DialogManager):
-    context = manager.current_context()
     await manager.switch_to(states.Quiz.analysis)
+
+
+async def on_quiz_guideline(callback, widget, manager: DialogManager):
+    await manager.switch_to(states.Quiz.articles)
 
 
 async def on_adding_questions(callback, widget, manager: DialogManager):

@@ -11,3 +11,4 @@ class Quiz(StatesGroup):
     quiz_step = State()
     quiz_result = State()
     quiz_report = State()
+    articles = State()
