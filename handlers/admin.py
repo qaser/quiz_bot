@@ -76,13 +76,11 @@ async def request_save(message: Message, state: FSMContext):
         user_id = message.from_user.id
         data = await state.get_data()
         comment = data['comment']
-        user = users.find_one({'user_id': user_id})
-        user_dep = user.get('department')
-        username = user.get('full_name')
+        username = message.from_user.full_name
         admin_requests.insert_one(
             {
                 'user_id': user_id,
-                'username': username,
+                'username': message.from_user.full_name,
                 'comment': comment,
             }
         )
@@ -91,7 +89,7 @@ async def request_save(message: Message, state: FSMContext):
             chat_id=ADMIN_TELEGRAM_ID,
             text=(
                 'Получена заявка на получение прав Администратора:\n\n'
-                f'{username}\n{user_dep}\n"{comment}"\n\n'
+                f'{username}\n"{comment}"\n\n'
             ),
             reply_markup=kb.accept_or_deny(user_id)
         )

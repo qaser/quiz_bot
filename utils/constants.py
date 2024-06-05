@@ -39,8 +39,7 @@ HELP_TEXT = (
     'Команды для пользователей:\n'
     '/quiz - Статистика проверки знаний\n'
     '/terms - Термины и определения\n'
-    '/videos - Короткие обучающие ролики\n'
-    '/key_rules - Ключевые правила безопасности\n'
+    '/options - Настройки\n'
 )
 
 QUIZ_HELLO_TEXT = (
@@ -83,6 +82,7 @@ TU = {
     '12.01.2024': 'https://telegra.ph/Tehnicheskaya-ucheba-KC-56-ot-12012024-01-09',
     '19.01.2024': 'https://telegra.ph/Tehnicheskaya-uchyoba-ba-KC-56-ot-19012024-01-19',
 }
+
 
 BOT_TERMS = '''
     <u>1. Основные понятия</u>

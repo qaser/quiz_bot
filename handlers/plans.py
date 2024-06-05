@@ -24,7 +24,7 @@ dialog =  Dialog(
 
 @router.message(Command('plans'))
 async def blpu_request(message: Message, dialog_manager: DialogManager):
-    # await message.delete()
+    await message.delete()
     # Important: always set `mode=StartMode.RESET_STACK` you don't want to stack dialogs
     await dialog_manager.start(Plans.select_category, mode=StartMode.RESET_STACK)
 

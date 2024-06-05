@@ -10,7 +10,7 @@ from config.bot_config import dp, bot
 from handlers import (
     start, service, terms, quiz, options, articles, admin, blpu, plans
 )
-from scheduler.scheduler_func import check_tu_events
+from scheduler.scheduler_func import check_tu_events, send_news
 from utils.constants import HELP_TEXT, TIME_ZONE
 from middlewares.check_user import CheckUserMiddleware
 
@@ -37,6 +37,14 @@ async def main():
     scheduler.add_job(
         check_tu_events,
         'cron',
+        hour=10,
+        minute=0,
+        timezone=TIME_ZONE
+    )
+    scheduler.add_job(
+        send_news,
+        'cron',
+        day_of_week='mon-sun',
         hour=10,
         minute=0,
         timezone=TIME_ZONE
