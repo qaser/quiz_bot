@@ -47,9 +47,8 @@ async def show_conditions(message):
     kb.adjust(1)
     condition = conditions.find({}).sort({'release_date': -1}).limit(1)[0]
     text = condition['text']
-    release_date = condition['release_date']
     await message.answer(
-        f'{DISCLAIMER}\nПоследняя редакция от {release_date}\n\n{text}',
+        f'Пользовательское соглшение:\n{text}',
         reply_markup=kb.as_markup(),
     )
     await message.delete()
