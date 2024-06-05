@@ -48,8 +48,9 @@ async def show_conditions(message):
     condition = conditions.find({}).sort({'release_date': -1}).limit(1)[0]
     text = condition['text']
     await message.answer(
-        f'Пользовательское соглшение:\n{text}',
+        f'Пользовательское соглашение:\n{text}',
         reply_markup=kb.as_markup(),
+        parse_mode='HTML'
     )
     await message.delete()
 
