@@ -1,7 +1,5 @@
 TIME_ZONE = 'Asia/Yekaterinburg'
 
-START_TEXT = ('В нижней части есть кнопка "Меню", там Вы найдете всё необходимое')
-
 PASS_TEXT = 'Введите пароль'
 
 HELP_TEXT = 'команды'
@@ -53,7 +51,7 @@ QUIZ_HELLO_TEXT = (
     'повторно перейдя по ссылке @quiz_blpu_bot'
 )
 
-DEPARTMENTS = [
+DEPARTMENTS = (
     'КЦ-1,4',
     'КЦ-2,3',
     'КЦ-5,6',
@@ -65,8 +63,7 @@ DEPARTMENTS = [
     'СЗК',
     'АиМО',
     'Связь',
-    'гостевой доступ'
-]
+)
 
 TEST_TYPE = {
     'input': 'входной',

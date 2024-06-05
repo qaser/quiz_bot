@@ -12,6 +12,15 @@ from texts.initial import ADMIN_REQUEST
 from utils.decorators import registration_check
 
 
+ADMIN_REQUEST = (
+    'Вы собираетесь подать заявку на права Администратора '
+    'системы.\n\n'
+    'Напишите комментарий, который поможет определить '
+    'целесообразность предоставления Вам этих прав.\n'
+    'Если Вы передумали, то введите "отмена"'
+)
+
+
 router = Router()
 
 
@@ -27,11 +36,11 @@ class AdminRequestConfirm(StatesGroup):
 
 
 @registration_check
-@router.message(Command('admin_request'))
+@router.message(Command('admin'))
 async def admin_request(message: Message, state: FSMContext):
     user_id = message.from_user.id
     user_is_admin = users.find_one({'user_id': user_id}).get('is_admin')
-    if user_is_admin == 'true':
+    if user_is_admin == True:
         await message.answer('Вы уже являетесь администратором')
     else:
         request_user = admin_requests.find_one({'user_id': user_id})
@@ -88,6 +97,7 @@ async def request_save(message: Message, state: FSMContext):
         )
         await message.answer(
             'Заявка отправлена.\nВ ближайшее время Вам придёт ответ',
+            reply_markup=ReplyKeyboardRemove()
         )
     else:
         await message.answer(
@@ -103,11 +113,14 @@ async def request_save(message: Message, state: FSMContext):
 async def admin_request_confirm(call: CallbackQuery):
     _, user_id, result = call.data.split('_')
     if result == 'deny':
-        await bot.send_message(chat_id=user_id, text='Ваша заявка отклонена')
+        await bot.send_message(
+            chat_id=user_id,
+            text='Ваша заявка на права администратора отклонена'
+        )
     else:
         users.update_one(
             {'user_id': int(user_id)},
-            {'$set': {'is_admin': 'true'}},
+            {'$set': {'is_admin': True}},
             upsert=False
         )
         await bot.send_message(

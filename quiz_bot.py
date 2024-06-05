@@ -4,11 +4,15 @@ import logging
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
-# from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config.bot_config import dp, bot
-from handlers import start, service, terms, quiz
+from handlers import (
+    start, service, terms, quiz, options, articles, admin, blpu, plans
+)
+from scheduler.scheduler_func import check_tu_events
 from utils.constants import HELP_TEXT, TIME_ZONE
+from middlewares.check_user import CheckUserMiddleware
 
 from aiogram_dialog import setup_dialogs
 
@@ -29,40 +33,32 @@ async def help_handler(message: Message):
 
 
 async def main():
-    # scheduler = AsyncIOScheduler()
-    # scheduler.add_job(
-    #     send_quiz_button_in_chat,
-    #     'cron',
-    #     month='1,4,7,10',
-    #     day=12,
-    #     hour=8,
-    #     minute=0,
-    #     timezone=TIME_ZONE
-    # )
-    # scheduler.add_job(
-    #     send_quiz_button_in_chat,
-    #     'cron',
-    #     month='3,6,9,12',
-    #     day=29,
-    #     hour=8,
-    #     minute=0,
-    #     timezone=TIME_ZONE
-    # )
-    # scheduler.add_job(
-    #     send_tu_material,
-    #     'cron',
-    #     hour=8,
-    #     minute=0,
-    #     timezone=TIME_ZONE
-    # )
-    # scheduler.start()
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        check_tu_events,
+        'cron',
+        hour=10,
+        minute=0,
+        timezone=TIME_ZONE
+    )
+    scheduler.start()
+    dp.update.outer_middleware(CheckUserMiddleware())
     dp.include_routers(
         service.router,
         start.router,
+        admin.router,
         terms.router,
         quiz.router,
+        options.router,
+        articles.router,
+        blpu.router,
+        plans.router,
         terms.dialog,
         quiz.dialog,
+        options.dialog,
+        articles.dialog,
+        blpu.dialog,
+        plans.dialog,
     )
     setup_dialogs(dp)
     await dp.start_polling(bot)

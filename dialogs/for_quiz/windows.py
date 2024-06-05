@@ -1,9 +1,18 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Cancel, Back, Button, Group, Select
+from aiogram_dialog.widgets.kbd import (Cancel, Back, Button,
+                                        Group, Select, CurrentPage,
+                                        NextPage, PrevPage, Row)
 from aiogram_dialog.widgets.text import Format, Const
 
 from . import keyboards, getters, selected, states
 import utils.constants as texts
+
+from aiogram_dialog.widgets.kbd import (
+    CurrentPage, NextPage, PrevPage, Row
+)
+
+
+ID_SCROLL_PAGER = 'themes_pager'
 
 
 async def exit_click(callback, button, dialog_manager):
@@ -28,7 +37,12 @@ def themes_window():
         Const(texts.QUIZ_THEMES_TEXT),
         Const(texts.QUIZ_THEME_WARNING, when='warning'),
         Format('🔷 <u>Выбрано тем: {themes_count}</u>'),
-        keyboards.paginated_themes(),
+        keyboards.paginated_themes(ID_SCROLL_PAGER),
+        Row(
+            PrevPage(scroll=ID_SCROLL_PAGER, text=Format('<')),
+            CurrentPage(scroll=ID_SCROLL_PAGER, text=Format('{current_page1} / {pages}')),
+            NextPage(scroll=ID_SCROLL_PAGER, text=Format('>')),
+        ),
         Button(
             Const(texts.NEXT_BUTTON),
             id='themes_done',
@@ -37,7 +51,7 @@ def themes_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.select_themes,
         getter=getters.get_themes,
-        parse_mode='HTML'
+        parse_mode='HTML',
     )
 
 

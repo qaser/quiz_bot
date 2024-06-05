@@ -1,5 +1,5 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Cancel, Back
+from aiogram_dialog.widgets.kbd import Cancel, Back, Button
 from aiogram_dialog.widgets.text import Format, Const
 
 from . import keyboards, getters, selected

@@ -21,16 +21,16 @@ def main_menu_buttons():
             on_click=selected.on_stats,
             when=no_first_quiz
         ),
-        # Button(
-        #     Const('📝 Добавить вопросы в БД'),
-        #     'add_questions',
-        #     on_click=selected.on_adding_questions,
-        #     when=is_admin
-        # )
+        Button(
+            Const('📝 Добавить вопросы в БД'),
+            'add_questions',
+            on_click=selected.on_adding_questions,
+            when=is_admin
+        )
     )
 
 
-def paginated_themes():
+def paginated_themes(id_pager):
     return ScrollingGroup(
         Multiselect(
             Format('🟢 {item[name]}'),
@@ -41,9 +41,11 @@ def paginated_themes():
             min_selected=0,
             max_selected=5
         ),
-        id='themes_page',
+        id=id_pager,
         width=1,
-        height=SCROLLING_HEIGHT
+        height=SCROLLING_HEIGHT,
+        hide_pager=True,
+        hide_on_single_page=True
     )
 
 

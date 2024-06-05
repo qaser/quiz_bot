@@ -5,10 +5,21 @@ from aiogram.exceptions import AiogramError
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config.bot_config import bot
-from config.mongo_config import plans, users
+from config.mongo_config import plans, users, scheduler_tu
 from config.telegram_config import ADMIN_TELEGRAM_ID, CHAT_56_ID, QUIZ_THREAD_ID
 from utils.constants import TEST_TYPE, TU, QUIZ_HELLO_TEXT
 from utils.utils import calc_date, calc_test_type
+
+
+async def check_tu_events():
+    today = dt.datetime.today().strftime('%d.%m.%Y')
+    queryset = scheduler_tu.find({'date': today})
+    if queryset is not None:
+        for event in len(queryset):
+            if event['type'] == 'quiz':
+                print('Отсылаем кнопку тестирования')
+            elif event['type'] == 'article':
+                print('Отсылаем статью')
 
 
 # отправка кнопки для начала тестирования

@@ -12,13 +12,15 @@ answers = db['answers']
 results = db['results']
 articles = db['articles']
 docs = db['docs']
+conditions = db['conditions']
+admin_requests = db['admin_requests']
+plans = db['plans']
+results_tu = db['results_tu']
+scheduler_tu = db['scheduler']
+
 
 buffer = db['buffer']
-results_ks = db['results_ks']
-admin_requests = db['admin_requests']
 offers = db['offers']
-plans = db['plans']
-key_rules = db['key_rules']
 plan_tu = db['plan_tu']
 videos = db['videos']
 
@@ -51,7 +53,6 @@ videos = db['videos']
     'text': текст ответа
 
 структура данных terms
-    '_id' дефолтный первичный ключ
     'theme_code': код темы
     'name': название термина
     'description': описание термина
@@ -73,7 +74,7 @@ videos = db['videos']
     'date': дата добавления в БД
     'link': ссылка
 
-структура данных results_ks
+структура данных results_tu
     '_id': дефолтный первичный ключ
     'user_id': id пользователя телеграм
     'year': год проверки знаний
@@ -82,13 +83,6 @@ videos = db['videos']
     'done': прошел проверку знаний (булево)
     'quiz_results': список из кортежей
     'grade': оценка за тест
-
-структура данных question
-    '_id': дефолтный первичный ключ
-    'theme' тематика вопроса
-    'question' вопрос (не более 200 знаков)
-    'correct_answer' индекс правильного ответа
-    'answers' ответы (список)
 
 структура данных планов (plans)
     '_id': дефолтный первичный ключ
@@ -100,25 +94,26 @@ videos = db['videos']
     'questions' id вопросов список
 
 структура данных admin_requests
-    '_id' дефолтный первичный ключ
     'user_id' id юзера
     'username' имя пользователя
     'comment' комментарий
 
 структура данных themes
-    '_id' дефолтный первичный ключ
     'code' id юзера
     'name' имя пользователя
 
-структура данных definitions
-    '_id' дефолтный первичный ключ
-    'theme_code': код темы
-    'theme': тематика терминов
-    'name': название термина
-    'description': описание термина
+структура данных tu_scheduler
+    'date' дата рассылки
+    'time' время рассылки
+    'type' тип рассылки (quiz, article)
+    'event_id' _id события, например plans
 
 структура данных plan_tu
     'department' наименование подразделения
     'plan': словарь с даными вида: {'date': дата, 'theme: название темы, 'doc':ссылка на документ}
+
+структура данных conditions
+    'text': текст пользовательского соглашения
+    'release_date': дата выхода
 
 '''

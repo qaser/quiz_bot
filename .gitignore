@@ -50,3 +50,5 @@ media/cache/
 run.sh
 
 *.log
+
+dump.rdb
