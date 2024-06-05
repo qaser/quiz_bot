@@ -33,11 +33,20 @@ async def check_tu_events():
 
 async def send_news():
     qs = list(users.find({}))
+    count = 0
     for user in qs:
-        await bot.send_message(
-            chat_id=user['user_id'],
-            text=NEWS
-        )
+        try:
+            await bot.send_message(
+                chat_id=user['user_id'],
+                text=NEWS
+            )
+            count += 1
+        except:
+            pass
+    await bot.send_message(
+        ADMIN_TELEGRAM_ID,
+        text=f'Рассылка отправлена. Доступно {count} из {len(qs)}'
+    )
 
 
 
