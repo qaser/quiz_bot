@@ -41,14 +41,14 @@ async def main():
         minute=0,
         timezone=TIME_ZONE
     )
-    scheduler.add_job(
-        send_news,
-        'cron',
-        day_of_week='mon-sun',
-        hour=10,
-        minute=0,
-        timezone=TIME_ZONE
-    )
+    # scheduler.add_job(
+    #     send_news,
+    #     'cron',
+    #     day_of_week='mon-sun',
+    #     hour=10,
+    #     minute=0,
+    #     timezone=TIME_ZONE
+    # )
     scheduler.start()
     dp.update.outer_middleware(CheckUserMiddleware())
     dp.include_routers(
