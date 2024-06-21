@@ -1,10 +1,11 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Cancel, Back
-from aiogram_dialog.widgets.text import Format, Const
 from aiogram_dialog.widgets.input import TextInput
+from aiogram_dialog.widgets.kbd import Back, Cancel
+from aiogram_dialog.widgets.text import Const, Format
 
-from . import keyboards, getters, selected
 from dialogs.for_blpu.states import Blpu
+
+from . import getters, keyboards, selected
 
 
 async def on_click(callback, button, dialog_manager):
@@ -33,8 +34,7 @@ def input_name_window():
             on_success=selected.save_username,
         ),
         Back(Const('🔙 Назад')),
-        state=Blpu.input_name,
-        parse_mode='HTML'
+        state=Blpu.input_name
     )
 
 

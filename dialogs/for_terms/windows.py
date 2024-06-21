@@ -1,9 +1,10 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Cancel, Back, Button
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import Back, Button, Cancel
+from aiogram_dialog.widgets.text import Const, Format
 
-from . import keyboards, getters, selected
 from dialogs.for_terms.states import Terms
+
+from . import getters, keyboards, selected
 
 
 async def on_click(callback, button, dialog_manager):

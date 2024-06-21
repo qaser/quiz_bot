@@ -1,6 +1,7 @@
-import pymongo
-import os
 import json
+import os
+
+import pymongo
 
 # from config.mongo_config import quiz
 

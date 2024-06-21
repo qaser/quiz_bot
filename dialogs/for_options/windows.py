@@ -1,10 +1,11 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import Cancel, Back
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import Back, Cancel
+from aiogram_dialog.widgets.text import Const, Format
 
-from . import keyboards, getters
-from dialogs.for_options.states import Options
 import utils.constants as texts
+from dialogs.for_options.states import Options
+
+from . import getters, keyboards
 
 SUBSCRIBE_TEXT = ('Бот может рассылать уведомления об обновлениях приложения.\n'
                   'Если Вы не хотите получать уведомления, то включите "тихий режим"')
@@ -37,7 +38,6 @@ def conditions_window():
         Back(Const(texts.BACK_BUTTON)),
         state=Options.conditions,
         getter=getters.get_conditions,
-        parse_mode='HTML'
     )
 
 
@@ -49,7 +49,7 @@ def conditions_window():
 #         keyboards.subscribe_buttons(),
 #         state=Options.subscribe,
 #         getter=getters.get_subscribe,
-#         parse_mode='HTML'
+#
 #     )
 
 
@@ -59,5 +59,4 @@ def delete_user_window():
         Const(DELETE_TEXT),
         keyboards.delete_user_buttons(),
         state=Options.delete_user,
-        parse_mode='HTML',
     )

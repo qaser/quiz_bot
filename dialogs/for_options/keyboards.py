@@ -1,8 +1,9 @@
-from aiogram_dialog.widgets.kbd import Column, Button
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import Button, Column
+from aiogram_dialog.widgets.text import Const, Format
+
+import utils.constants as texts
 
 from . import selected
-import utils.constants as texts
 
 
 def category_buttons():

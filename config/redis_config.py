@@ -1,5 +1,5 @@
 import redis
-from aiogram.fsm.storage.redis import RedisStorage, DefaultKeyBuilder
+from aiogram.fsm.storage.redis import DefaultKeyBuilder, RedisStorage
 
 # Create the client
 client = RedisStorage(redis)

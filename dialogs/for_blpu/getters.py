@@ -1,4 +1,5 @@
 from aiogram_dialog import DialogManager
+
 from utils.constants import DEPARTMENTS
 
 

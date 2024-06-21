@@ -1,12 +1,11 @@
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, Message
 from bson.objectid import ObjectId
 
+import keyboards.for_videos as kb
 from config.bot_config import bot
 from config.mongo_config import videos
-import keyboards.for_videos as kb
-
 
 router = Router()
 

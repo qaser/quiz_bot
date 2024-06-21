@@ -1,14 +1,13 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import (
-    Cancel, Back, Button, CurrentPage, NextPage, PrevPage,
-    Row, Calendar, CalendarConfig, SwitchTo
-)
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import (Back, Button, Cancel, CurrentPage,
+                                        NextPage, PrevPage, Row)
+from aiogram_dialog.widgets.text import Const, Format
 
-from . import keyboards, getters, selected
-from dialogs.for_plans.states import Plans
 import utils.constants as texts
 from dialogs.custom_widgets.custom_calendar import CustomCalendar
+from dialogs.for_tu.states import Tu
+
+from . import getters, keyboards, selected
 
 ID_SCROLL_PAGER = 'themes_pager'
 PLANS_THEMES_TEXT = ('Выберите темы для составления квартального теста знаний '
@@ -33,7 +32,7 @@ def main_menu_window():
         Const('Модуль планирования технической учёбы'),
         keyboards.category_buttons(),
         Cancel(Const('🔚 Выход'), on_click=on_click),
-        state=Plans.select_category,
+        state=Tu.select_category,
     )
 
 
@@ -42,7 +41,7 @@ def select_year_window():
         Const('Выберите год планирования ТУ'),
         keyboards.years_buttons(),
         Back(Const(texts.BACK_BUTTON)),
-        state=Plans.select_year,
+        state=Tu.select_year,
     )
 
 
@@ -51,7 +50,7 @@ def select_quarter_window():
         Const('Выберите квартал планирования ТУ'),
         keyboards.quarters_buttons(),
         Back(Const(texts.BACK_BUTTON)),
-        state=Plans.select_quarter,
+        state=Tu.select_quarter,
     )
 
 
@@ -70,12 +69,12 @@ def select_themes_window():
         Button(
             Const(texts.NEXT_BUTTON),
             id='select_date',
-            on_click=selected.on_themes_done
+            on_click=selected.on_themes_done,
+            when='chosen_one'
         ),
         Back(Const(texts.BACK_BUTTON)),
-        state=Plans.select_themes,
-        getter=getters.get_themes,
-        parse_mode='HTML'
+        state=Tu.select_themes,
+        getter=getters.get_themes
     )
 
 
@@ -83,7 +82,9 @@ def select_date_window():
     return Window(
         Format(
             ('Выберите дату рассылки тестового задания в '
-             '<u>{period}</u> <b>{q}</b> кв. <b>{y}</b> г.')
+             '<u>{period}</u> {q} кв. {y}г.\n'
+             '<b>Подсказка:</b> найдите в календаре <u>{y}</u> год, '
+             'затем <u>{m}</u> и выберите дату')
         ),
         CustomCalendar(
             id='calendar',
@@ -91,15 +92,13 @@ def select_date_window():
         ),
         Back(Const(texts.BACK_BUTTON)),
         getter=getters.get_plan_params,
-        state=Plans.select_date,
-        parse_mode='HTML'
+        state=Tu.select_date
     )
 
 
 def save_plan_window():
     return Window(
-        Const('Данные сохранены'),
+        Format('Данные сохранены'),
         Cancel(Const('🔚 Выход'), on_click=on_click),
-        state=Plans.save_plan,
-        parse_mode='HTML'
+        state=Tu.save_plan
     )

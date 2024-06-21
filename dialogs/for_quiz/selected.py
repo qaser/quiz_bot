@@ -1,14 +1,26 @@
+import random
+import datetime as dt
 from collections import Counter
+
 from aiogram_dialog import DialogManager, StartMode
 from bson.objectid import ObjectId
-import random
+
+from config.mongo_config import answers, docs, questions, results, themes, plans, results_tu
+from utils.utils import calc_grade
 
 from . import states
-from config.mongo_config import questions, themes, answers, docs, results
 
 
 async def on_main_menu(callback, widget, manager: DialogManager):
-    await manager.start(states.Quiz.select_category, mode=StartMode.RESET_STACK)
+    context = manager.current_context()
+    if context.dialog_data['category'] == 'tu_quiz':
+        try:
+            await manager.done()
+            await callback.message.delete()
+        except:
+            pass
+    else:
+        await manager.start(states.Quiz.select_category, mode=StartMode.RESET_STACK)
 
 
 async def on_choose_themes(callback, widget, manager: DialogManager):
@@ -124,8 +136,12 @@ async def on_quiz_step(callback, widget, manager: DialogManager):
     quiz_params = context.dialog_data['quiz_params']
     quiz_len = quiz_params['len']  # сколько всего вопросов
     if quiz_count == quiz_len:  # завершение теста, сохранение статистики юзера
-        user_stats_update(manager)
-        await manager.switch_to(states.Quiz.quiz_result)
+        if context.dialog_data['category'] == 'tu_quiz':
+            save_tu_quiz_result(manager)
+            await manager.switch_to(states.Quiz.tu_quiz_result)
+        else:
+            user_stats_update(manager)
+            await manager.switch_to(states.Quiz.quiz_result)
     else:
         await prepare_question(manager, quiz_count)
         quiz_count+=1
@@ -178,6 +194,33 @@ def user_stats_update(manager: DialogManager):
             }},
             upsert=False
         )
+
+
+def save_tu_quiz_result(manager: DialogManager):
+    context = manager.current_context()
+    user_id = manager.event.from_user.id
+    plan_id = context.dialog_data['plan_id']
+    quiz_type = context.dialog_data['quiz_type']
+    quiz_len = context.dialog_data['quiz_params']['len']
+    user_result = context.dialog_data['user_result']
+    plan_tu = plans.find_one({'_id': ObjectId(plan_id)})
+    grade = calc_grade(user_result['count'], quiz_len)
+    context.dialog_data.update(grade=grade)
+    results_tu.update_one(
+        {
+            'user_id': user_id,
+            'year': plan_tu['year'],
+            'quarter': plan_tu['quarter'],
+            'quiz_type': quiz_type
+        },
+        {'$set': {
+            'done': True,
+            'date': dt.datetime.now(),
+            'grade': grade,
+            'quiz_results': user_result
+        }},
+        upsert=True
+    )
 
 
 async def on_quiz_report(callback, widget, manager: DialogManager, data=None):

@@ -1,13 +1,10 @@
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
+from aiogram_dialog import Dialog, DialogManager, StartMode
 
-from aiogram_dialog import Dialog
-from aiogram_dialog import DialogManager, StartMode
-
-from dialogs.for_blpu.states import Blpu
 from dialogs.for_blpu import windows
-
+from dialogs.for_blpu.states import Blpu
 
 router = Router()
 dialog =  Dialog(

@@ -1,18 +1,32 @@
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import (Cancel, Back, Button,
-                                        Group, Select, CurrentPage,
-                                        NextPage, PrevPage, Row)
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import (Back, Button, Cancel, CurrentPage,
+                                        Group, NextPage, PrevPage, Row, Select)
+from aiogram_dialog.widgets.text import Const, Format
 
-from . import keyboards, getters, selected, states
 import utils.constants as texts
 
-from aiogram_dialog.widgets.kbd import (
-    CurrentPage, NextPage, PrevPage, Row
-)
-
+from . import getters, keyboards, selected, states
 
 ID_SCROLL_PAGER = 'themes_pager'
+QUIZ_LEN_TEXT = 'Выберите желаемое количество вопросов в тесте'
+ARTICLES_TITLE = 'Рекомендуемые статьи, выбранные на основе пройденного теста'
+QUIZ_START_TEXT = ('Модуль тестирования знаний.\n'
+                   'Вы можете посмотреть свою статистику '
+                   'прохождения тестов или начать новый тест')
+QUIZ_LEN_WARNING = ('❗ <i>Количество вопросов уменьшено по причине '
+                    'отсутствия в базе данных достаточного количества '
+                    'вопросов по выбранным тематикам</i>')
+QUIZ_THEMES_TEXT = ('Выберите тематику вопросов для составления теста.\n'
+                    'Вы можете выбрать от одной до пяти тем.\n'
+                    'Если Вы не выберите ни одной темы, то тестирование '
+                    'будет проходить по <u>всем темам</u>.\n')
+QUIZ_THEME_WARNING = ('❗ <b>Вы выбрали 5 тем, выбор новых тем ограничен.\n'
+                     'Чтобы изменить выбор просто нажмите на уже '
+                     'выбранную тему, а затем выберите другую</b>\n')
+QUIZ_ARTICLES_WARNING = ('😔 К сожалению в базе знаний отсутствуют статьи по '
+                         'данной теме. Они обязательно скоро появятся!\n')
+QUIZ_REPORT_LEGEND = ('<i>Синим кругом 🔵 отмечен Ваш ответ, правильный ответ '
+                      '<u>подчеркнут</u></i>')
 
 
 async def exit_click(callback, button, dialog_manager):
@@ -25,7 +39,7 @@ async def exit_click(callback, button, dialog_manager):
 
 def quiz_main_window():
     return Window(
-        Const(texts.QUIZ_START_TEXT),
+        Const(QUIZ_START_TEXT),
         keyboards.main_menu_buttons(),
         Cancel((Const(texts.EXIT_BUTTON)), on_click=exit_click),
         state=states.Quiz.select_category,
@@ -34,8 +48,8 @@ def quiz_main_window():
 
 def themes_window():
     return Window(
-        Const(texts.QUIZ_THEMES_TEXT),
-        Const(texts.QUIZ_THEME_WARNING, when='warning'),
+        Const(QUIZ_THEMES_TEXT),
+        Const(QUIZ_THEME_WARNING, when='warning'),
         Format('🔷 <u>Выбрано тем: {themes_count}</u>'),
         keyboards.paginated_themes(ID_SCROLL_PAGER),
         Row(
@@ -51,13 +65,12 @@ def themes_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.select_themes,
         getter=getters.get_themes,
-        parse_mode='HTML',
     )
 
 
 def len_quiz_window():
     return Window(
-        Const(texts.QUIZ_LEN_TEXT),
+        Const(QUIZ_LEN_TEXT),
         keyboards.len_quiz_buttons(),
         Button(
             Const(texts.NEXT_BUTTON),
@@ -74,7 +87,7 @@ def quiz_window():
         Const('<u>Выбранные темы:</u>'),
         Format('<b>{name_themes}</b>'),
         Format('\nВсего вопросов: <b>{quiz_len}</b>'),
-        Const(f'{texts.QUIZ_LEN_WARNING}', when=len_quiz_equal),
+        Const(f'{QUIZ_LEN_WARNING}', when=len_quiz_equal),
         Button(
             Const('🚀 Начать тест'),
             id='quiz_start',
@@ -83,7 +96,6 @@ def quiz_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.quiz,
         getter=getters.get_quiz_params,
-        parse_mode='HTML'
     )
 
 
@@ -105,7 +117,6 @@ def quiz_step_window():
         ),
         state=states.Quiz.quiz_step,
         getter=getters.get_quiz_step,
-        parse_mode='HTML'
     )
 
 
@@ -118,12 +129,11 @@ def quiz_result_window():
                   'Вы совершили на вопросах по теме "{theme_name}"\n'),
             when='with_errors'
         ),
-        Const(texts.QUIZ_ARTICLES_WARNING,  when='no_articles'),
+        Const(QUIZ_ARTICLES_WARNING,  when='no_articles'),
         Format('🏆 Ваше место в рейтинге: {place} из {users} 👷🏼 ({move_sign}{move_num})'),
         keyboards.result_buttons(),
         state=states.Quiz.quiz_result,
         getter=getters.get_quiz_result,
-        parse_mode='HTML'
     )
 
 
@@ -132,7 +142,7 @@ def quiz_report_window():
         Format('<u>Вопрос №{num}</u>'),
         Format('<b>{q_text}\n</b>'),
         Format('{ans_text}'),
-        Const(texts.QUIZ_REPORT_LEGEND),
+        Const(QUIZ_REPORT_LEGEND),
         Group(
             Select(
                 Format('{item[2]} {item[0]} '),
@@ -147,7 +157,6 @@ def quiz_report_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.quiz_report,
         getter=getters.get_quiz_report,
-        parse_mode='HTML'
     )
 
 
@@ -171,7 +180,6 @@ def stats_window():
         ),
         state=states.Quiz.stats,
         getter=getters.get_stats,
-        parse_mode='HTML'
     )
 
 
@@ -182,18 +190,48 @@ def analysis_window():
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.analysis,
         getter=getters.get_analysis_data,
-        parse_mode='HTML'
     )
 
 
 def articles_window():
     return Window(
-        Const(texts.ARTICLES_TITLE),
+        Const(ARTICLES_TITLE),
         keyboards.result_articles_buttons(),
         Back(Const(texts.BACK_BUTTON)),
         state=states.Quiz.articles,
         getter=getters.get_articles_data,
-        parse_mode='HTML'
+    )
+
+
+def tu_quiz_window():
+    return Window(
+        Const('Темы, использованные для составления теста:'),
+        Format('<b>{name_themes}</b>'),
+        Format('\nВсего вопросов: <b>{quiz_len}</b>'),
+        Button(
+            Const('🚀 Начать тест'),
+            id='quiz_start',
+            on_click=selected.on_quiz_step
+        ),
+        state=states.Quiz.tu_quiz,
+        getter=getters.get_quiz_params,
+    )
+
+
+def tu_quiz_result_window():
+    return Window(
+        Const('<u>Результат теста:</u>\n'),
+        Format('🎉 Правильных ответов: {score} из {count}'),
+        Format('🎖️ Ваша оценка за тест: {grade} из 10-ти баллов\n'),
+        Format(
+            text=('❗ Наибольшее количество ошибок ({errors_num}) '
+                  'Вы совершили на вопросах по теме "{theme_name}"\n'),
+            when='with_errors'
+        ),
+        Const(QUIZ_ARTICLES_WARNING,  when='no_articles'),
+        keyboards.result_buttons(),
+        state=states.Quiz.tu_quiz_result,
+        getter=getters.get_quiz_result,
     )
 
 

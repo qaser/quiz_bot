@@ -1,9 +1,10 @@
 from datetime import date
+
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
-from dialogs.for_plans.states import Plans
-from config.mongo_config import questions, themes, plans, scheduler_tu
+from config.mongo_config import plans, questions, scheduler_tu, themes
+from dialogs.for_tu.states import Tu
 
 QUIZ_LEN = 20
 
@@ -11,13 +12,13 @@ QUIZ_LEN = 20
 async def on_choose_category(callback, widget, manager: DialogManager):
     context = manager.current_context()
     context.dialog_data.update(category=widget.widget_id)
-    await manager.switch_to(Plans.select_year)
+    await manager.switch_to(Tu.select_year)
 
 
 async def on_year(callback, widget, manager: DialogManager):
     context = manager.current_context()
     context.dialog_data.update(year=widget.text.text)
-    await manager.switch_to(Plans.select_quarter)
+    await manager.switch_to(Tu.select_quarter)
 
 
 async def on_quarter(callback, widget, manager: DialogManager):
@@ -25,11 +26,11 @@ async def on_quarter(callback, widget, manager: DialogManager):
     context.dialog_data.update(quarter=widget.text.text)
     if context.dialog_data['category'] == 'new_plan':
         await get_themes(manager)
-        await manager.switch_to(Plans.select_themes)
+        await manager.switch_to(Tu.select_themes)
     elif context.dialog_data['category'] == 'show_plan':
-        await manager.switch_to(Plans.plan_review)
+        await manager.switch_to(Tu.plan_review)
     elif context.dialog_data['category'] == 'export_test':
-        await manager.switch_to(Plans.export_test)
+        await manager.switch_to(Tu.export_test)
 
 
 async def get_themes(manager: DialogManager):
@@ -69,7 +70,7 @@ async def on_themes_done(callback, widget, manager: DialogManager):
     ctx.dialog_data.update(plan_id=str(plan['_id']))
     ctx.dialog_data.update(period_start='')
     ctx.dialog_data.update(period_end='')
-    await manager.switch_to(Plans.select_date)
+    await manager.switch_to(Tu.select_date)
 
 
 def get_questions(themes_list):
@@ -82,7 +83,7 @@ def get_questions(themes_list):
         {'$sample': {'size': QUIZ_LEN}},
         {'$group': {
             '_id': ObjectId(),
-            'q_ids': {'$push': '$_id'},
+            'q_ids': {'$push': {"$toString": "$_id"}},
         }},
     ]
     return list(questions.aggregate(pipeline))[0]['q_ids']
@@ -94,11 +95,11 @@ async def on_select_date(callback, widget, manager, clicked_date):
     period_start = ctx.dialog_data['period_start']
     if period_start == '':
         ctx.dialog_data.update(period_start=period)
-        await manager.switch_to(Plans.select_date)
+        await manager.switch_to(Tu.select_date)
     else:
         ctx.dialog_data.update(period_end=period)
         save_plan_in_scheduler(manager)
-        await manager.switch_to(Plans.save_plan)
+        await manager.switch_to(Tu.save_plan)
 
 
 

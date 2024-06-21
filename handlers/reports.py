@@ -1,15 +1,15 @@
 import os
+
 from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, FSInputFile
+from aiogram.types import CallbackQuery, FSInputFile, Message
 
+import keyboards.for_reports as kb
 from config.bot_config import bot
 from config.mongo_config import results, users
 from utils.decorators import admin_check
 from utils.make_pdf import report_department_pdf
 from utils.save_docx_file import create_results_docx_file
-import keyboards.for_reports as kb
-
 
 router = Router()
 

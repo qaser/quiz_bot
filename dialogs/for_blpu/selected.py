@@ -1,8 +1,8 @@
 from aiogram_dialog import DialogManager
 
+from config.mongo_config import users
 from dialogs.for_blpu.states import Blpu
 from utils.constants import DEPARTMENTS
-from config.mongo_config import users
 
 
 async def on_departments(callback, widget, manager: DialogManager, dep_id):

@@ -1,8 +1,8 @@
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
-from dialogs.for_terms.states import Terms
 from config.mongo_config import terms, themes
+from dialogs.for_terms.states import Terms
 
 
 async def get_themes(dialog_manager: DialogManager, **middleware_data):

@@ -1,9 +1,10 @@
 from collections import Counter
+
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
-from config.mongo_config import (questions, themes, users,
-                                 articles, answers, results)
+from config.mongo_config import (answers, articles, questions, results, themes,
+                                 users, plans)
 
 
 async def get_themes(dialog_manager: DialogManager, **middleware_data):
@@ -21,32 +22,46 @@ async def get_themes(dialog_manager: DialogManager, **middleware_data):
 
 async def get_quiz_params(dialog_manager: DialogManager, **middleware_data):
     ctx = dialog_manager.current_context()
-    quiz_len = ctx.dialog_data['quiz_len']  # количество вопросов, которое захотел юзер
-    s_themes = ctx.dialog_data['selected_themes']
-    len_themes = len(s_themes)
-    selected_themes = questions.distinct('theme') if len_themes == 0 else s_themes
-    pipeline = [
-        {'$match': {
-            'theme': {'$in': selected_themes},
-            'is_active': True,
-            'multiple': False
-        }},
-        {'$sample': {'size': int(quiz_len)}},
-        {'$group': {
-            '_id': ObjectId(),
-            'q_ids': {'$push': {"$toString": "$_id"}},
-            'len': { '$sum': 1 }
-        }},
-    ]
-    quiz_params = list(questions.aggregate(pipeline))[0]
-    del quiz_params['_id']
+    category = dialog_manager.start_data.get('category')
+    if category == 'tu_quiz':
+        ctx.dialog_data.update(category=category)
+        plan_id = dialog_manager.start_data['plan_id']
+        quiz_type = dialog_manager.start_data['quiz_type']
+        plan_tu = plans.find_one({'_id': ObjectId(plan_id)})
+        quiz_params = {'q_ids': plan_tu['questions'], 'len': len(plan_tu['questions'])}
+        ctx.dialog_data.update(selected_themes=plan_tu['themes'])
+        ctx.dialog_data.update(quiz_params=quiz_params)
+        ctx.dialog_data.update(quiz_type=quiz_type)
+        ctx.dialog_data.update(plan_id=plan_id)
+        selected_themes = ctx.dialog_data['selected_themes']
+        len_themes = len(selected_themes)
+    else:
+        quiz_len = ctx.dialog_data['quiz_len']  # количество вопросов, которое захотел юзер
+        s_themes = ctx.dialog_data['selected_themes']
+        len_themes = len(s_themes)
+        selected_themes = questions.distinct('theme') if len_themes == 0 else s_themes
+        pipeline = [
+            {'$match': {
+                'theme': {'$in': selected_themes},
+                'is_active': True,
+                'multiple': False
+            }},
+            {'$sample': {'size': int(quiz_len)}},
+            {'$group': {
+                '_id': ObjectId(),
+                'q_ids': {'$push': {"$toString": "$_id"}},
+                'len': { '$sum': 1 }
+            }},
+        ]
+        quiz_params = list(questions.aggregate(pipeline))[0]
+        del quiz_params['_id']
+        ctx.dialog_data.update(quiz_params=quiz_params)
     ctx.dialog_data.update(quiz_count=0)
     ctx.dialog_data.update(user_result={})  # данные о результате пользователя
     ctx.dialog_data['user_result']['count'] = 0
     ctx.dialog_data['user_result']['answers'] = []
     ctx.dialog_data['user_result']['answers_correct'] = []
     ctx.dialog_data['user_result']['errors_themes'] = []
-    ctx.dialog_data.update(quiz_params=quiz_params)
     name_themes = (',\n'.join([themes.find_one({'code': code})['name'] for code in selected_themes])
                    if len_themes > 0
                    else 'Все темы из БД')
@@ -63,12 +78,6 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
     context = dialog_manager.current_context()
     questions_count = context.dialog_data['quiz_params']['len']
     score = context.dialog_data['user_result']['count']
-    users_num = users.count_documents({})
-    place = context.dialog_data.get('place', users_num)
-    move_num = context.dialog_data.get('move_num', '0')
-    move_sign = context.dialog_data.get('move_sign', '')
-    move_sign = '📌' if move_num == '0' else move_sign
-    move_num = '' if move_num == '0' else move_num
     errors_themes = Counter(context.dialog_data['user_result']['errors_themes']).most_common(1)
     if len(errors_themes) > 0:
         theme_code, errors_num = errors_themes[0]
@@ -83,19 +92,40 @@ async def get_quiz_result(dialog_manager: DialogManager, **middleware_data):
         with_errors = False
         no_articles = False
         have_articles = False
-    data = {
-        'count': questions_count,
-        'score': score,
-        'place': place,
-        'users': users_num,
-        'move_sign': move_sign,
-        'move_num': move_num,
-        'errors_num': errors_num,
-        'theme_name': theme_name,
-        'with_errors': with_errors,
-        'have_articles': have_articles,
-        'no_articles': no_articles
-    }
+    if context.dialog_data['category'] == 'tu_quiz':
+        grade = context.dialog_data['grade']
+        data = {
+            'count': questions_count,
+            'score': score,
+            'errors_num': errors_num,
+            'theme_name': theme_name,
+            'with_errors': with_errors,
+            'have_articles': have_articles,
+            'no_articles': no_articles,
+            'grade': grade,
+            'button': 'Выход'
+        }
+    else:
+        users_num = users.count_documents({})
+        place = context.dialog_data.get('place', users_num)
+        move_num = context.dialog_data.get('move_num', '0')
+        move_sign = context.dialog_data.get('move_sign', '')
+        move_sign = '📌' if move_num == '0' else move_sign
+        move_num = '' if move_num == '0' else move_num
+        data = {
+            'count': questions_count,
+            'score': score,
+            'place': place,
+            'users': users_num,
+            'move_sign': move_sign,
+            'move_num': move_num,
+            'errors_num': errors_num,
+            'theme_name': theme_name,
+            'with_errors': with_errors,
+            'have_articles': have_articles,
+            'no_articles': no_articles,
+            'button': 'Главное меню'
+        }
     return data
 
 

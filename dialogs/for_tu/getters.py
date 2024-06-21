@@ -1,8 +1,9 @@
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
-from dialogs.for_plans.states import Plans
 from config.mongo_config import plans, users
+from dialogs.for_tu.states import Tu
+from utils.constants import MONTHS_NAMES
 
 
 async def get_themes(dialog_manager: DialogManager, **middleware_data):
@@ -11,6 +12,7 @@ async def get_themes(dialog_manager: DialogManager, **middleware_data):
     themes_list = ctx.dialog_data['themes']
     themes_count = len(widget.get_checked())
     user_warn = True if themes_count == 15 else False
+    chosen_one = False if themes_count == 0 else True
     dep = users.find_one({'user_id': dialog_manager.event.from_user.id}).get('department')
     if dep:
         plan = plans.find_one(
@@ -28,7 +30,8 @@ async def get_themes(dialog_manager: DialogManager, **middleware_data):
         'themes': themes_list,
         'themes_count': themes_count,
         'warning': user_warn,
-        'plan_it': plan_it
+        'plan_it': plan_it,
+        'chosen_one': chosen_one,
     }
 
 
@@ -36,8 +39,12 @@ async def get_plan_params(dialog_manager: DialogManager, **middleware_data):
     ctx = dialog_manager.current_context()
     period_start = ctx.dialog_data.get('period_start')
     period = 'начале' if period_start == '' else 'конце'
+    q = int(ctx.dialog_data['quarter'])
+    y = ctx.dialog_data['year']
+    m = str((q * 3) if period == 'конце' else ((q * 3) - 2))
     return {
-        'y': ctx.dialog_data['year'],
-        'q': ctx.dialog_data['quarter'],
+        'y': y,
+        'q': q,
+        'm': MONTHS_NAMES[m],
         'period': period,
     }

@@ -1,7 +1,7 @@
 from aiogram_dialog import DialogManager, StartMode
 
+from config.mongo_config import results, users
 from dialogs.for_options.states import Options
-from config.mongo_config import users, results
 
 
 async def on_main_menu(callback, widget, manager: DialogManager):

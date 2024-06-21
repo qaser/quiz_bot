@@ -3,6 +3,7 @@ import pymongo
 # Create the client
 client = pymongo.MongoClient('localhost', 27017)
 
+# db = client['camarada_db']
 db = client['quiz_db']
 themes = db['themes']
 users = db['users']
@@ -79,9 +80,10 @@ videos = db['videos']
     'user_id': id пользователя телеграм
     'year': год проверки знаний
     'quarter': квартал года
-    'test_type': тип теста (входной или выходной)
+    'quiz_type': тип теста (входной или выходной)
     'done': прошел проверку знаний (булево)
-    'quiz_results': список из кортежей
+    'quiz_results': user_result из контекста
+    'date': дата окончания тестирования
     'grade': оценка за тест
 
 структура данных планов (plans)

@@ -1,7 +1,8 @@
 import operator
 
-from aiogram_dialog.widgets.kbd import Select, Column
+from aiogram_dialog.widgets.kbd import Column, Select
 from aiogram_dialog.widgets.text import Format
+
 
 def themes_buttons(on_click):
     return Column(

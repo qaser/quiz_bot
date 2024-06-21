@@ -1,13 +1,10 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
+from aiogram_dialog import Dialog, DialogManager, StartMode
 
-from aiogram_dialog import Dialog
-from aiogram_dialog import DialogManager, StartMode
-
-from dialogs.for_articles.states import Articles
 from dialogs.for_articles import windows
-
+from dialogs.for_articles.states import Articles
 
 router = Router()
 dialog =  Dialog(

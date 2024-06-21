@@ -1,32 +1,18 @@
 from datetime import date
 from typing import Dict
 
-from aiogram import F
-from babel.dates import get_day_names, get_month_names
-
-from aiogram_dialog import ChatEvent, Dialog, DialogManager, Window
-from aiogram_dialog.widgets.kbd import (
-    Calendar, CalendarScope, ManagedCalendar, SwitchTo, Start
-)
-from aiogram_dialog.widgets.kbd.calendar_kbd import (
-    CalendarDaysView, CalendarMonthView,
-    CalendarScopeView, CalendarYearsView,
-)
-from aiogram_dialog.widgets.text import Const, Format, Text
 from aiogram.filters.state import State, StatesGroup
+from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.kbd import Calendar, CalendarScope
+from aiogram_dialog.widgets.kbd.calendar_kbd import (CalendarDaysView,
+                                                     CalendarMonthView,
+                                                     CalendarScopeView,
+                                                     CalendarYearsView)
+from aiogram_dialog.widgets.text import Format, Text
+from babel.dates import get_day_names, get_month_names
 
 SELECTED_DAYS_KEY = "selected_dates"
 
-
-class Main(StatesGroup):
-    MAIN = State()
-
-
-MAIN_MENU_BUTTON = Start(
-    text=Const("☰ Main menu"),
-    id="__main__",
-    state=Main.MAIN,
-)
 
 class CalendarState(StatesGroup):
     MAIN = State()
@@ -57,7 +43,7 @@ class CustomCalendar(Calendar):
         return {
             CalendarScope.DAYS: CalendarDaysView(
                 self._item_callback_data,
-                header_text="~~~ " + Month() + " ~~~",
+                header_text="🗓 " + Month() + Format(" {date:%Y}"),
                 weekday_text=WeekDay(),
                 next_month_text=Month() + " >>",
                 prev_month_text="<< " + Month(),
@@ -66,7 +52,7 @@ class CustomCalendar(Calendar):
             CalendarScope.MONTHS: CalendarMonthView(
                 self._item_callback_data,
                 month_text=Month(),
-                header_text="~~~ " + Format("{date:%Y}") + " ~~~",
+                header_text="🗓 " + Format("{date:%Y}"),
                 this_month_text="[" + Month() + "]",
                 config=self.config
             ),
@@ -77,21 +63,11 @@ class CustomCalendar(Calendar):
         }
 
 
-async def on_date_clicked(
-    callback: ChatEvent,
-    widget: ManagedCalendar,
-    manager: DialogManager,
-    selected_date: date, /,
-):
+async def on_date_clicked(callback, widget, manager, selected_date, /):
     await callback.answer(str(selected_date))
 
 
-async def on_date_selected(
-    callback: ChatEvent,
-    widget: ManagedCalendar,
-    manager: DialogManager,
-    clicked_date: date, /,
-):
+async def on_date_selected(callback, widget,  manager, clicked_date, /):
     selected = manager.dialog_data.setdefault(SELECTED_DAYS_KEY, [])
     serial_date = clicked_date.isoformat()
     if serial_date in selected:
@@ -103,44 +79,3 @@ async def on_date_selected(
 async def selection_getter(dialog_manager, **_):
     selected = dialog_manager.dialog_data.get(SELECTED_DAYS_KEY, [])
     return {"selected": ", ".join(sorted(selected)),}
-
-
-CALENDAR_MAIN_MENU_BUTTON = SwitchTo(
-    text=Const("Back"),
-    id="back",
-    state=CalendarState.MAIN,
-)
-calendar_dialog = Dialog(
-    Window(
-        Const("Select calendar configuration"),
-        SwitchTo(
-            Const("Default"),
-            id="default",
-            state=CalendarState.DEFAULT,
-        ),
-        SwitchTo(
-            Const("Customized"),
-            id="custom",
-            state=CalendarState.CUSTOM,
-        ),
-        MAIN_MENU_BUTTON,
-        state=CalendarState.MAIN,
-    ),
-    Window(
-        Const("Default calendar widget"),
-        Calendar(id="cal", on_click=on_date_clicked),
-        CALENDAR_MAIN_MENU_BUTTON,
-        state=CalendarState.DEFAULT,
-    ),
-    Window(
-        Const("Customized calendar widget"),
-        Const("Here we use custom text widgets to localize "
-              "and store selection"),
-        Format("\nSelected: {selected}", when=F["selected"]),
-        Format("\nNo dates selected", when=~F["selected"]),
-        CustomCalendar(id="cal", on_click=on_date_selected),
-        CALENDAR_MAIN_MENU_BUTTON,
-        getter=selection_getter,
-        state=CalendarState.CUSTOM,
-    ),
-)

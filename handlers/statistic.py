@@ -1,15 +1,14 @@
 from aiogram import F, Router
-from aiogram.types import CallbackQuery, Message
-from aiogram.filters import Command
 from aiogram.exceptions import AiogramError
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 from bson.objectid import ObjectId
 
+import keyboards.for_statistic as kb
 from config.bot_config import bot
 from config.mongo_config import buffer, results, users
 from utils.decorators import admin_check
 from utils.utils import calc_date, calc_test_type
-import keyboards.for_statistic as kb
-
 
 router = Router()
 

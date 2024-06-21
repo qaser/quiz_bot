@@ -1,13 +1,10 @@
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.types import Message
+from aiogram_dialog import Dialog, DialogManager, StartMode
 
-from aiogram_dialog import Dialog
-from aiogram_dialog import DialogManager, StartMode
-
-from dialogs.for_plans.states import Plans
-from dialogs.for_plans import windows
-
+from dialogs.for_tu import windows
+from dialogs.for_tu.states import Tu
 
 router = Router()
 dialog =  Dialog(
@@ -22,11 +19,11 @@ dialog =  Dialog(
 )
 
 
-@router.message(Command('plans'))
+@router.message(Command('tu'))
 async def blpu_request(message: Message, dialog_manager: DialogManager):
     await message.delete()
     # Important: always set `mode=StartMode.RESET_STACK` you don't want to stack dialogs
-    await dialog_manager.start(Plans.select_category, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(Tu.select_category, mode=StartMode.RESET_STACK)
 
 
 

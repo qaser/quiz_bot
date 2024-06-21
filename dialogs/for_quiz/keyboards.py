@@ -1,9 +1,10 @@
-from aiogram_dialog.widgets.kbd import (Radio, Column, Button,
-                                        ScrollingGroup, Multiselect, Row, Url, ListGroup)
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import (Button, Column, ListGroup, Multiselect,
+                                        Radio, Row, ScrollingGroup, Url)
+from aiogram_dialog.widgets.text import Const, Format
+
+from config.mongo_config import results, users
 
 from . import selected
-from config.mongo_config import users, results
 
 SCROLLING_HEIGHT = 6
 
@@ -96,7 +97,7 @@ def result_buttons():
             when='have_articles'
         ),
         Button(
-            Const('🔚 Главное меню'),
+            Format('🔚 {button}'),
             id='main_menu',
             on_click=selected.on_main_menu
         ),

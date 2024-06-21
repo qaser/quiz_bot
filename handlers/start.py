@@ -1,14 +1,13 @@
 import datetime as dt
-from aiogram import Router, F
 
+from aiogram import F, Router
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
-
-from config.bot_config import dp
-from config.mongo_config import users, conditions
+from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from config.bot_config import dp
+from config.mongo_config import conditions, users
 
 DISCLAIMER = 'Для продолжения работы с сервисом Вам необходимо принять "Пользовательское соглашение"'
 START_TEXT = 'В нижней части есть кнопка "Меню", там Вы найдете всё необходимое'

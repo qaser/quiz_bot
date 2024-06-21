@@ -1,12 +1,12 @@
 import datetime as dt
 
-from aiogram_dialog.widgets.kbd import (
-    ScrollingGroup, Column, Button, Select, Row, Multiselect
-)
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import (Button, Column, Multiselect, Row,
+                                        ScrollingGroup, Select)
+from aiogram_dialog.widgets.text import Const, Format
+
+from config.mongo_config import plans
 
 from . import selected
-from config.mongo_config import plans
 
 SCROLLING_HEIGHT = 6
 
@@ -29,8 +29,13 @@ def category_buttons():
             on_click=selected.on_choose_category,
         ),
         Button(
-            Const('📊 Экспорт результатов тестирования'),
-            'export_test',
+            Const('📊 Просмотр результатов тестирования'),
+            'show_results',
+            on_click=selected.on_choose_category,
+        ),
+        Button(
+            Const('📥 Экспорт результатов тестирования'),
+            'export_results',
             on_click=selected.on_choose_category,
         ),
         Button(
@@ -75,7 +80,7 @@ def paginated_themes(id_pager):
             item_id_getter=lambda x: x['code'],
             items='themes',
             min_selected=1,
-            max_selected=10
+            max_selected=15
         ),
         id=id_pager,
         width=1,

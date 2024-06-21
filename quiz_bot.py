@@ -4,17 +4,15 @@ import logging
 from aiogram.filters.command import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram_dialog import setup_dialogs
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from config.bot_config import dp, bot
-from handlers import (
-    start, service, terms, quiz, options, articles, admin, blpu, plans
-)
+from config.bot_config import bot, dp
+from handlers import (admin, articles, blpu, options, quiz, service, start,
+                      terms, tu)
+from middlewares.check_user import CheckUserMiddleware
 from scheduler.scheduler_func import check_tu_events, send_news
 from utils.constants import HELP_TEXT, TIME_ZONE
-from middlewares.check_user import CheckUserMiddleware
-
-from aiogram_dialog import setup_dialogs
 
 
 @dp.message(Command('reset'))
@@ -37,8 +35,8 @@ async def main():
     scheduler.add_job(
         check_tu_events,
         'cron',
-        hour=10,
-        minute=0,
+        hour=0,
+        minute=19,
         timezone=TIME_ZONE
     )
     # scheduler.add_job(
@@ -60,13 +58,13 @@ async def main():
         options.router,
         articles.router,
         blpu.router,
-        plans.router,
+        tu.router,
         terms.dialog,
         quiz.dialog,
         options.dialog,
         articles.dialog,
         blpu.dialog,
-        plans.dialog,
+        tu.dialog,
     )
     setup_dialogs(dp)
     await dp.start_polling(bot)

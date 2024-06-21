@@ -1,7 +1,7 @@
 from aiogram.filters.state import State, StatesGroup
 
 
-class Plans(StatesGroup):
+class Tu(StatesGroup):
     select_category = State()
     select_year = State()
     select_quarter = State()

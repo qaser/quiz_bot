@@ -1,10 +1,9 @@
 from aiogram import Router
-from aiogram.types import Message, FSInputFile
 from aiogram.filters import Command
+from aiogram.types import FSInputFile, Message
 
 from config.mongo_config import users
 from config.telegram_config import ADMIN_TELEGRAM_ID
-
 
 router = Router()
 

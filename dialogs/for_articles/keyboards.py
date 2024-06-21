@@ -1,13 +1,13 @@
-from aiogram_dialog.widgets.kbd import (
-    CurrentPage, FirstPage, LastPage,
-    Multiselect, NextPage, NumberedPager,
-    PrevPage, Row, ScrollingGroup,
-    StubScroll, SwitchTo, Column, Button, Select,
-)
-from aiogram_dialog.widgets.text import Format, Const
+from aiogram_dialog.widgets.kbd import (Button, Column, CurrentPage, FirstPage,
+                                        LastPage, Multiselect, NextPage,
+                                        NumberedPager, PrevPage, Row,
+                                        ScrollingGroup, Select, StubScroll,
+                                        SwitchTo)
+from aiogram_dialog.widgets.text import Const, Format
+
+from config.mongo_config import results, users
 
 from . import selected
-from config.mongo_config import users, results
 
 SCROLLING_HEIGHT = 6
 

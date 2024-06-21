@@ -1,8 +1,8 @@
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
+from config.mongo_config import articles, themes
 from dialogs.for_articles.states import Articles
-from config.mongo_config import themes, articles
 
 
 async def get_random_article(dialog_manager: DialogManager, **middleware_data):
