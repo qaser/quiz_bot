@@ -1,6 +1,7 @@
 from aiogram import F, Router
+from aiogram.exceptions import AiogramError
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import Dialog, DialogManager, StartMode
 
 from dialogs.for_tu import windows
@@ -14,6 +15,11 @@ dialog =  Dialog(
     windows.select_themes_window(),
     windows.select_date_window(),
     windows.save_plan_window(),
+    windows.quiz_window(),
+    windows.quiz_step_window(),
+    windows.quiz_result_window(),
+    windows.quiz_reports_window(),
+    windows.quiz_chosen_report_window(),
     # windows.export_test(),
     # windows.plan_review_window(),
 )
@@ -25,6 +31,20 @@ async def blpu_request(message: Message, dialog_manager: DialogManager):
     # Important: always set `mode=StartMode.RESET_STACK` you don't want to stack dialogs
     await dialog_manager.start(Tu.select_category, mode=StartMode.RESET_STACK)
 
+
+@router.callback_query(F.data.startswith('tu_'))
+async def get_test_quarter(callback: CallbackQuery, dialog_manager: DialogManager):
+    _, plan_id, quiz_type = callback.data.split('_')
+    try:
+        await callback.message.delete()
+    except AiogramError:
+        pass
+        # сделать проверку на прохождение пользователем этого теста
+    await dialog_manager.start(
+        Tu.quiz,
+        data={'plan_id': plan_id, 'quiz_type': quiz_type},
+        mode=StartMode.NEW_STACK
+    )
 
 
 # import datetime as dt

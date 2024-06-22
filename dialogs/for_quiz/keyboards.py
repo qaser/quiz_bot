@@ -88,7 +88,7 @@ def result_buttons():
         Button(
             Const('📝 Посмотреть подробный отчёт'),
             id='quiz_report',
-            on_click=selected.on_quiz_report
+            on_click=selected.on_quiz_report,
         ),
         Button(
             Const('⚡ Посмотреть рекомендации'),
@@ -97,7 +97,7 @@ def result_buttons():
             when='have_articles'
         ),
         Button(
-            Format('🔚 {button}'),
+            Format('🔚 В главное меню'),
             id='main_menu',
             on_click=selected.on_main_menu
         ),

@@ -7,7 +7,7 @@ from config.bot_config import bot
 from config.mongo_config import plans, scheduler_tu, users
 from config.telegram_config import (ADMIN_TELEGRAM_ID, CHAT_56_ID,
                                     QUIZ_THREAD_ID)
-from utils.constants import TEST_TYPE, TU, NEXT_BUTTON
+from utils.constants import NEXT_BUTTON, TEST_TYPE, TU
 
 NEWS = ('Удачи!')
 

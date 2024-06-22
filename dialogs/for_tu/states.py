@@ -10,3 +10,8 @@ class Tu(StatesGroup):
     save_plan = State()
     export_test = State()
     plan_review = State()
+    quiz = State()
+    quiz_step = State()
+    quiz_result = State()
+    quiz_reports = State()
+    quiz_chosen_report = State()

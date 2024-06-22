@@ -1,7 +1,7 @@
 import datetime as dt
 
-from aiogram_dialog.widgets.kbd import (Button, Column, Multiselect, Row,
-                                        ScrollingGroup, Select)
+from aiogram_dialog.widgets.kbd import (Button, Column, Multiselect, Radio,
+                                        Row, ScrollingGroup)
 from aiogram_dialog.widgets.text import Const, Format
 
 from config.mongo_config import plans
@@ -88,3 +88,34 @@ def paginated_themes(id_pager):
         hide_pager=True,
         hide_on_single_page=True,
     )
+
+
+def options_buttons():
+    return Row(
+        Radio(
+            Format('🟢 {item[0]}'),
+            Format('⚪ {item[0]}'),
+            id='user_answers',
+            item_id_getter=lambda x: x[1],
+            items='options',
+            when=is_no_multiple
+        ),
+    )
+
+
+def result_buttons():
+    return Column(
+        Button(
+            Const('📝 Посмотреть подробный отчёт'),
+            id='quiz_report',
+            on_click=selected.on_quiz_reports,
+            when='report_access'
+        ),
+        id='result_btns'
+    )
+
+
+def is_no_multiple(data, widget, manager):
+    ctx = manager.current_context()
+    is_multiple = ctx.dialog_data['quiz_step']['multiple']
+    return not is_multiple

@@ -203,38 +203,6 @@ def articles_window():
     )
 
 
-def tu_quiz_window():
-    return Window(
-        Const('Темы, использованные для составления теста:'),
-        Format('<b>{name_themes}</b>'),
-        Format('\nВсего вопросов: <b>{quiz_len}</b>'),
-        Button(
-            Const('🚀 Начать тест'),
-            id='quiz_start',
-            on_click=selected.on_quiz_step
-        ),
-        state=states.Quiz.tu_quiz,
-        getter=getters.get_quiz_params,
-    )
-
-
-def tu_quiz_result_window():
-    return Window(
-        Const('<u>Результат теста:</u>\n'),
-        Format('🎉 Правильных ответов: {score} из {count}'),
-        Format('🎖️ Ваша оценка за тест: {grade} из 10-ти баллов\n'),
-        Format(
-            text=('❗ Наибольшее количество ошибок ({errors_num}) '
-                  'Вы совершили на вопросах по теме "{theme_name}"\n'),
-            when='with_errors'
-        ),
-        Const(QUIZ_ARTICLES_WARNING,  when='no_articles'),
-        keyboards.result_buttons(),
-        state=states.Quiz.tu_quiz_result,
-        getter=getters.get_quiz_result,
-    )
-
-
 # проверка соответствия желания пользователя наличию вопросов в БД
 def len_quiz_equal(data, widget, manager):
     ctx = manager.current_context()
