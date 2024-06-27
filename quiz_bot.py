@@ -35,8 +35,8 @@ async def main():
     scheduler.add_job(
         check_tu_events,
         'cron',
-        hour=23,
-        minute=45,
+        hour=21,
+        minute=38,
         timezone=TIME_ZONE
     )
     # scheduler.add_job(

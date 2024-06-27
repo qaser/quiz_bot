@@ -14,13 +14,16 @@ dialog =  Dialog(
     windows.select_quarter_window(),
     windows.select_themes_window(),
     windows.select_date_window(),
+    windows.select_input_date_window(),
+    windows.select_output_date_window(),
     windows.save_plan_window(),
+    windows.users_window(),
+    windows.results_review_window(),
     windows.quiz_window(),
     windows.quiz_step_window(),
     windows.quiz_result_window(),
     windows.quiz_reports_window(),
     windows.quiz_chosen_report_window(),
-    # windows.export_test(),
     # windows.plan_review_window(),
 )
 

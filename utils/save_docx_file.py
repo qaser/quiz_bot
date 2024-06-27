@@ -1,12 +1,13 @@
 from math import ceil
 
+from bson import ObjectId
 from docx import Document
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
-from config.mongo_config import questions, themes, users
+from config.mongo_config import answers, questions, themes, users
 
 
 def set_cell_color(cell, color):
@@ -17,7 +18,7 @@ def set_cell_color(cell, color):
     table_cell_properties.append(shade_obj)
 
 
-def create_docx_file(plan):
+def create_tests_docx_file(plan):
     department = plan.get('department')
     quarter = plan.get('quarter')
     year = plan.get('year')
@@ -74,25 +75,26 @@ def create_docx_file(plan):
 
     current_rows = 2  # текущее количество строк в таблице
     for num, q_id in enumerate(questions_list):
-        q = questions.find_one({'_id': q_id})
-        num_answers = q.get('num_answers')
+        q = questions.find_one({'_id': ObjectId(q_id)})
+        q_answers = list(answers.find({'q_id': ObjectId(q_id), 'is_active': True}))
+        num_answers = len(q_answers)
         main_row = table.add_row().cells
         main_row[0].text = str(num + 1)
         main_row[1].text = themes.find_one({'code': q.get('theme')}).get('name')
         main_row[2].text = str(num + 1)
-        main_row[3].text = q.get('question')
+        main_row[3].text = q.get('text')
         main_row[4].text = '1'
-        main_row[5].text = q.get('answers')[0]
+        main_row[5].text = q_answers[0]['text']
         for i in range(1, num_answers):
             row_ans = table.add_row().cells
             row_ans[-2].text = str(i + 1)
-            row_ans[-1].text = q.get('answers')[i]
+            row_ans[-1].text = q_answers[i]['text']
         for row_id in range(current_rows, current_rows + num_answers - 1):
             for cell_id in range(0, 4):
                 table.rows[row_id].cells[cell_id].merge(table.rows[row_id+1].cells[cell_id])
         current_rows += num_answers
 
-    path = f'static/reports/Тест {department} ({quarter} кв. {year}г).docx'
+    path = f'static/export/Тест {department} ({quarter} кв. {year}г).docx'
     document.save(path)
 
 
@@ -154,9 +156,6 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
         document.add_paragraph(f'Результат тестирования: {grade}')
         document.add_paragraph('')
         document.add_paragraph('')
-
-
-
 
         path = f'static/reports/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
         document.save(path)

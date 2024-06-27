@@ -1,7 +1,7 @@
 import datetime as dt
 
-from aiogram_dialog.widgets.kbd import (Button, Column, Multiselect, Radio,
-                                        Row, ScrollingGroup)
+from aiogram_dialog.widgets.kbd import (Button, Column, Group, Multiselect,
+                                        Radio, Row, ScrollingGroup, Select)
 from aiogram_dialog.widgets.text import Const, Format
 
 from config.mongo_config import plans
@@ -14,49 +14,55 @@ SCROLLING_HEIGHT = 6
 def category_buttons():
     return Column(
         Button(
-            Const('🧠 Составить тестовое задание'),
+            Const('✍️ Составить тестовое задание'),
             'new_plan',
             on_click=selected.on_choose_category
         ),
+        # Button(
+        #     Const('🔎 Обзор тестовых заданий ТУ'),
+        #     'plan_review',
+        #     on_click=selected.on_choose_category,
+        # ),
         Button(
-            Const('🔎 Обзор плана ТУ'),
-            'show_plan',
+            Const('👷🏻‍♂️ Просмотр результатов тестирования'),
+            'results_review',
             on_click=selected.on_choose_category,
         ),
+        # Button(
+        #     Const('📈 Посмотреть статистику персонала'),
+        #     'stats',
+        #     on_click=selected.on_choose_category,
+        # ),
         Button(
-            Const('💾 Экспорт тестовых вопросов'),
-            'export_test',
+            Const('💾 Экспорт тестовых вопросов (.docx)'),
+            'test_export',
             on_click=selected.on_choose_category,
         ),
-        Button(
-            Const('📊 Просмотр результатов тестирования'),
-            'show_results',
-            on_click=selected.on_choose_category,
-        ),
-        Button(
-            Const('📥 Экспорт результатов тестирования'),
-            'export_results',
-            on_click=selected.on_choose_category,
-        ),
-        Button(
-            Const('📝 Планирование рассылки статей'),
-            'sub_plan',
-            on_click=selected.on_choose_category,
-        ),
+        # Button(
+        #     Const('📥 Экспорт результатов тестирования (.docx)'),
+        #     'results_export',
+        #     on_click=selected.on_choose_category,
+        # ),
+        # Button(
+        #     Const('📝 Планирование рассылки статей'),
+        #     'sub_plan',
+        #     on_click=selected.on_choose_category,
+        # ),
     )
 
 
 def years_buttons():
-    now_year = dt.datetime.now().year
-    btns = [
-        Button(
-            Const(year),
-            id=year,
-            on_click=selected.on_year
-        )
-        for year in [str(now_year), str(now_year + 1)]
-    ]
-    return Row(*btns)
+    return Group(
+        Select(
+            Format('{item}'),
+            id='select_years',
+            item_id_getter=lambda x: x,
+            items='years',
+            on_click=selected.on_year,
+        ),
+        id='years',
+        width=2,
+    )
 
 
 def quarters_buttons():
@@ -84,6 +90,23 @@ def paginated_themes(id_pager):
         ),
         id=id_pager,
         width=1,
+        height=SCROLLING_HEIGHT,
+        hide_pager=True,
+        hide_on_single_page=True,
+    )
+
+
+def paginated_users(id_pager):
+    return ScrollingGroup(
+        Select(
+            Format('{item[username]}'),
+            id='s_users',
+            item_id_getter=lambda x: x['user_id'],
+            items='users',
+            on_click=selected.on_user_results
+        ),
+        id=id_pager,
+        width=2,
         height=SCROLLING_HEIGHT,
         hide_pager=True,
         hide_on_single_page=True,

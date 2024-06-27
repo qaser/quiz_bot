@@ -1,10 +1,11 @@
+import datetime as dt
 from collections import Counter
 
 from aiogram_dialog import DialogManager
 from bson.objectid import ObjectId
 
-from config.mongo_config import (answers, plans, questions, results_tu, themes,
-                                 users)
+from config.mongo_config import (answers, plans, questions, results_tu,
+                                 scheduler_tu, themes, users)
 from utils.constants import MONTHS_NAMES
 
 
@@ -20,8 +21,8 @@ async def get_themes(dialog_manager: DialogManager, **middleware_data):
         plan = plans.find_one(
             {
                 'department': dep,
-                'year': ctx.dialog_data['year'],
-                'quarter': ctx.dialog_data['quarter']
+                'year': int(ctx.dialog_data['year']),
+                'quarter': int(ctx.dialog_data['quarter'])
             }
         )
         ctx.dialog_data.update(department=dep)
@@ -37,15 +38,104 @@ async def get_themes(dialog_manager: DialogManager, **middleware_data):
     }
 
 
+async def get_years(dialog_manager: DialogManager, **middleware_data):
+    ctx = dialog_manager.current_context()
+    category = ctx.dialog_data['category']
+    now_year = dt.datetime.now().year
+    if category == 'new_plan':
+        years = [str(now_year), str(now_year + 1)]
+    else:
+        user_id = dialog_manager.event.from_user.id
+        user_dep = users.find_one({'user_id': user_id})['department']
+        years = plans.find({'department': user_dep}).sort('year', 1).distinct('year')
+    return {'years': years}
+
+
+async def get_quarter(dialog_manager: DialogManager, **middleware_data):
+    ctx = dialog_manager.current_context()
+    category = ctx.dialog_data['category']
+    year = ctx.dialog_data['year']
+    if category == 'new_plan':
+        quarters = [q for q in range(1, 5)]
+    else:
+        user_id = dialog_manager.event.from_user.id
+        user_dep = users.find_one({'user_id': user_id})['department']
+        quarters = plans.find(
+            {'department': user_dep, 'year': int(year)}
+        ).sort('quarter', 1).distinct('quarter')
+    return {'quarters': quarters}
+
+
+async def get_users(dialog_manager: DialogManager, **middleware_data):
+    ctx = dialog_manager.current_context()
+    user_id = dialog_manager.event.from_user.id
+    admin_dep = users.find_one({'user_id': user_id})['department']
+    users_dep = list(users.find({'department': admin_dep}))
+    users_with_results = results_tu.find({
+        'user_id': {'$in': [u["user_id"] for u in users_dep]},
+        'year': int(ctx.dialog_data['year']),
+        'quarter': int(ctx.dialog_data['quarter']),
+        'done': True
+    }).distinct('user_id')
+    target_users = [
+        {'username': u['username'], 'user_id': u['user_id']}
+        for u in list(users.find({'user_id': {'$in': users_with_results}}).sort('username', 1))
+    ]
+    empty_list = True if len(target_users) == 0 else False
+    title_visible = not empty_list
+    return {
+        'users': target_users,
+        'empty_list': empty_list,
+        'title_visible': title_visible
+    }
+
+
+async def get_user_results(dialog_manager: DialogManager, **middleware_data):
+    ctx = dialog_manager.current_context()
+    user_id = int(ctx.dialog_data['user_id'])
+    username = users.find_one({'user_id': user_id})['username']
+    year = int(ctx.dialog_data['year'])
+    quarter = int(ctx.dialog_data['quarter'])
+    res_input = results_tu.find_one({
+        'user_id': user_id,
+        'year': year,
+        'quarter': quarter,
+        'done': True,
+        'quiz_type': 'input'
+    })
+    res_output = results_tu.find_one({
+        'user_id': user_id,
+        'year': year,
+        'quarter': quarter,
+        'done': True,
+        'quiz_type': 'output'
+    })
+    data = {
+        'username': username,
+        'year': year,
+        'quarter': quarter,
+        'input_date': '' if res_input is None else res_input['date'].strftime('%d.%m.%Y'),
+        'input_grade': '' if res_input is None else res_input['grade'],
+        'input_count': '' if res_input is None else res_input['quiz_results']['count'],
+        'input_quiz_len': '' if res_input is None else len(res_input['quiz_results']['answers']),
+        'input_done': False if res_input is None else True,
+        'output_date': '' if res_output is None else res_output['date'].strftime('%d.%m.%Y'),
+        'output_grade': '' if res_output is None else res_output['grade'],
+        'output_count': '' if res_output is None else res_output['quiz_results']['count'],
+        'output_quiz_len': '' if res_output is None else len(res_output['quiz_results']['answers']),
+        'output_done': False if res_output is None else True,
+    }
+    return data
+
+
 async def get_plan_params(dialog_manager: DialogManager, **middleware_data):
     ctx = dialog_manager.current_context()
     period_start = ctx.dialog_data.get('period_start')
     period = 'начале' if period_start == '' else 'конце'
     q = int(ctx.dialog_data['quarter'])
-    y = ctx.dialog_data['year']
     m = str((q * 3) if period == 'конце' else ((q * 3) - 2))
     return {
-        'y': y,
+        'y': ctx.dialog_data['year'],
         'q': q,
         'm': MONTHS_NAMES[m],
         'period': period,
@@ -182,3 +272,32 @@ async def get_chosen_quiz_report(dialog_manager: DialogManager, **middleware_dat
         'options': [(num+1, id, ans_correct[num]) for num, id in enumerate(qs)],
     }
     return data
+
+
+async def get_resume_and_save(dialog_manager: DialogManager, **middleware_data):
+    ctx = dialog_manager.current_context()
+    widget = dialog_manager.find('s_themes')
+    q = ctx.dialog_data['quarter']
+    quiz_len = len(ctx.dialog_data['questions'])
+    name_themes = ',\n'.join([themes.find_one({'code': code})['name'] for code in widget.get_checked()])
+    input_date = ctx.dialog_data['period_start']
+    output_date = ctx.dialog_data['period_end']
+    data = {
+        'q': q,
+        'y': ctx.dialog_data['year'],
+        'name_themes': name_themes,
+        'quiz_len': quiz_len,
+        'input_date': input_date,
+        'output_date': output_date,
+        'input_warn': check_date(input_date, int(q), 'input'),
+        'output_warn': check_date(output_date, int(q), 'output'),
+    }
+    return data
+
+
+def check_date(date, q, period):
+    _, m, _ = date.split('.')
+    true_m = str((q * 3) if period == 'output' else ((q * 3) - 2))
+    true_m = f'0{true_m}' if len(true_m) == 1 else true_m
+    if true_m != m:
+        return True

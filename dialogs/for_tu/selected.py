@@ -1,16 +1,27 @@
 import datetime as dt
+import os
 import random
 from collections import Counter
 
-from aiogram_dialog import DialogManager
+from aiogram.types import FSInputFile
+from aiogram_dialog import DialogManager, StartMode
 from bson.objectid import ObjectId
 
 from config.mongo_config import (answers, docs, plans, questions, results_tu,
-                                 scheduler_tu, themes)
+                                 scheduler_tu, themes, users)
 from dialogs.for_tu.states import Tu
+from utils.save_docx_file import create_tests_docx_file
 from utils.utils import calc_grade
 
 QUIZ_LEN = 20
+
+
+async def on_main_menu(callback, widget, manager: DialogManager):
+    await manager.start(Tu.select_category, mode=StartMode.RESET_STACK)
+
+
+async def on_back_to_quarters(callback, widget, manager: DialogManager):
+    await manager.switch_to(Tu.select_quarter)
 
 
 async def on_choose_category(callback, widget, manager: DialogManager):
@@ -19,22 +30,41 @@ async def on_choose_category(callback, widget, manager: DialogManager):
     await manager.switch_to(Tu.select_year)
 
 
-async def on_year(callback, widget, manager: DialogManager):
+async def on_year(callback, widget, manager: DialogManager, year):
     context = manager.current_context()
-    context.dialog_data.update(year=widget.text.text)
+    context.dialog_data.update(year=year)
     await manager.switch_to(Tu.select_quarter)
 
 
-async def on_quarter(callback, widget, manager: DialogManager):
+async def on_quarter(callback, widget, manager: DialogManager, quarter):
     context = manager.current_context()
-    context.dialog_data.update(quarter=widget.text.text)
-    if context.dialog_data['category'] == 'new_plan':
+    context.dialog_data.update(quarter=quarter)
+    category = context.dialog_data['category']
+    if category == 'new_plan':
         await get_themes(manager)
         await manager.switch_to(Tu.select_themes)
-    elif context.dialog_data['category'] == 'show_plan':
+    elif category == 'plan_review':
         await manager.switch_to(Tu.plan_review)
-    elif context.dialog_data['category'] == 'export_test':
-        await manager.switch_to(Tu.export_test)
+    elif category == 'results_review':
+        await manager.switch_to(Tu.select_user)
+    elif category == 'test_export':
+        dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
+        year = int(context.dialog_data['year'])
+        plan = plans.find_one({
+            'department': dep,
+            'quarter': int(quarter),
+            'year': year
+        })
+        create_tests_docx_file(plan)
+        path=f'static/export/Тест {dep} ({quarter} кв. {year}г).docx'
+        document = FSInputFile(path=path)
+        await callback.message.answer_document(document=document)
+        os.remove(path)
+    elif category == 'results_export':
+        pass  # нужно сделать окно с выбором входного или выходного тестов
+        # dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
+        # year = int(context.dialog_data['year'])
+
 
 
 async def get_themes(manager: DialogManager):
@@ -66,12 +96,14 @@ async def on_themes_done(callback, widget, manager: DialogManager):
                 'themes': widget.get_checked(),
                 'owner': manager.event.from_user.id,
                 'questions': q_ids,
+                'type': 'quiz_plan'
             }
         },
         upsert=True,
         return_document=True,
     )
     ctx.dialog_data.update(plan_id=str(plan['_id']))
+    ctx.dialog_data.update(questions=q_ids)
     ctx.dialog_data.update(period_start='')
     ctx.dialog_data.update(period_end='')
     await manager.switch_to(Tu.select_date)
@@ -106,6 +138,38 @@ async def on_select_date(callback, widget, manager, clicked_date):
         await manager.switch_to(Tu.save_plan)
 
 
+async def on_change_date(callback, widget, manager):
+    ctx = manager.current_context()
+    if widget.widget_id == 'input_warn_date':
+        ctx.dialog_data.update(period_start='')
+        await manager.switch_to(Tu.select_input_date)
+    else:
+        await manager.switch_to(Tu.select_output_date)
+
+
+async def on_input_date(callback, widget, manager, clicked_date):
+    ctx = manager.current_context()
+    period = clicked_date.strftime('%d.%m.%Y')
+    ctx.dialog_data.update(period_start=period)
+    plan_id = ctx.dialog_data['plan_id']
+    scheduler_tu.update_one(
+        {'event_id': ObjectId(plan_id), 'quiz_type': 'input'},
+        {'$set': {'date': period}}
+    )
+    await manager.switch_to(Tu.save_plan)
+
+
+async def on_output_date(callback, widget, manager, clicked_date):
+    ctx = manager.current_context()
+    period = clicked_date.strftime('%d.%m.%Y')
+    ctx.dialog_data.update(period_end=period)
+    plan_id = ctx.dialog_data['plan_id']
+    scheduler_tu.update_one(
+        {'event_id': ObjectId(plan_id), 'quiz_type': 'output'},
+        {'$set': {'date': period}}
+    )
+    await manager.switch_to(Tu.save_plan)
+
 
 def save_plan_in_scheduler(manager: DialogManager):
     ctx = manager.current_context()
@@ -114,15 +178,17 @@ def save_plan_in_scheduler(manager: DialogManager):
         (ctx.dialog_data['period_end'], 'output')
     ]
     for period in periods:
-        scheduler_tu.insert_one(
-            {
-                'date': period[0],
-                'quiz_type': period[1],
-                # 'time': '10:00',
-                'type': 'quiz_plan',
-                'event_id': ObjectId(ctx.dialog_data['plan_id']),
-            }
+        scheduler_tu.update_one(
+            {'event_id': ctx.dialog_data['plan_id'], 'quiz_type': period[1],},
+            {'$set': {'date': period[0], 'type': 'quiz_plan'}},
+            upsert=True
         )
+
+
+async def on_user_results(callback, widget, manager: DialogManager, user_id):
+    ctx = manager.current_context()
+    ctx.dialog_data.update(user_id=user_id)
+    await manager.switch_to(Tu.results_review)
 
 
 async def on_quiz_step(callback, widget, manager: DialogManager):
@@ -242,8 +308,6 @@ def save_quiz_result(manager: DialogManager):
 
 
 async def on_quiz_reports(callback, widget, manager: DialogManager):
-    context = manager.current_context()
-
     await manager.switch_to(Tu.quiz_reports)
 
 
