@@ -71,11 +71,12 @@ async def on_quarter(callback, widget, manager: DialogManager, quarter):
                 'done': True,
                 'quiz_type': quiz_type
             })
-            test_type = 'входного' if quiz_type == 'input' else 'выходного'
-            create_results_docx_file(year, quarter, test_type, results_set)
-            path = f'static/export/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
-            await callback.message.answer_document(document=FSInputFile(path=path))
-            os.remove(path)
+            if results_set is not None:
+                test_type = 'входного' if quiz_type == 'input' else 'выходного'
+                create_results_docx_file(year, quarter, test_type, results_set)
+                path = f'static/export/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
+                await callback.message.answer_document(document=FSInputFile(path=path))
+                os.remove(path)
 
 
 async def get_themes(manager: DialogManager):
