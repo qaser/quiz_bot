@@ -8,7 +8,6 @@ import keyboards.for_admin_registration as kb
 from config.bot_config import bot
 from config.mongo_config import admin_requests, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
-from texts.initial import ADMIN_REQUEST
 from utils.decorators import registration_check
 
 ADMIN_REQUEST = (

@@ -98,7 +98,7 @@ def create_tests_docx_file(plan):
     document.save(path)
 
 
-def create_results_docx_file(year, quarter, test_type, department, results_set):
+def create_results_docx_file(year, quarter, test_type, results_set):
     DOC_HEADER = (
         f'Результаты тестирования {test_type} контроля знаний по технической учебе\n'
         f'за {quarter} квартал {year} года'
@@ -118,10 +118,10 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
 
     for res in results_set:
         results = res.get('quiz_results')
-        username = users.find_one({'user_id': res.get('user_id')}).get('full_name')
+        username = users.find_one({'user_id': res.get('user_id')}).get('username')
         grade = res.get('grade')
 
-        len_test = len(results)
+        len_test = len(results['answers'])
         num_rows = ceil(len_test / 10) * 2
         header = document.add_paragraph(DOC_HEADER)
         header.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
@@ -138,17 +138,28 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
             cell.text = TABLE_HEADERS[cell_id]
             cell.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
-        for id, data in enumerate(results):
-            _, _, ans, correct = data
+        for id, ans_id in enumerate(results['answers']):
+            if ans_id is not None:
+                ans = answers.find_one({'_id': ObjectId(ans_id)})
+                q_answers = list(answers.find({'q_id': ans['q_id'], 'is_active': True}))
+                for a_id, ans_data in enumerate(q_answers):
+                    if str(ans_data['_id']) == ans_id:
+                        ans_pos = (a_id + 1)
+                        break
+                correct = ans['is_correct']
+            else:
+                ans_pos = '-'
+                correct = False
+
             row_id = (id // 10) * 2
             cell_id = int(str(id)[-1])
             cell_hdr = table.rows[row_id].cells[cell_id+1]
             cell_value = table.rows[row_id+1].cells[cell_id+1]
             cell_hdr.text = str(id + 1)
             cell_hdr.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            cell_value.text = str(ans + 1)
+            cell_value.text = str(ans_pos)
             cell_value.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            if correct == 'true':
+            if correct:
                 set_cell_color(cell_value, 'addfad')
 
         document.add_paragraph('')
@@ -157,5 +168,5 @@ def create_results_docx_file(year, quarter, test_type, department, results_set):
         document.add_paragraph('')
         document.add_paragraph('')
 
-        path = f'static/reports/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
+        path = f'static/export/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
         document.save(path)

@@ -38,11 +38,11 @@ def category_buttons():
             'test_export',
             on_click=selected.on_choose_category,
         ),
-        # Button(
-        #     Const('📥 Экспорт результатов тестирования (.docx)'),
-        #     'results_export',
-        #     on_click=selected.on_choose_category,
-        # ),
+        Button(
+            Const('📥 Экспорт результатов тестирования (.docx)'),
+            'results_export',
+            on_click=selected.on_choose_category,
+        ),
         # Button(
         #     Const('📝 Планирование рассылки статей'),
         #     'sub_plan',

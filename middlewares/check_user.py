@@ -22,12 +22,7 @@ class CheckUserMiddleware(BaseMiddleware):
             data: Dict[str, Any]
     ) -> Any:
         user = data["event_from_user"]
-        if event.callback_query:
-            if self.is_legal_user(user.id) or event.callback_query.data in ['cond_accept', 'cond_decline']:
-                return await handler(event, data)
-        elif event.message:
-            if self.is_legal_user(user.id) or event.message.text == '/start':
-                return await handler(event, data)
-        # await event.message.answer(UNAUTHORIZED_MSG)
-        # return
-        return await handler(event, data)
+        if self.is_legal_user(user.id) or event.message.text == '/start':
+            return await handler(event, data)
+        await event.message.answer(UNAUTHORIZED_MSG)
+        return

@@ -10,7 +10,7 @@ from bson.objectid import ObjectId
 from config.mongo_config import (answers, docs, plans, questions, results_tu,
                                  scheduler_tu, themes, users)
 from dialogs.for_tu.states import Tu
-from utils.save_docx_file import create_tests_docx_file
+from utils.save_docx_file import create_results_docx_file, create_tests_docx_file
 from utils.utils import calc_grade
 
 QUIZ_LEN = 20
@@ -57,14 +57,25 @@ async def on_quarter(callback, widget, manager: DialogManager, quarter):
         })
         create_tests_docx_file(plan)
         path=f'static/export/Тест {dep} ({quarter} кв. {year}г).docx'
-        document = FSInputFile(path=path)
-        await callback.message.answer_document(document=document)
+        await callback.message.answer_document(document=FSInputFile(path=path))
         os.remove(path)
     elif category == 'results_export':
-        pass  # нужно сделать окно с выбором входного или выходного тестов
-        # dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
-        # year = int(context.dialog_data['year'])
-
+        dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
+        users_dep = list(users.find({'department': dep}))
+        year = int(context.dialog_data['year'])
+        for quiz_type in ['input', 'output']:
+            results_set = results_tu.find({
+                'user_id': {'$in': [u["user_id"] for u in users_dep]},
+                'quarter': int(quarter),
+                'year': year,
+                'done': True,
+                'quiz_type': quiz_type
+            })
+            test_type = 'входного' if quiz_type == 'input' else 'выходного'
+            create_results_docx_file(year, quarter, test_type, results_set)
+            path = f'static/export/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
+            await callback.message.answer_document(document=FSInputFile(path=path))
+            os.remove(path)
 
 
 async def get_themes(manager: DialogManager):
