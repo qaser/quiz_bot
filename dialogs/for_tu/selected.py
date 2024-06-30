@@ -63,7 +63,7 @@ async def on_quarter(callback, widget, manager: DialogManager, quarter):
         dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
         users_dep = list(users.find({'department': dep}))
         year = int(context.dialog_data['year'])
-        for quiz_type in ['input', 'output']:
+        for quiz_type in ['output']:
             results_set = results_tu.find({
                 'user_id': {'$in': [u["user_id"] for u in users_dep]},
                 'quarter': int(quarter),
