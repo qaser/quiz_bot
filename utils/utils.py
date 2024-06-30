@@ -7,23 +7,23 @@ def calc_grade(pos_ans, all_ans) -> int:
     расчет оценки в зависимости от процента правильных ответов
     '''
     percent = (pos_ans / all_ans) * 100
-    if percent < 55:
+    if percent < 9:
         return 1
-    elif percent < 60 and percent >= 55:
+    elif percent < 20 and percent >= 10:
         return 2
-    elif percent < 65 and percent >= 60:
+    elif percent < 30 and percent >= 20:
         return 3
-    elif percent < 70 and percent >= 65:
+    elif percent < 40 and percent >= 30:
         return 4
-    elif percent < 75 and percent >= 70:
+    elif percent < 50 and percent >= 40:
         return 5
-    elif percent < 80 and percent >= 75:
+    elif percent < 60 and percent >= 50:
         return 6
-    elif percent < 85 and percent >= 80:
+    elif percent < 70 and percent >= 60:
         return 7
-    elif percent < 90 and percent >= 85:
+    elif percent < 80 and percent >= 70:
         return 8
-    elif percent < 95 and percent >= 90:
+    elif percent < 90 and percent >= 80:
         return 9
     return 10
 

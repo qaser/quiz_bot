@@ -63,7 +63,7 @@ async def on_quarter(callback, widget, manager: DialogManager, quarter):
         dep = users.find_one({'user_id': manager.event.from_user.id}).get('department')
         users_dep = list(users.find({'department': dep}))
         year = int(context.dialog_data['year'])
-        for quiz_type in ['output']:
+        for quiz_type in ['input', 'output']:
             results_set = results_tu.find({
                 'user_id': {'$in': [u["user_id"] for u in users_dep]},
                 'quarter': int(quarter),
@@ -71,7 +71,7 @@ async def on_quarter(callback, widget, manager: DialogManager, quarter):
                 'done': True,
                 'quiz_type': quiz_type
             })
-            if results_set is not None:
+            if len(list(results_set)) != 0:
                 test_type = 'входного' if quiz_type == 'input' else 'выходного'
                 create_results_docx_file(year, quarter, test_type, results_set)
                 path = f'static/export/Результаты {test_type} контроля знаний ({quarter} кв. {year}г).docx'
