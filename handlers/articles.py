@@ -25,7 +25,7 @@ dialog =  Dialog(
 
 @router.message(Command('articles'))
 async def articles_handler(message: Message, dialog_manager: DialogManager):
-    # await message.delete()
+    await message.delete()
     # Important: always set `mode=StartMode.RESET_STACK` you don't want to stack dialogs
     await dialog_manager.start(Articles.select_category, mode=StartMode.RESET_STACK)
 

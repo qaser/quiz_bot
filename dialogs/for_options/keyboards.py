@@ -13,11 +13,11 @@ def category_buttons():
             id='conditions',
             on_click=selected.on_conditions
         ),
-        Button(
-            Const('📣 Уведомления'),
-            id='subscribe',
-            on_click=selected.on_subscribe
-        ),
+        # Button(
+        #     Const('📣 Уведомления'),
+        #     id='subscribe',
+        #     on_click=selected.on_subscribe
+        # ),
         # Button(
         #     Const('🏅 Мои достижения'),
         #     id='records',
