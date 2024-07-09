@@ -52,3 +52,5 @@ run.sh
 *.log
 
 dump.rdb
+
+TODO.txt

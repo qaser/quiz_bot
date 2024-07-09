@@ -41,16 +41,16 @@ def conditions_window():
     )
 
 
-# def subscribe_window():
-#     return Window(
-#         Const('<b>Настройка рассылки</b>\n'),
-#         Const(SUBSCRIBE_TEXT),
-#         Format('На данный момент у Вас <u>{status}</u> "тихий режим"'),
-#         keyboards.subscribe_buttons(),
-#         state=Options.subscribe,
-#         getter=getters.get_subscribe,
-#
-#     )
+def subscribe_window():
+    return Window(
+        Const('<b>Настройка рассылки</b>\n'),
+        Const(SUBSCRIBE_TEXT),
+        Format('На данный момент у Вас <u>{status}</u> "тихий режим"'),
+        keyboards.subscribe_buttons(),
+        state=Options.subscribe,
+        getter=getters.get_subscribe,
+
+    )
 
 
 def delete_user_window():

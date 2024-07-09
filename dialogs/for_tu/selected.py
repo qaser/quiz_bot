@@ -1,8 +1,8 @@
 import datetime as dt
 import os
 import random
-from collections import Counter
 import time
+from collections import Counter
 
 from aiogram.types import FSInputFile
 from aiogram_dialog import DialogManager, StartMode
@@ -11,7 +11,8 @@ from bson.objectid import ObjectId
 from config.mongo_config import (answers, docs, plans, questions, results_tu,
                                  scheduler_tu, themes, users)
 from dialogs.for_tu.states import Tu
-from utils.save_docx_file import create_results_docx_file, create_tests_docx_file
+from utils.save_docx_file import (create_results_docx_file,
+                                  create_tests_docx_file)
 from utils.utils import calc_grade
 
 QUIZ_LEN = 20

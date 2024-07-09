@@ -13,10 +13,15 @@ def category_buttons():
             id='conditions',
             on_click=selected.on_conditions
         ),
+        Button(
+            Const('📣 Уведомления'),
+            id='subscribe',
+            on_click=selected.on_subscribe
+        ),
         # Button(
-        #     Const('📣 Уведомления'),
-        #     id='subscribe',
-        #     on_click=selected.on_subscribe
+        #     Const('🏅 Мои достижения'),
+        #     id='records',
+        #     on_click=selected.on_records
         # ),
         Button(
             Const('❌ Удалить аккаунт'),
@@ -31,19 +36,19 @@ def category_buttons():
     )
 
 
-# def subscribe_buttons():
-#     return Column(
-#         Button(
-#             Format('{active} "тихий режим"'),
-#             id='subscribe_change',
-#             on_click=selected.on_subscribe_change
-#         ),
-#         Button(
-#             Const(texts.BACK_BUTTON),
-#             id='back_from_subs',
-#             on_click=selected.on_main_menu
-#         ),
-#     )
+def subscribe_buttons():
+    return Column(
+        Button(
+            Format('{active} "тихий режим"'),
+            id='subscribe_change',
+            on_click=selected.on_subscribe_change
+        ),
+        Button(
+            Const(texts.BACK_BUTTON),
+            id='back_from_subs',
+            on_click=selected.on_main_menu
+        ),
+    )
 
 
 def delete_user_buttons():

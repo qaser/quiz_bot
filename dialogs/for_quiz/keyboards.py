@@ -22,12 +22,12 @@ def main_menu_buttons():
             on_click=selected.on_stats,
             when=no_first_quiz
         ),
-        Button(
-            Const('📝 Добавить вопросы в БД'),
-            'add_questions',
-            on_click=selected.on_adding_questions,
-            when=is_admin
-        )
+        # Button(
+        #     Const('📝 Добавить вопросы в БД'),
+        #     'add_questions',
+        #     on_click=selected.on_adding_questions,
+        #     when=is_admin
+        # )
     )
 
 

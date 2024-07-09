@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 
-import keyboards.for_admin_registration as kb
+import keyboards.for_admin as kb
 from config.bot_config import bot
 from config.mongo_config import admin_requests, users
 from config.telegram_config import ADMIN_TELEGRAM_ID
