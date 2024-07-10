@@ -64,7 +64,7 @@ async def on_save_article(callback, widget, manager: DialogManager, article_url)
     kb.adjust(2)
     await bot.send_message(
         chat_id=ADMIN_TELEGRAM_ID,
-        text=(f'Получена новая статья:\n<b>Автор:<b/> {user.username}\n'
+        text=(f'Получена новая статья:\n<b>Автор:</b> {user.username}\n'
               f'<b>Название статьи:</b> {name}\n{article_url}'),
         reply_markup=kb.as_markup()
     )
